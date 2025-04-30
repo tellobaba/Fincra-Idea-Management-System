@@ -108,7 +108,18 @@ export class DatabaseStorage implements IStorage {
     return idea;
   }
   
-  async getIdeas(filters?: { status?: string; submittedById?: number }): Promise<Idea[]> {
+  async getIdeas(filters?: { 
+    status?: string; 
+    submittedById?: number; 
+    category?: string; 
+    department?: string;
+    priority?: string;
+    search?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+    limit?: number;
+    offset?: number;
+  }): Promise<Idea[]> {
     let query = db.select().from(ideas);
     
     if (filters) {
@@ -122,13 +133,68 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(ideas.submittedById, filters.submittedById));
       }
       
+      if (filters.category) {
+        conditions.push(eq(ideas.category, filters.category));
+      }
+      
+      if (filters.department) {
+        conditions.push(eq(ideas.department, filters.department));
+      }
+      
+      if (filters.priority) {
+        conditions.push(eq(ideas.priority, filters.priority));
+      }
+      
+      if (filters.search) {
+        const searchTerm = `%${filters.search}%`;
+        conditions.push(
+          sql`(${ideas.title} ILIKE ${searchTerm} OR ${ideas.description} ILIKE ${searchTerm})`
+        );
+      }
+      
       if (conditions.length > 0) {
         query = query.where(and(...conditions));
       }
+      
+      // Apply sorting
+      if (filters.sortBy) {
+        const column = getColumnForSort(filters.sortBy);
+        const direction = filters.sortDirection === 'asc' ? asc : desc;
+        query = query.orderBy(direction(column));
+      } else {
+        // Default to most recent first
+        query = query.orderBy(desc(ideas.createdAt));
+      }
+      
+      // Apply pagination
+      if (filters.limit) {
+        query = query.limit(filters.limit);
+        
+        if (filters.offset) {
+          query = query.offset(filters.offset);
+        }
+      }
+    } else {
+      // Default to most recent first
+      query = query.orderBy(desc(ideas.createdAt));
     }
     
-    // Sort by most recent first
-    return await query.orderBy(desc(ideas.createdAt));
+    return await query;
+  }
+  
+  // Helper to get the correct column for sorting
+  private getColumnForSort(sortBy: string) {
+    switch(sortBy) {
+      case 'title': return ideas.title;
+      case 'category': return ideas.category;
+      case 'department': return ideas.department;
+      case 'status': return ideas.status;
+      case 'priority': return ideas.priority;
+      case 'votes': return ideas.votes;
+      case 'createdAt': return ideas.createdAt;
+      case 'updatedAt': return ideas.updatedAt;
+      default: return ideas.createdAt;
+    }
   }
   
   async updateIdea(id: number, updates: Partial<Idea>): Promise<Idea | undefined> {

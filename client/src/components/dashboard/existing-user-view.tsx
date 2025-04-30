@@ -174,7 +174,7 @@ export function ExistingUserView() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
-              <LineChart
+              <BarChart
                 data={idealVolume}
                 margin={{
                   top: 5,
@@ -191,15 +191,13 @@ export function ExistingUserView() {
                   tickMargin={10}
                 />
                 <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#8884d8"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 6, fill: "#8884d8" }}
+                <Bar 
+                  dataKey="value" 
+                  fill="#8884d8" 
+                  radius={[4, 4, 0, 0]}
+                  barSize={30}
                 />
-              </LineChart>
+              </BarChart>
             </ResponsiveContainer>
             <div className="text-xs text-gray-500 mt-2 text-right">Monday, 22</div>
           </CardContent>

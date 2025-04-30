@@ -18,7 +18,9 @@ export const ideas = pgTable("ideas", {
   description: text("description").notNull(),
   category: text("category").notNull(), // 'pain-point', 'opportunity', 'challenge'
   tags: text("tags").array(),
-  status: text("status").default("submitted").notNull(), // 'submitted', 'in-review', 'in-refinement', 'implemented', 'closed'
+  department: text("department"), // 'Organisation Health', 'Tech & Systems', 'Commercial & Strategy', etc.
+  status: text("status").default("submitted").notNull(), // 'submitted', 'in-review', 'merged', 'parked', 'implemented'
+  priority: text("priority"), // 'high', 'medium', 'low'
   votes: integer("votes").default(0).notNull(),
   submittedById: integer("submitted_by_id").notNull(),
   assignedToId: integer("assigned_to_id"),
@@ -28,6 +30,7 @@ export const ideas = pgTable("ideas", {
   costSaved: integer("cost_saved"),
   revenueGenerated: integer("revenue_generated"),
   attachments: json("attachments").$type<string[]>(),
+  mediaUrls: json("media_urls").$type<{type: string, url: string}[]>(), // For images, videos, voice notes
 });
 
 export const comments = pgTable("comments", {
@@ -54,8 +57,11 @@ export const insertIdeaSchema = createInsertSchema(ideas).pick({
   description: true,
   category: true,
   tags: true,
+  department: true,
+  priority: true,
   submittedById: true,
   attachments: true,
+  mediaUrls: true,
 });
 
 export const insertCommentSchema = createInsertSchema(comments).pick({
@@ -80,8 +86,26 @@ export const categorySchema = z.enum(['pain-point', 'opportunity', 'challenge'])
 export type Category = z.infer<typeof categorySchema>;
 
 // Status type
-export const statusSchema = z.enum(['submitted', 'in-review', 'in-refinement', 'implemented', 'closed']);
+export const statusSchema = z.enum(['submitted', 'in-review', 'merged', 'parked', 'implemented']);
 export type Status = z.infer<typeof statusSchema>;
+
+// Priority type
+export const prioritySchema = z.enum(['high', 'medium', 'low']);
+export type Priority = z.infer<typeof prioritySchema>;
+
+// Department type
+export const departmentSchema = z.enum([
+  'Organisation Health', 
+  'Tech & Systems', 
+  'Commercial & Strategy', 
+  'Operations',
+  'Finance',
+  'Marketing',
+  'Sales',
+  'Product',
+  'Other'
+]);
+export type Department = z.infer<typeof departmentSchema>;
 
 // Role type
 export const roleSchema = z.enum(['user', 'reviewer', 'transformer', 'implementer', 'admin']);
