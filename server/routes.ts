@@ -386,6 +386,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch metrics" });
     }
   });
+  
+  // Get idea volume data for charts
+  app.get("/api/ideas/volume", async (req, res) => {
+    try {
+      // For demo purposes, return static data for chart
+      // In a real implementation, this would be aggregated from database
+      res.json([
+        { name: "5D", value: 10 },
+        { name: "2W", value: 35 },
+        { name: "1M", value: 80 },
+        { name: "6M", value: 120 },
+        { name: "1Y", value: 210 }
+      ]);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch idea volume data" });
+    }
+  });
 
   const httpServer = createServer(app);
 
