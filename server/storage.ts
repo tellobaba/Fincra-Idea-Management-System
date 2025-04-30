@@ -1,8 +1,11 @@
 import { users, ideas, comments, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment } from "@shared/schema";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import { db } from "./db";
+import { eq, asc, desc, and, sql } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 // modify the interface with any CRUD methods
 // you might need
@@ -35,64 +38,58 @@ export interface IStorage {
   sessionStore: session.SessionStore;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private ideas: Map<number, Idea>;
-  private comments: Map<number, Comment>;
-  currentUserId: number;
-  currentIdeaId: number;
-  currentCommentId: number;
+export class DatabaseStorage implements IStorage {
   sessionStore: session.SessionStore;
 
   constructor() {
-    this.users = new Map();
-    this.ideas = new Map();
-    this.comments = new Map();
-    this.currentUserId = 1;
-    this.currentIdeaId = 1;
-    this.currentCommentId = 1;
-    
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000 // Prune expired entries every 24h
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
     });
     
-    // Add some initial data for testing
-    this.createUser({
-      username: "admin@fincra.com",
-      password: "$2b$10$ZWqrRTfv2E4p9TGvAzMiOO6k9oADxM/9Cl5qV.Vej/yPZD5QjC852", // "password"
-      displayName: "Admin User",
-      department: "Administration",
-      role: "admin",
-      avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin"
+    // Add initial admin user if not exists
+    this.initializeAdminUser().catch(err => {
+      console.error("Failed to initialize admin user:", err);
     });
+  }
+
+  private async initializeAdminUser() {
+    const adminUser = await this.getUserByUsername("admin@fincra.com");
+    
+    if (!adminUser) {
+      await this.createUser({
+        username: "admin@fincra.com",
+        password: "$2b$10$ZWqrRTfv2E4p9TGvAzMiOO6k9oADxM/9Cl5qV.Vej/yPZD5QjC852", // "password"
+        displayName: "Admin User",
+        department: "Administration",
+        role: "admin",
+        avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin"
+      });
+    }
   }
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
   
   // Idea operations
   async createIdea(insertIdea: InsertIdea): Promise<Idea> {
-    const id = this.currentIdeaId++;
     const now = new Date();
     
-    const idea: Idea = {
+    const [idea] = await db.insert(ideas).values({
       ...insertIdea,
-      id,
       status: 'submitted',
       votes: 0,
       createdAt: now,
@@ -101,136 +98,146 @@ export class MemStorage implements IStorage {
       costSaved: null,
       revenueGenerated: null,
       assignedToId: null,
-    };
+    }).returning();
     
-    this.ideas.set(id, idea);
     return idea;
   }
   
   async getIdea(id: number): Promise<Idea | undefined> {
-    return this.ideas.get(id);
+    const [idea] = await db.select().from(ideas).where(eq(ideas.id, id));
+    return idea;
   }
   
   async getIdeas(filters?: { status?: string; submittedById?: number }): Promise<Idea[]> {
-    let result = Array.from(this.ideas.values());
+    let query = db.select().from(ideas);
     
     if (filters) {
+      const conditions = [];
+      
       if (filters.status) {
-        result = result.filter(idea => idea.status === filters.status);
+        conditions.push(eq(ideas.status, filters.status));
       }
       
       if (filters.submittedById) {
-        result = result.filter(idea => idea.submittedById === filters.submittedById);
+        conditions.push(eq(ideas.submittedById, filters.submittedById));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
       }
     }
     
     // Sort by most recent first
-    return result.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    return await query.orderBy(desc(ideas.createdAt));
   }
   
   async updateIdea(id: number, updates: Partial<Idea>): Promise<Idea | undefined> {
-    const idea = this.ideas.get(id);
+    const [idea] = await db
+      .update(ideas)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(ideas.id, id))
+      .returning();
     
-    if (!idea) return undefined;
-    
-    const updatedIdea: Idea = {
-      ...idea,
-      ...updates,
-      updatedAt: new Date(),
-    };
-    
-    this.ideas.set(id, updatedIdea);
-    return updatedIdea;
+    return idea;
   }
   
   async deleteIdea(id: number): Promise<boolean> {
-    return this.ideas.delete(id);
+    const result = await db.delete(ideas).where(eq(ideas.id, id));
+    return !!result;
   }
   
   async voteIdea(id: number): Promise<Idea | undefined> {
-    const idea = this.ideas.get(id);
+    const [idea] = await db
+      .update(ideas)
+      .set({ 
+        votes: sql`${ideas.votes} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(ideas.id, id))
+      .returning();
     
-    if (!idea) return undefined;
-    
-    const updatedIdea: Idea = {
-      ...idea,
-      votes: idea.votes + 1,
-      updatedAt: new Date(),
-    };
-    
-    this.ideas.set(id, updatedIdea);
-    return updatedIdea;
+    return idea;
   }
   
   async getTopIdeas(limit: number = 5): Promise<Idea[]> {
-    const allIdeas = Array.from(this.ideas.values());
-    return allIdeas
-      .sort((a, b) => b.votes - a.votes)
-      .slice(0, limit);
+    return await db
+      .select()
+      .from(ideas)
+      .orderBy(desc(ideas.votes))
+      .limit(limit);
   }
   
   // Comment operations
   async createComment(insertComment: InsertComment): Promise<Comment> {
-    const id = this.currentCommentId++;
-    const now = new Date();
+    const [comment] = await db
+      .insert(comments)
+      .values({
+        ...insertComment,
+        createdAt: new Date(),
+      })
+      .returning();
     
-    const comment: Comment = {
-      ...insertComment,
-      id,
-      createdAt: now,
-    };
-    
-    this.comments.set(id, comment);
     return comment;
   }
   
   async getComments(ideaId: number): Promise<Comment[]> {
-    return Array.from(this.comments.values())
-      .filter(comment => comment.ideaId === ideaId)
-      .sort((a, b) => 
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
+    return await db
+      .select()
+      .from(comments)
+      .where(eq(comments.ideaId, ideaId))
+      .orderBy(asc(comments.createdAt));
   }
   
   // Leaderboard
   async getLeaderboard(): Promise<{ user: User; ideasSubmitted: number; ideasImplemented: number; impactScore: number }[]> {
-    const users = Array.from(this.users.values());
-    const ideas = Array.from(this.ideas.values());
+    // We need to use SQL for more complex queries like this
+    const result = await db.execute(sql`
+      WITH idea_counts AS (
+        SELECT 
+          "submittedById",
+          COUNT(*) AS ideas_submitted,
+          COUNT(*) FILTER (WHERE status = 'implemented') AS ideas_implemented,
+          SUM(votes) AS total_votes
+        FROM ${ideas}
+        GROUP BY "submittedById"
+      )
+      SELECT 
+        u.*,
+        COALESCE(ic.ideas_submitted, 0) AS ideas_submitted,
+        COALESCE(ic.ideas_implemented, 0) AS ideas_implemented,
+        COALESCE((ic.ideas_submitted * 2) + (ic.ideas_implemented * 5) + ic.total_votes, 0) AS impact_score
+      FROM ${users} u
+      LEFT JOIN idea_counts ic ON u.id = ic."submittedById"
+      ORDER BY impact_score DESC
+    `);
     
-    const leaderboard = users.map(user => {
-      const userIdeas = ideas.filter(idea => idea.submittedById === user.id);
-      const implementedIdeas = userIdeas.filter(idea => idea.status === 'implemented');
-      
-      // Calculate impact score (simplified for demonstration)
-      let impactScore = userIdeas.length * 2; // 2 points per idea
-      impactScore += implementedIdeas.length * 5; // 5 additional points per implemented idea
-      
-      // Add points based on votes
-      const totalVotes = userIdeas.reduce((sum, idea) => sum + idea.votes, 0);
-      impactScore += totalVotes;
-      
-      return {
-        user,
-        ideasSubmitted: userIdeas.length,
-        ideasImplemented: implementedIdeas.length,
-        impactScore,
-      };
-    });
-    
-    // Sort by impact score (highest first)
-    return leaderboard.sort((a, b) => b.impactScore - a.impactScore);
+    return result.rows.map((row: any) => ({
+      user: {
+        id: row.id,
+        username: row.username,
+        displayName: row.displayName,
+        department: row.department,
+        role: row.role,
+        avatarUrl: row.avatarUrl,
+        password: row.password, // Not used in frontend, just for type compatibility
+      },
+      ideasSubmitted: parseInt(row.ideas_submitted) || 0,
+      ideasImplemented: parseInt(row.ideas_implemented) || 0,
+      impactScore: parseInt(row.impact_score) || 0,
+    }));
   }
   
   // Admin operations
   async getIdeasForReview(): Promise<Idea[]> {
-    return Array.from(this.ideas.values())
-      .filter(idea => idea.status === 'submitted')
-      .sort((a, b) => 
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
+    return await db
+      .select()
+      .from(ideas)
+      .where(eq(ideas.status, 'submitted'))
+      .orderBy(asc(ideas.createdAt));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
