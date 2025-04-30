@@ -251,7 +251,7 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder="Select subcategory" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
