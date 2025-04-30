@@ -143,25 +143,50 @@ export function ExistingUserView() {
             <button className="text-sm text-blue-600 hover:underline">See Report</button>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col md:flex-row">
-              <div className="relative aspect-square h-40 w-40 mx-auto">
-                <div
-                  className="absolute inset-0 flex items-center justify-center"
-                  style={{ background: "conic-gradient(#4CAF50 0% 46%, #2196F3 46% 70%, #FF9800 70% 87%, #00BCD4 87% 96%, #F06292 96% 100%)" }}
-                >
-                  <div className="h-[70%] w-[70%] rounded-full bg-white"></div>
-                </div>
-              </div>
-              
-              <div className="md:ml-6 mt-4 md:mt-0 space-y-3">
-                {statusData.map((item, index) => (
-                  <div key={index} className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-2" style={{ background: item.fill }}></div>
-                    <div className="flex-1 text-sm">{item.name}</div>
-                    <div className="text-gray-500 text-sm">{item.value}</div>
-                  </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart
+                data={statusData}
+                layout="vertical"
+                barCategoryGap={12}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  width={100}
+                  tick={{ fontSize: 12 }}
+                />
+                <Tooltip />
+                {/* Create a separate bar for each status with its color */}
+                {statusData.map((entry, index) => (
+                  <Bar 
+                    key={`status-bar-${index}`}
+                    dataKey="value" 
+                    name={entry.name}
+                    data={[entry]}
+                    barSize={20}
+                    fill={entry.fill}
+                    fillOpacity={0.9}
+                  />
                 ))}
-              </div>
+              </BarChart>
+            </ResponsiveContainer>
+            
+            {/* Legend */}
+            <div className="flex flex-wrap gap-3 justify-center mt-4">
+              {statusData.map((item, index) => (
+                <div key={index} className="flex items-center">
+                  <div className="w-3 h-3 rounded-full mr-2" style={{ background: item.fill }}></div>
+                  <div className="text-xs text-gray-500">{item.name}: {item.value}</div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
