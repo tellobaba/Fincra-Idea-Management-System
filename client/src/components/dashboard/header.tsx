@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
+import { NewIdeaModal } from "./new-idea-modal";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -27,6 +28,7 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("ideas");
+  const [newIdeaModalOpen, setNewIdeaModalOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +45,10 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
     setActiveTab(tab);
     // In a real application, this would update content or change routes
     // For now we'll just set active tab state
+  };
+  
+  const handleAddNew = () => {
+    setNewIdeaModalOpen(true);
   };
 
   return (
@@ -77,7 +83,7 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
             <Button 
               variant="default" 
               className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              onClick={() => setLocation("/submit")}
+              onClick={handleAddNew}
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Add new
@@ -89,7 +95,7 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
             <Button 
               variant="default" 
               className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              onClick={() => setLocation("/submit")}
+              onClick={handleAddNew}
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Add New Idea
@@ -176,6 +182,9 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
           </nav>
         </div>
       )}
+      
+      {/* New Idea Modal */}
+      <NewIdeaModal open={newIdeaModalOpen} onOpenChange={setNewIdeaModalOpen} />
     </header>
   );
 }
