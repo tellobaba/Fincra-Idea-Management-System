@@ -1,0 +1,102 @@
+Prompt for Vercel v0 (or any AI wire-framing tool)
+
+Role:
+You are a senior UX designer tasked with translating the PRD for Fincra’s Ideas Management System into low-fidelity wireframes that illustrate the complete user journey.
+
+1. Overall Goals
+Deliver a dashboard-first experience, not a marketing website look.
+
+
+Make the primary Call to Action (CTA) impossible to miss: “Hi Joy, what’s been on your mind?” with three clearly separated buttons
+
+
+“I’ve got a PAIN-POINT” (Problem)
+
+
+“I’ve got an IDEA” (Opportunity)
+
+
+“I want to post a CHALLENGE” (Problem / Opportunity)
+
+
+Keep navigation intuitive, role-based, and consistent across all pages.
+
+
+
+2. Wireframe Set & Flow
+Create one frame per bullet (unless noted as a modal). Wireframes can be sketched or greyscale; annotations welcome.
+#
+Screen / Component
+Must-Have Elements
+Interaction Notes
+1
+Login
+Company logo centered, email + password fields, “Forgot password?”, primary Sign In button
+One-screen auth; on success route to Overview
+2
+Dashboard Overview
+Left sidebar nav (icons + labels): • Overview (default) • Submit Idea/Pain-Point • Leaderboard • My Submissions • Admin Panel (role-based)Top header: search, notifications, avatar dropdownMain canvas: 5 KPI cards (Ideas Submitted, In Review, Implemented, Cost Saved, Revenue Generated) + Top 5 Ideas table
+Sidebar collapses to icons on ≤1024 px; KPI cards click through to filtered views
+3
+CTA Zone (within Overview)
+Large card or hero block with greeting: “Hi Joy, what’s been on your mind?” and the 3 CTA buttons listed above
+Buttons open Submit Idea modal pre-tagged to Problem / Opportunity / Challenge
+4
+Submit Idea Modal
+Fields: Title, Description, Category selector (Problem / Opportunity / Challenge), Tag picker, File/voice upload, “Submit” button; helper text for each field
+Autosave draft; progress bar for attachments
+5
+Submit Idea Page (full view)
+Replicate modal content on a full page (for mobile) + “Back to Dashboard” breadcrumb
+Show live preview of Markdown entry
+6
+Leaderboard
+Toggle: Most Ideas / Highest Impact / Most Votes, filter by date, sortable table, badge icons for top 3
+Each row links to idea details
+7
+My Submissions
+Tabbed table: All
+In Review
+8
+Admin Panel (role-restricted)
+Queued ideas list with bulk actions (Approve, Request More Info, Assign Transformer/Implementer), SLA timer pill, audit trail side-panel
+Access controlled; breadcrumb back to Overview
+9
+Idea Details (shared template)
+Title, metadata chips, status tracker (Submitted → Reviewed → In Refinement → Implemented → Closed), threaded comments, versions timeline
+Floating CTA: “Change Status” for Admin roles
+—
+Micro-States & Feedback
+Toasts: success, error, info; Skeleton loaders; Empty-state illustrations for zero results
+Maintain uniform placement & motion
+
+
+3. Visual & Interaction Guidelines
+Dashboard, not Website: Use a compact grid, card components, and data-dense tables—avoid hero images except the greeting CTA block.
+
+
+Hierarchy: Sidebar nav (primary) → Header (utility) → Main canvas (content) → CTA block (high emphasis).
+
+
+Roles: Hide Admin Panel link unless role = reviewer | transformer | implementer.
+
+
+Micro-copy: Friendly and concise; use sentence-case labels.
+
+
+Accessibility: 4.5:1 contrast for text, focus rings, keyboard-friendly.
+
+
+Mobile: Single-column layout; sidebar collapses into bottom nav bar.
+
+
+
+4. Deliverables
+Annotated low-fidelity wireframes (PNG / SVG / Figma pages).
+
+
+Clickable flow showing: Login → Dashboard → CTA → Submit Idea → Dashboard, plus lateral navigation to Leaderboard, My Submissions, Admin Panel.
+
+
+Notes layer describing key interactions, states, and responsive behavior.
+
