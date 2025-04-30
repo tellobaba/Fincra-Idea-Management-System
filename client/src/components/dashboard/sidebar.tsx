@@ -218,7 +218,7 @@ export function Sidebar({ className }: SidebarProps) {
           <div className="p-4 border-t border-gray-100 mt-2">
             <Link href="/profile" className="flex items-center">
               <Avatar className="h-8 w-8 mr-3">
-                <AvatarImage src={user.avatarUrl} alt={user.displayName} />
+                <AvatarImage src={user.avatarUrl || undefined} alt={user.displayName} />
                 <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">

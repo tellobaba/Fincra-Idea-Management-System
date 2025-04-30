@@ -118,7 +118,7 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2 text-gray-700">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatarUrl} alt={user.displayName} />
+                    <AvatarImage src={user.avatarUrl || undefined} alt={user.displayName} />
                     <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </Button>

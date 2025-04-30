@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
-import { KpiCard } from "@/components/dashboard/kpi-card";
-import { CtaSection } from "@/components/dashboard/cta-section";
-import { IdeaTable } from "@/components/dashboard/idea-table";
 import { IdeaWithUser, Metrics } from "@/types/ideas";
-import { BarChart2, LightbulbIcon, Search, CheckCircle, DollarSign, TrendingUp } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { NewUserView } from "@/components/dashboard/new-user-view";
+import { ExistingUserView } from "@/components/dashboard/existing-user-view";
 
 export default function HomePage() {
   const { user } = useAuth();
+  const [isNewUser, setIsNewUser] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   
   // Fetch metrics for KPI cards
@@ -19,8 +19,15 @@ export default function HomePage() {
   });
   
   // Fetch top ideas
-  const { data: topIdeas, isLoading: ideasLoading } = useQuery<IdeaWithUser[]>({
+  const { data: topIdeas = [], isLoading: ideasLoading } = useQuery<IdeaWithUser[]>({
     queryKey: ["/api/ideas/top"],
+  });
+  
+  // Fetch user's ideas
+  const { data: userIdeas = [], isLoading: userIdeasLoading } = useQuery<IdeaWithUser[]>({
+    queryKey: ["/api/ideas", user?.id],
+    queryFn: () => fetch(`/api/ideas?submittedById=${user?.id}`).then(res => res.json()),
+    enabled: !!user?.id
   });
   
   const handleSearch = (query: string) => {
@@ -29,70 +36,51 @@ export default function HomePage() {
     console.log("Searching for:", query);
   };
   
-  // Trend calculation helpers (would typically come from real data)
-  const getTrend = (value: number, base: number = 100) => {
-    const percentage = Math.floor(Math.random() * 30) - 10; // Just for demonstration
-    return {
-      value: Math.abs(percentage),
-      direction: percentage > 0 ? "up" : percentage < 0 ? "down" : "neutral",
-      label: "from last month"
-    };
-  };
+  // Determine if user is new based on whether they have submitted any ideas
+  useEffect(() => {
+    if (!userIdeasLoading && user) {
+      setIsNewUser(userIdeas.length === 0);
+    }
+  }, [user, userIdeas, userIdeasLoading]);
+  
+  if (metricsLoading || ideasLoading || userIdeasLoading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <div className="flex flex-1">
+          <Sidebar />
+          <div className="flex-1 flex justify-center items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-screen flex overflow-hidden bg-background">
+    <div className="h-screen flex overflow-hidden bg-white">
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header onSearch={handleSearch} />
-        
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <h1 className="text-2xl font-semibold mb-6">Dashboard Overview</h1>
-          
-          {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <KpiCard
-              title="Ideas Submitted"
-              value={metrics?.ideasSubmitted || 0}
-              icon={<LightbulbIcon className="h-5 w-5" />}
-              trend={metrics && getTrend(metrics.ideasSubmitted)}
+        {isNewUser ? (
+          <>
+            <Header onSearch={handleSearch} />
+            <main className="flex-1 overflow-y-auto">
+              <NewUserView />
+            </main>
+          </>
+        ) : (
+          <>
+            <Header 
+              onSearch={handleSearch}
+              welcomeMessage="Welcome back,"
+              showTabs={true}
+              showAddNewButton={true}
             />
-            <KpiCard
-              title="In Review"
-              value={metrics?.inReview || 0}
-              icon={<Search className="h-5 w-5" />}
-              trend={metrics && getTrend(metrics.inReview)}
-            />
-            <KpiCard
-              title="Implemented"
-              value={metrics?.implemented || 0}
-              icon={<CheckCircle className="h-5 w-5" />}
-              trend={metrics && getTrend(metrics.implemented)}
-            />
-            <KpiCard
-              title="Cost Saved"
-              value={`$${((metrics?.costSaved || 0) / 1000).toFixed(1)}k`}
-              icon={<DollarSign className="h-5 w-5" />}
-              trend={metrics && getTrend(metrics.costSaved)}
-            />
-            <KpiCard
-              title="Revenue Generated"
-              value={`$${((metrics?.revenueGenerated || 0) / 1000).toFixed(1)}k`}
-              icon={<TrendingUp className="h-5 w-5" />}
-              trend={metrics && getTrend(metrics.revenueGenerated)}
-            />
-          </div>
-          
-          {/* CTA Section */}
-          {user && <CtaSection displayName={user.displayName} />}
-          
-          {/* Top Ideas Table */}
-          <IdeaTable 
-            title="Top 5 Ideas" 
-            ideas={topIdeas || []} 
-            isLoading={ideasLoading}
-          />
-        </main>
+            <main className="flex-1 overflow-y-auto">
+              <ExistingUserView />
+            </main>
+          </>
+        )}
       </div>
     </div>
   );

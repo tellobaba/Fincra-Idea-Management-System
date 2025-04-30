@@ -1,11 +1,20 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
+import path from "path";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { insertIdeaSchema, insertCommentSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve assets from the client/src/assets directory
+  app.use('/assets', (req, res, next) => {
+    const assetPath = path.join(process.cwd(), 'client/src/assets', req.path);
+    res.sendFile(assetPath, err => {
+      if (err) next();
+    });
+  });
+
   // Authentication routes
   setupAuth(app);
 
