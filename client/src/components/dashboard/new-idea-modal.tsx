@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LogYourIdeaModal } from "./log-idea-modal";
+
+// Lazy load the LogYourIdeaModal to prevent circular dependency
+const LogYourIdeaModal = lazy(() => import("./log-idea-modal").then(module => ({ 
+  default: module.LogYourIdeaModal 
+})));
 
 interface NewIdeaModalProps {
   open: boolean;
@@ -117,7 +121,9 @@ export function NewIdeaModal({ open, onOpenChange }: NewIdeaModalProps) {
         </DialogContent>
       </Dialog>
 
-      <LogYourIdeaModal open={logIdeaOpen} onOpenChange={setLogIdeaOpen} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <LogYourIdeaModal open={logIdeaOpen} onOpenChange={setLogIdeaOpen} />
+      </Suspense>
     </>
   );
 }

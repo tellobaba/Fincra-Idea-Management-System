@@ -42,6 +42,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Export as a named export for normal imports and as default export for dynamic imports
 export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -146,7 +147,7 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -243,7 +244,7 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
               name="subcategory"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>Subcategory</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
@@ -329,3 +330,6 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
     </Dialog>
   );
 }
+
+// Add default export to support dynamic imports
+export default { LogYourIdeaModal };
