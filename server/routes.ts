@@ -22,7 +22,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all ideas (with optional filters)
   app.get("/api/ideas", async (req, res) => {
     try {
-      const filters: { status?: string; submittedById?: number } = {};
+      const filters: { 
+        status?: string; 
+        submittedById?: number; 
+        category?: string; 
+        department?: string;
+        priority?: string;
+      } = {};
       
       if (req.query.status) {
         filters.status = req.query.status as string;
@@ -30,6 +36,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (req.query.submittedById && !isNaN(Number(req.query.submittedById))) {
         filters.submittedById = Number(req.query.submittedById);
+      }
+      
+      if (req.query.category) {
+        filters.category = req.query.category as string;
+      }
+      
+      if (req.query.department) {
+        filters.department = req.query.department as string;
+      }
+      
+      if (req.query.priority) {
+        filters.priority = req.query.priority as string;
       }
       
       const ideas = await storage.getIdeas(filters);
@@ -64,6 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(ideasWithUsers);
     } catch (error) {
+      console.error('Error fetching ideas:', error);
       res.status(500).json({ message: "Failed to fetch ideas" });
     }
   });
@@ -93,6 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(ideasWithUsers);
     } catch (error) {
+      console.error('Error fetching top ideas:', error);
       res.status(500).json({ message: "Failed to fetch top ideas" });
     }
   });
@@ -383,6 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(metrics);
     } catch (error) {
+      console.error('Error fetching metrics:', error);
       res.status(500).json({ message: "Failed to fetch metrics" });
     }
   });

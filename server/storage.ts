@@ -158,7 +158,7 @@ export class DatabaseStorage implements IStorage {
       
       // Apply sorting
       if (filters.sortBy) {
-        const column = getColumnForSort(filters.sortBy);
+        const column = this.getColumnForSort(filters.sortBy);
         const direction = filters.sortDirection === 'asc' ? asc : desc;
         query = query.orderBy(direction(column));
       } else {
