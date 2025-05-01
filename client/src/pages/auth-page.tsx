@@ -70,7 +70,7 @@ export default function AuthPage() {
             <div className="mb-6">
               <div className="flex justify-center items-center w-16 h-16">
                 <img 
-                  src="/assets/Logomark.png" 
+                  src="/Logomark.png" 
                   alt="Fincra Logo" 
                   className="h-16 w-16" 
                 />

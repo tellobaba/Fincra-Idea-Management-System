@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
-import { NewIdeaModal } from "./new-idea-modal";
+import { AddNewModal } from "./add-new-modal";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -184,7 +184,7 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
       )}
       
       {/* New Idea Modal */}
-      <NewIdeaModal open={newIdeaModalOpen} onOpenChange={setNewIdeaModalOpen} />
+      <AddNewModal open={newIdeaModalOpen} onOpenChange={setNewIdeaModalOpen} />
     </header>
   );
 }
