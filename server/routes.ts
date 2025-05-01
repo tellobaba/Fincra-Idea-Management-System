@@ -59,7 +59,27 @@ const checkAdminRole = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+// Serve uploaded files
+const serveUploads = (app: Express) => {
+  const uploadDir = path.join(process.cwd(), 'uploads');
+  
+  // Create uploads directory if it doesn't exist
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  
+  // Serve files from the uploads directory
+  app.use('/uploads', (req, res, next) => {
+    const filePath = path.join(uploadDir, req.path);
+    res.sendFile(filePath, err => {
+      if (err) next();
+    });
+  });
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup upload handling
+  serveUploads(app);
   // Serve assets from the client/src/assets directory
   app.use('/assets', (req, res, next) => {
     const assetPath = path.join(process.cwd(), 'client/src/assets', req.path);
@@ -272,8 +292,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new idea
-  app.post("/api/ideas", async (req, res) => {
+  // Create new idea with file upload
+  app.post("/api/ideas", upload.array('media', 5), async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
