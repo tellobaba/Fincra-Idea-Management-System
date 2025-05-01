@@ -1,10 +1,63 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import path from "path";
+import fs from 'fs';
 import { setupAuth } from "./auth";
-import { storage } from "./storage";
+import { storage as dbStorage } from "./storage";
 import { insertIdeaSchema, insertCommentSchema } from "@shared/schema";
 import { z } from "zod";
+import multer from 'multer';
+import { categorySchema, statusSchema, prioritySchema, departmentSchema, roleSchema } from '@shared/schema';
+
+// Setup for file uploads
+const multerStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(process.cwd(), 'uploads');
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Create a unique filename with original extension
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+  }
+});
+
+// Create multer upload instance
+const upload = multer({ 
+  storage: multerStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max file size
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept images, videos, pdfs, and common office document types
+    const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|mpeg|pdf|doc|docx|xls|xlsx|ppt|pptx/;
+    const ext = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (ext && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error('Invalid file type. Only images, videos, PDFs and office documents are allowed.'));
+  }
+});
+
+// Middleware to check if user has admin role
+const checkAdminRole = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  if (!['admin', 'reviewer', 'transformer', 'implementer'].includes(req.user.role)) {
+    return res.status(403).json({ message: "Forbidden - Admin role required" });
+  }
+  
+  next();
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve assets from the client/src/assets directory
@@ -50,16 +103,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         filters.priority = req.query.priority as string;
       }
       
-      const ideas = await storage.getIdeas(filters);
+      const ideas = await dbStorage.getIdeas(filters);
       
       // Attach user info to each idea
       const ideasWithUsers = await Promise.all(
         ideas.map(async (idea) => {
-          const submitter = await storage.getUser(idea.submittedById);
+          const submitter = await dbStorage.getUser(idea.submittedById);
           let assignedTo = null;
           
           if (idea.assignedToId) {
-            assignedTo = await storage.getUser(idea.assignedToId);
+            assignedTo = await dbStorage.getUser(idea.assignedToId);
           }
           
           return {
@@ -91,12 +144,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/ideas/top", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
-      const ideas = await storage.getTopIdeas(limit);
+      const ideas = await dbStorage.getTopIdeas(limit);
       
       // Attach user info to each idea
       const ideasWithUsers = await Promise.all(
         ideas.map(async (idea) => {
-          const submitter = await storage.getUser(idea.submittedById);
+          const submitter = await dbStorage.getUser(idea.submittedById);
           
           return {
             ...idea,
@@ -129,12 +182,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      const ideas = await storage.getIdeasForReview();
+      const ideas = await dbStorage.getIdeasForReview();
       
       // Attach user info to each idea
       const ideasWithUsers = await Promise.all(
         ideas.map(async (idea) => {
-          const submitter = await storage.getUser(idea.submittedById);
+          const submitter = await dbStorage.getUser(idea.submittedById);
           
           return {
             ...idea,
@@ -163,27 +216,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
       
-      const idea = await storage.getIdea(id);
+      const idea = await dbStorage.getIdea(id);
       
       if (!idea) {
         return res.status(404).json({ message: "Idea not found" });
       }
       
       // Attach user info
-      const submitter = await storage.getUser(idea.submittedById);
+      const submitter = await dbStorage.getUser(idea.submittedById);
       let assignedTo = null;
       
       if (idea.assignedToId) {
-        assignedTo = await storage.getUser(idea.assignedToId);
+        assignedTo = await dbStorage.getUser(idea.assignedToId);
       }
       
       // Get comments for the idea
-      const comments = await storage.getComments(id);
+      const comments = await dbStorage.getComments(id);
       
       // Attach user info to comments
       const commentsWithUsers = await Promise.all(
         comments.map(async (comment) => {
-          const user = await storage.getUser(comment.userId);
+          const user = await dbStorage.getUser(comment.userId);
           
           return {
             ...comment,
@@ -236,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid idea data", errors: validationResult.error.errors });
       }
       
-      const idea = await storage.createIdea(validationResult.data);
+      const idea = await dbStorage.createIdea(validationResult.data);
       
       res.status(201).json(idea);
     } catch (error) {
@@ -257,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
       
-      const idea = await storage.getIdea(id);
+      const idea = await dbStorage.getIdea(id);
       
       if (!idea) {
         return res.status(404).json({ message: "Idea not found" });
@@ -275,7 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       delete updates.submittedById;
       delete updates.createdAt;
       
-      const updatedIdea = await storage.updateIdea(id, updates);
+      const updatedIdea = await dbStorage.updateIdea(id, updates);
       
       res.json(updatedIdea);
     } catch (error) {
@@ -296,13 +349,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
       
-      const idea = await storage.getIdea(id);
+      const idea = await dbStorage.getIdea(id);
       
       if (!idea) {
         return res.status(404).json({ message: "Idea not found" });
       }
       
-      const updatedIdea = await storage.voteIdea(id);
+      const updatedIdea = await dbStorage.voteIdea(id);
       
       res.json(updatedIdea);
     } catch (error) {
@@ -323,7 +376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
       
-      const idea = await storage.getIdea(ideaId);
+      const idea = await dbStorage.getIdea(ideaId);
       
       if (!idea) {
         return res.status(404).json({ message: "Idea not found" });
@@ -340,10 +393,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid comment data", errors: validationResult.error.errors });
       }
       
-      const comment = await storage.createComment(validationResult.data);
+      const comment = await dbStorage.createComment(validationResult.data);
       
       // Attach user info
-      const user = await storage.getUser(comment.userId);
+      const user = await dbStorage.getUser(comment.userId);
       
       res.status(201).json({
         ...comment,
@@ -363,7 +416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get leaderboard
   app.get("/api/leaderboard", async (req, res) => {
     try {
-      const leaderboard = await storage.getLeaderboard();
+      const leaderboard = await dbStorage.getLeaderboard();
       
       // Map to simplified response
       const response = leaderboard.map(entry => ({
@@ -387,7 +440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get KPI metrics
   app.get("/api/metrics", async (req, res) => {
     try {
-      const ideas = await storage.getIdeas();
+      const ideas = await dbStorage.getIdeas();
       
       const metrics = {
         ideasSubmitted: ideas.length,

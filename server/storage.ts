@@ -14,15 +14,30 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  getUsers(role?: string): Promise<User[]>;
   
   // Idea operations
   createIdea(idea: InsertIdea): Promise<Idea>;
   getIdea(id: number): Promise<Idea | undefined>;
-  getIdeas(filters?: { status?: string; submittedById?: number }): Promise<Idea[]>;
+  getIdeas(filters?: { 
+    status?: string; 
+    submittedById?: number; 
+    category?: string; 
+    department?: string;
+    priority?: string;
+    search?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+    limit?: number;
+    offset?: number;
+  }): Promise<Idea[]>;
   updateIdea(id: number, updates: Partial<Idea>): Promise<Idea | undefined>;
   deleteIdea(id: number): Promise<boolean>;
   voteIdea(id: number): Promise<Idea | undefined>;
   getTopIdeas(limit?: number): Promise<Idea[]>;
+  assignIdea(id: number, userId: number): Promise<Idea | undefined>;
+  changeIdeaStatus(id: number, status: string): Promise<Idea | undefined>;
   
   // Comment operations
   createComment(comment: InsertComment): Promise<Comment>;
@@ -33,6 +48,20 @@ export interface IStorage {
   
   // Admin operations
   getIdeasForReview(): Promise<Idea[]>;
+  getIdeasByStatus(status: string): Promise<Idea[]>;
+  getIdeasByDepartment(department: string): Promise<Idea[]>;
+  getIdeasByPriority(priority: string): Promise<Idea[]>;
+  getIdeasByCategory(category: string): Promise<Idea[]>;
+  getIdeasAssignedTo(userId: number): Promise<Idea[]>;
+  
+  // Metrics
+  getMetrics(): Promise<{ 
+    ideasSubmitted: number; 
+    inReview: number; 
+    implemented: number; 
+    costSaved: number; 
+    revenueGenerated: number 
+  }>;
   
   // Session store
   sessionStore: session.SessionStore;
@@ -82,6 +111,26 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+  
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+      
+    return user;
+  }
+  
+  async getUsers(role?: string): Promise<User[]> {
+    let query = db.select().from(users);
+    
+    if (role) {
+      query = query.where(eq(users.role, role));
+    }
+    
+    return await query;
   }
   
   // Idea operations
@@ -303,6 +352,94 @@ export class DatabaseStorage implements IStorage {
       .from(ideas)
       .where(eq(ideas.status, 'submitted'))
       .orderBy(asc(ideas.createdAt));
+  }
+
+  async getIdeasByStatus(status: string): Promise<Idea[]> {
+    return await db
+      .select()
+      .from(ideas)
+      .where(eq(ideas.status, status))
+      .orderBy(desc(ideas.updatedAt));
+  }
+
+  async getIdeasByDepartment(department: string): Promise<Idea[]> {
+    return await db
+      .select()
+      .from(ideas)
+      .where(eq(ideas.department, department))
+      .orderBy(desc(ideas.createdAt));
+  }
+
+  async getIdeasByPriority(priority: string): Promise<Idea[]> {
+    return await db
+      .select()
+      .from(ideas)
+      .where(eq(ideas.priority, priority))
+      .orderBy(desc(ideas.createdAt));
+  }
+
+  async getIdeasByCategory(category: string): Promise<Idea[]> {
+    return await db
+      .select()
+      .from(ideas)
+      .where(eq(ideas.category, category))
+      .orderBy(desc(ideas.createdAt));
+  }
+
+  async getIdeasAssignedTo(userId: number): Promise<Idea[]> {
+    return await db
+      .select()
+      .from(ideas)
+      .where(eq(ideas.assignedToId, userId))
+      .orderBy(desc(ideas.createdAt));
+  }
+
+  async assignIdea(id: number, userId: number): Promise<Idea | undefined> {
+    const [idea] = await db
+      .update(ideas)
+      .set({ 
+        assignedToId: userId,
+        updatedAt: new Date()
+      })
+      .where(eq(ideas.id, id))
+      .returning();
+    
+    return idea;
+  }
+
+  async changeIdeaStatus(id: number, status: string): Promise<Idea | undefined> {
+    const [idea] = await db
+      .update(ideas)
+      .set({ 
+        status,
+        updatedAt: new Date()
+      })
+      .where(eq(ideas.id, id))
+      .returning();
+    
+    return idea;
+  }
+
+  async getMetrics(): Promise<{ 
+    ideasSubmitted: number; 
+    inReview: number; 
+    implemented: number; 
+    costSaved: number; 
+    revenueGenerated: number 
+  }> {
+    const allIdeas = await db.select().from(ideas);
+    
+    return {
+      ideasSubmitted: allIdeas.length,
+      inReview: allIdeas.filter(idea => idea.status === 'in-review').length,
+      implemented: allIdeas.filter(idea => idea.status === 'implemented').length,
+      costSaved: allIdeas
+        .filter(idea => idea.costSaved !== null && idea.costSaved !== undefined)
+        .reduce((sum, idea) => sum + (idea.costSaved || 0), 0),
+      revenueGenerated: allIdeas
+        .filter(idea => idea.revenueGenerated !== null && idea.revenueGenerated !== undefined)
+        .reduce((sum, idea) => sum + (idea.revenueGenerated || 0), 0),
+    };
   }
 }
 
