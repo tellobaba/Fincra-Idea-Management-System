@@ -61,7 +61,7 @@ export function NewIdeaModal({ open, onOpenChange }: NewIdeaModalProps) {
           <div className="flex flex-col items-center">
             <div className="h-16 w-16 rounded-full bg-purple-100 flex items-center justify-center mb-4">
               <img 
-                src="/assets/Logomark.png" 
+                src="/Logomark.png" 
                 alt="Fincra Logo" 
                 className="h-10 w-10" 
               />

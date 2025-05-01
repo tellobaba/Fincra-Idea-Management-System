@@ -12,7 +12,7 @@ interface AddNewModalProps {
 }
 
 export function AddNewModal({ open, onOpenChange }: AddNewModalProps) {
-  const [_, navigate] = useLocation();
+  const [location, navigate] = useLocation();
 
   const handleSubmitIdea = () => {
     navigate("/submit/opportunity");
