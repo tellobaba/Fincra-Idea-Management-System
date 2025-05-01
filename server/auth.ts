@@ -93,8 +93,10 @@ export function setupAuth(app: Express) {
       });
 
       // Remove password from response
-      const userResponse = { ...user };
-      delete userResponse.password;
+      const userResponse: any = { ...user };
+      if (userResponse.password) {
+        delete userResponse.password;
+      }
 
       req.login(user, (err) => {
         if (err) return next(err);
@@ -106,7 +108,7 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: any, user: Express.User | false, info: any) => {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: "Invalid username or password" });
       
@@ -114,8 +116,10 @@ export function setupAuth(app: Express) {
         if (err) return next(err);
         
         // Remove password from response
-        const userResponse = { ...user };
-        delete userResponse.password;
+        const userResponse: any = { ...user };
+        if (userResponse.password) {
+          delete userResponse.password;
+        }
         
         return res.status(200).json(userResponse);
       });
@@ -133,8 +137,10 @@ export function setupAuth(app: Express) {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
     // Remove password from response
-    const userResponse = { ...req.user };
-    delete userResponse.password;
+    const userResponse: any = { ...req.user };
+    if (userResponse.password) {
+      delete userResponse.password;
+    }
     
     res.json(userResponse);
   });

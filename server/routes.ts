@@ -299,10 +299,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
+      // Process uploaded files if any
+      const mediaUrls = [];
+      if (req.files && Array.isArray(req.files)) {
+        for (const file of req.files) {
+          const fileUrl = `/uploads/${file.filename}`;
+          const fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
+          mediaUrls.push({
+            type: fileType,
+            url: fileUrl
+          });
+        }
+      }
+      
       // Validate request body
       const validationResult = insertIdeaSchema.safeParse({
         ...req.body,
         submittedById: req.user.id,
+        mediaUrls: mediaUrls.length ? mediaUrls : undefined
       });
       
       if (!validationResult.success) {
@@ -311,14 +325,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const idea = await dbStorage.createIdea(validationResult.data);
       
-      res.status(201).json(idea);
+      // Attach submitter info to response
+      const submitter = await dbStorage.getUser(idea.submittedById);
+      
+      res.status(201).json({
+        ...idea,
+        submitter: submitter ? {
+          id: submitter.id,
+          displayName: submitter.displayName,
+          department: submitter.department,
+          avatarUrl: submitter.avatarUrl,
+        } : null
+      });
     } catch (error) {
+      console.error('Error creating idea:', error);
       res.status(500).json({ message: "Failed to create idea" });
     }
   });
 
-  // Update idea
-  app.patch("/api/ideas/:id", async (req, res) => {
+  // Update idea with file upload
+  app.patch("/api/ideas/:id", upload.array('media', 5), async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -342,15 +368,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
+      // Process uploaded files if any
+      const mediaUrls = [];
+      if (req.files && Array.isArray(req.files)) {
+        for (const file of req.files) {
+          const fileUrl = `/uploads/${file.filename}`;
+          const fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
+          mediaUrls.push({
+            type: fileType,
+            url: fileUrl
+          });
+        }
+      }
+      
       // Remove fields that shouldn't be updated directly
       const updates = { ...req.body };
       delete updates.id;
       delete updates.submittedById;
       delete updates.createdAt;
       
+      // Add media URLs if any were uploaded
+      if (mediaUrls.length > 0) {
+        // Append to existing media or create new array
+        const existingMedia = idea.mediaUrls || [];
+        updates.mediaUrls = [...existingMedia, ...mediaUrls];
+      }
+      
       const updatedIdea = await dbStorage.updateIdea(id, updates);
       
-      res.json(updatedIdea);
+      if (!updatedIdea) {
+        return res.status(500).json({ message: "Failed to update idea" });
+      }
+      
+      // Attach user info
+      const submitter = await dbStorage.getUser(updatedIdea.submittedById);
+      let assignedTo = null;
+      
+      if (updatedIdea.assignedToId) {
+        assignedTo = await dbStorage.getUser(updatedIdea.assignedToId);
+      }
+      
+      res.json({
+        ...updatedIdea,
+        submitter: submitter ? {
+          id: submitter.id,
+          displayName: submitter.displayName,
+          department: submitter.department,
+          avatarUrl: submitter.avatarUrl,
+        } : null,
+        assignedTo: assignedTo ? {
+          id: assignedTo.id,
+          displayName: assignedTo.displayName,
+          department: assignedTo.department,
+          avatarUrl: assignedTo.avatarUrl,
+        } : null,
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to update idea" });
     }
@@ -376,6 +448,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const updatedIdea = await dbStorage.voteIdea(id);
+      
+      if (!updatedIdea) {
+        return res.status(500).json({ message: "Failed to vote for idea" });
+      }
       
       res.json(updatedIdea);
     } catch (error) {
@@ -457,6 +533,191 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoint to assign reviewer/implementer
+  app.post("/api/ideas/:id/assign", checkAdminRole, async (req, res) => {
+    try {
+      const { userId } = req.body;
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      if (!userId || isNaN(parseInt(userId))) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const idea = await dbStorage.getIdea(id);
+      
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      const user = await dbStorage.getUser(parseInt(userId));
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const updatedIdea = await dbStorage.assignIdea(id, parseInt(userId));
+      
+      if (!updatedIdea) {
+        return res.status(500).json({ message: "Failed to assign idea" });
+      }
+      
+      // Attach user info
+      const assignedTo = updatedIdea.assignedToId ? await dbStorage.getUser(updatedIdea.assignedToId) : null;
+      
+      res.json({
+        ...updatedIdea,
+        assignedTo: assignedTo ? {
+          id: assignedTo.id,
+          displayName: assignedTo.displayName,
+          department: assignedTo.department,
+          avatarUrl: assignedTo.avatarUrl,
+          role: assignedTo.role,
+        } : null,
+      });
+    } catch (error) {
+      console.error('Error assigning idea:', error);
+      res.status(500).json({ message: "Failed to assign idea" });
+    }
+  });
+
+  // Admin endpoint to change idea status
+  app.post("/api/ideas/:id/status", checkAdminRole, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      if (!status || !statusSchema.safeParse(status).success) {
+        return res.status(400).json({ 
+          message: "Invalid status", 
+          allowedValues: statusSchema.options
+        });
+      }
+      
+      const idea = await dbStorage.getIdea(id);
+      
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      const updatedIdea = await dbStorage.changeIdeaStatus(id, status);
+      
+      if (!updatedIdea) {
+        return res.status(500).json({ message: "Failed to change idea status" });
+      }
+      
+      res.json(updatedIdea);
+    } catch (error) {
+      console.error('Error changing idea status:', error);
+      res.status(500).json({ message: "Failed to change idea status" });
+    }
+  });
+
+  // Admin endpoint to get ideas by category
+  app.get("/api/admin/ideas/category/:category", checkAdminRole, async (req, res) => {
+    try {
+      const { category } = req.params;
+      
+      if (!category || !categorySchema.safeParse(category).success) {
+        return res.status(400).json({ 
+          message: "Invalid category", 
+          allowedValues: categorySchema.options
+        });
+      }
+      
+      const ideas = await dbStorage.getIdeasByCategory(category);
+      
+      // Attach user info to each idea
+      const ideasWithUsers = await Promise.all(
+        ideas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          let assignedTo = null;
+          
+          if (idea.assignedToId) {
+            assignedTo = await dbStorage.getUser(idea.assignedToId);
+          }
+          
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+            assignedTo: assignedTo ? {
+              id: assignedTo.id,
+              displayName: assignedTo.displayName,
+              department: assignedTo.department,
+              avatarUrl: assignedTo.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching ideas by category:', error);
+      res.status(500).json({ message: "Failed to fetch ideas by category" });
+    }
+  });
+
+  // Admin endpoint to get ideas by status
+  app.get("/api/admin/ideas/status/:status", checkAdminRole, async (req, res) => {
+    try {
+      const { status } = req.params;
+      
+      if (!status || !statusSchema.safeParse(status).success) {
+        return res.status(400).json({ 
+          message: "Invalid status", 
+          allowedValues: statusSchema.options
+        });
+      }
+      
+      const ideas = await dbStorage.getIdeasByStatus(status);
+      
+      // Attach user info to each idea
+      const ideasWithUsers = await Promise.all(
+        ideas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          let assignedTo = null;
+          
+          if (idea.assignedToId) {
+            assignedTo = await dbStorage.getUser(idea.assignedToId);
+          }
+          
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+            assignedTo: assignedTo ? {
+              id: assignedTo.id,
+              displayName: assignedTo.displayName,
+              department: assignedTo.department,
+              avatarUrl: assignedTo.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching ideas by status:', error);
+      res.status(500).json({ message: "Failed to fetch ideas by status" });
+    }
+  });
+
   // Get KPI metrics
   app.get("/api/metrics", async (req, res) => {
     try {
@@ -495,6 +756,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ]);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch idea volume data" });
+    }
+  });
+  
+  // Get ideas by category (for charts)
+  app.get("/api/ideas/by-category", async (req, res) => {
+    try {
+      const ideas = await dbStorage.getIdeas();
+      
+      // Count ideas by category
+      const categoryCounts = {
+        'pain-point': ideas.filter(idea => idea.category === 'pain-point').length,
+        'opportunity': ideas.filter(idea => idea.category === 'opportunity').length,
+        'challenge': ideas.filter(idea => idea.category === 'challenge').length,
+      };
+      
+      // Format for chart display
+      const result = Object.entries(categoryCounts).map(([name, value]) => ({ name, value }));
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching ideas by category:', error);
+      res.status(500).json({ message: "Failed to fetch ideas by category" });
+    }
+  });
+  
+  // Get ideas by status (for charts)
+  app.get("/api/ideas/by-status", async (req, res) => {
+    try {
+      const ideas = await dbStorage.getIdeas();
+      
+      // Count ideas by status
+      const statusCounts = {
+        'submitted': ideas.filter(idea => idea.status === 'submitted').length,
+        'in-review': ideas.filter(idea => idea.status === 'in-review').length,
+        'merged': ideas.filter(idea => idea.status === 'merged').length,
+        'parked': ideas.filter(idea => idea.status === 'parked').length,
+        'implemented': ideas.filter(idea => idea.status === 'implemented').length,
+      };
+      
+      // Format for chart display
+      const result = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching ideas by status:', error);
+      res.status(500).json({ message: "Failed to fetch ideas by status" });
     }
   });
 
