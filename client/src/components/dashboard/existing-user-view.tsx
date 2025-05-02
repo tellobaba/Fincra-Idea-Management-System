@@ -17,7 +17,7 @@ export function ExistingUserView() {
   const [activeTab, setActiveTab] = useState("ideas");
   
   // Fetch real data from API endpoints
-  const { data: topIdeas = [] } = useQuery<IdeaWithUser[]>({
+  const { data: topIdeas = [], isLoading: topIdeasLoading } = useQuery<IdeaWithUser[]>({
     queryKey: ["/api/ideas/top"],
   });
   
@@ -27,11 +27,11 @@ export function ExistingUserView() {
     { name: "1M", value: 0 },
     { name: "6M", value: 0 },
     { name: "1Y", value: 0 }
-  ] } = useQuery<any>({
+  ], isLoading: volumeLoading } = useQuery<any>({
     queryKey: ["/api/ideas/volume"],
   });
   
-  const { data: statusBreakdown = [] } = useQuery<any>({
+  const { data: statusBreakdown = [], isLoading: statusLoading } = useQuery<any>({
     queryKey: ["/api/ideas/by-status"],
   });
   
@@ -75,7 +75,7 @@ export function ExistingUserView() {
   
   
   // Fetch recent activity from dedicated endpoint
-  const { data: recentActivity = [] } = useQuery<any>({
+  const { data: recentActivity = [], isLoading: activityLoading } = useQuery<any>({
     queryKey: ["/api/ideas/recent-activity"],
   });
   
@@ -126,7 +126,7 @@ export function ExistingUserView() {
   }
   
   // Fetch leaderboard data for contributors section
-  const { data: leaderboardData = [] } = useQuery<any>({
+  const { data: leaderboardData = [], isLoading: leaderboardLoading } = useQuery<any>({
     queryKey: ["/api/leaderboard"]
   });
   
@@ -158,9 +158,23 @@ export function ExistingUserView() {
         }))
     : [];
 
+  // Combine all loading states for overall loading indicator
+  const isLoading = topIdeasLoading || volumeLoading || statusLoading || activityLoading || leaderboardLoading;
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Overview</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Overview</h1>
+        {isLoading && (
+          <div className="flex items-center text-blue-600">
+            <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Loading data...</span>
+          </div>
+        )}        
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Status chart */}
@@ -295,18 +309,24 @@ export function ExistingUserView() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {contributorsData.map((contributor: any, index: number) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="h-8 w-8 rounded-full bg-gray-200 mr-3"></div>
-                    <div>
-                      <div className="text-sm font-medium">{contributor.name}</div>
-                      <div className="text-xs text-gray-500">{contributor.department}</div>
+              {contributorsData.length > 0 ? (
+                contributorsData.map((contributor: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 mr-3"></div>
+                      <div>
+                        <div className="text-sm font-medium">{contributor.name}</div>
+                        <div className="text-xs text-gray-500">{contributor.department}</div>
+                      </div>
                     </div>
+                    <div className="text-gray-700">{contributor.value}</div>
                   </div>
-                  <div className="text-gray-700">{contributor.value}</div>
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <p className="text-gray-500 text-sm">No contributor data available</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -319,19 +339,25 @@ export function ExistingUserView() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {topVotedData.map((item) => (
-                <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                  <h3 className="font-medium text-sm">{item.title}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{item.description}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-xs text-blue-700">{item.votes} Votes</span>
-                    <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
-                      {item.status}
-                    </span>
+              {topVotedData.length > 0 ? (
+                topVotedData.map((item) => (
+                  <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                    <h3 className="font-medium text-sm">{item.title}</h3>
+                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-xs text-blue-700">{item.votes} Votes</span>
+                      <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
+                        {item.status}
+                      </span>
+                    </div>
+                    <div className="text-right text-xs text-gray-400 mt-1">{item.date}</div>
                   </div>
-                  <div className="text-right text-xs text-gray-400 mt-1">{item.date}</div>
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <p className="text-gray-500 text-sm">No voted ideas available</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
