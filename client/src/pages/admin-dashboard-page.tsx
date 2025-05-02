@@ -28,7 +28,8 @@ export default function AdminDashboardPage() {
   const { data: ideas, isLoading, error } = useQuery<IdeaWithUser[]>({
     queryKey: ["/api/ideas", refreshFlag],
     queryFn: async () => {
-      const res = await fetch("/api/ideas");
+      // Get all ideas, do not filter by status
+      const res = await fetch("/api/ideas?all=true");
       if (!res.ok) {
         throw new Error("Failed to fetch ideas");
       }

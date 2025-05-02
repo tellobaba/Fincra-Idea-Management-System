@@ -103,10 +103,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category?: string; 
         department?: string;
         priority?: string;
+        search?: string;
       } = {};
       
-      if (req.query.status) {
+      // For admin users with 'all=true' parameter, don't apply status filter by default
+      // This allows admins to see all ideas regardless of status
+      if (!req.query.all && req.query.status) {
         filters.status = req.query.status as string;
+      } else if (!req.query.all && !req.isAuthenticated()) {
+        // Default filter for unauthenticated users or when 'all' is not specified
+        // Only show ideas with status that should be visible to regular users
+        filters.status = 'submitted';
+      }
+      
+      // For admin dashboard with 'all=true', allow full access without filtering
+      // But check that the user has admin rights
+      if (req.query.all === 'true') {
+        // Verify user has admin role
+        if (!req.isAuthenticated() || !['admin', 'reviewer', 'transformer', 'implementer'].includes(req.user.role)) {
+          return res.status(403).json({ message: "Admin access required" });
+        }
+        // If admin, don't apply the default status filter
       }
       
       if (req.query.submittedById && !isNaN(Number(req.query.submittedById))) {
