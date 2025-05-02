@@ -95,23 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Custom endpoints with specific paths must go first
   
-  // Get ideas volume data
-  app.get("/api/ideas/volume", async (_req, res) => {
-    try {
-      // Example: return a 5-point data series for chart
-      // This would normally be calculated from database
-      res.json([
-        { name: "5D", value: 12 },
-        { name: "2W", value: 19 },
-        { name: "1M", value: 25 },
-        { name: "6M", value: 42 },
-        { name: "1Y", value: 58 }
-      ]);
-    } catch (error) {
-      console.error('Error fetching ideas volume:', error);
-      res.status(500).json({ message: "Failed to fetch ideas volume" });
-    }
-  });
+  // The /api/ideas/volume endpoint is defined lower in the file with real database data
   
   // Get recent activity data
   app.get("/api/ideas/recent-activity", async (_req, res) => {
@@ -841,86 +825,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Specific category endpoints for each page
-  app.get("/api/ideas/opportunity", async (_req, res) => {
-    try {
-      const ideas = await dbStorage.getIdeas({ category: 'opportunity' });
-      
-      // Get user details for each idea
-      const ideasWithUsers = await Promise.all(
-        ideas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null
-          };
-        })
-      );
-      
-      res.json(ideasWithUsers);
-    } catch (error) {
-      console.error('Error fetching opportunity ideas:', error);
-      res.status(500).json({ message: "Failed to fetch ideas" });
-    }
-  });
-  
-  app.get("/api/ideas/challenge", async (_req, res) => {
-    try {
-      const ideas = await dbStorage.getIdeas({ category: 'challenge' });
-      
-      // Get user details for each idea
-      const ideasWithUsers = await Promise.all(
-        ideas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null
-          };
-        })
-      );
-      
-      res.json(ideasWithUsers);
-    } catch (error) {
-      console.error('Error fetching challenge ideas:', error);
-      res.status(500).json({ message: "Failed to fetch ideas" });
-    }
-  });
-  
-  app.get("/api/ideas/pain-point", async (_req, res) => {
-    try {
-      const ideas = await dbStorage.getIdeas({ category: 'pain-point' });
-      
-      // Get user details for each idea
-      const ideasWithUsers = await Promise.all(
-        ideas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null
-          };
-        })
-      );
-      
-      res.json(ideasWithUsers);
-    } catch (error) {
-      console.error('Error fetching pain-point ideas:', error);
-      res.status(500).json({ message: "Failed to fetch ideas" });
-    }
-  });
+  // These endpoints were moved lower in the file - see below
   
   // Ideas Volume Over Time
   app.get("/api/ideas/volume", async (_req, res) => {
