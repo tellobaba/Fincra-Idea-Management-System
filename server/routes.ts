@@ -924,8 +924,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get leaderboard data (top contributors)
   app.get("/api/leaderboard", async (_req, res) => {
     try {
-      const allIdeas = await dbStorage.getIdeas();
-      const allUsers = await dbStorage.getUsers();
+      // Wrap in try/catch blocks to handle individual query errors
+      let allIdeas = [];
+      let allUsers = [];
+      
+      try {
+        allIdeas = await dbStorage.getIdeas();
+      } catch (ideasError) {
+        console.error('Error fetching ideas for leaderboard:', ideasError);
+        // Continue with empty array rather than failing completely
+      }
+      
+      try {
+        allUsers = await dbStorage.getUsers();
+      } catch (usersError) {
+        console.error('Error fetching users for leaderboard:', usersError);
+        // Continue with empty array rather than failing completely
+      }
+      
+      // If both failed, return empty array instead of error
+      if (allIdeas.length === 0 && allUsers.length === 0) {
+        return res.json([]);
+      }
       
       // Count idea submissions per user
       const submissionCounts: Record<number, number> = {};
@@ -970,7 +990,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(leaderboard);
     } catch (error) {
       console.error('Error fetching leaderboard data:', error);
-      res.status(500).json({ message: "Failed to fetch leaderboard data" });
+      // Return empty array instead of error to prevent UI disruption
+      res.json([]);
     }
   });
   
@@ -978,7 +999,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get ideas by status (for charts)
   app.get("/api/ideas/by-status", async (_req, res) => {
     try {
-      const ideas = await dbStorage.getIdeas();
+      let ideas = [];
+      
+      try {
+        ideas = await dbStorage.getIdeas();
+      } catch (error) {
+        console.error('Error fetching ideas for status chart:', error);
+      }
       
       // Map our database statuses to the display categories
       // Ideas Submitted = total of all ideas
@@ -1006,7 +1033,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
     } catch (error) {
       console.error('Error fetching ideas by status:', error);
-      res.status(500).json({ message: "Failed to fetch ideas by status" });
+      // Return default data with zeros instead of error
+      const defaultData = [
+        { name: 'Ideas Submitted', value: 0, fill: '#8bc34a' },
+        { name: 'Implemented', value: 0, fill: '#2196f3' },
+        { name: 'Needs Review', value: 0, fill: '#ffc107' },
+        { name: 'Planned', value: 0, fill: '#03a9f4' },
+        { name: 'Future Consideration', value: 0, fill: '#e91e63' }
+      ];
+      res.json(defaultData);
     }
   });
 
