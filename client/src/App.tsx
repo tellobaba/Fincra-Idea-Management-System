@@ -12,6 +12,8 @@ import AuthPage from "@/pages/auth-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
 import SubmissionsPage from "@/pages/submissions-page";
 import AdminPage from "@/pages/admin-page";
+import AdminLoginPage from "@/pages/admin-login-page";
+import AdminDashboardPage from "@/pages/admin-dashboard-page";
 import IdeaDetailPage from "@/pages/idea-detail-page";
 import SubmitIdeaPage from "@/pages/submit-idea-page";
 
@@ -23,6 +25,8 @@ function Router() {
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
       <ProtectedRoute path="/submissions" component={SubmissionsPage} />
       <AdminRoute path="/admin" component={AdminPage} />
+      <Route path="/admin/login" component={AdminLoginPage} />
+      <AdminRoute path="/admin/dashboard" component={AdminDashboardPage} />
       <ProtectedRoute path="/ideas/:id" component={IdeaDetailPage} />
       <ProtectedRoute path="/submit" component={SubmitIdeaPage} />
       <ProtectedRoute path="/submit/:type" component={SubmitIdeaPage} />

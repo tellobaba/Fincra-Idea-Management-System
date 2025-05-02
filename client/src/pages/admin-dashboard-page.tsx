@@ -5,54 +5,58 @@ import { IdeaWithUser } from "@/types/ideas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IdeaManagementTable } from "@/components/admin/idea-management-table";
 import { Button } from "@/components/ui/button";
-import { LogOut, RefreshCw, Settings } from "lucide-react";
+import { LogOut, RefreshCw, Settings, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function AdminDashboardPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [refreshFlag, setRefreshFlag] = useState(0);
 
-  // Check if user is authenticated as admin
-  const authQuery = useQuery({
-    queryKey: ["/api/admin/auth-check"],
-    queryFn: async () => {
-      const res = await fetch("/api/admin/auth-check");
-      if (!res.ok) {
-        throw new Error("Unauthorized");
-      }
-      return await res.json();
-    },
-  });
-
-  // Redirect to login if not authenticated
+  // Check if user is authenticated as admin using the useAuth hook
+  const { user, isLoading: isAuthLoading } = useAuth();
+  
+  // Redirect to login if not authenticated or not an admin
   useEffect(() => {
-    if (authQuery.isError) {
+    if (!isAuthLoading && (!user || user.role !== 'admin')) {
       navigate("/admin/login");
     }
-  }, [authQuery.isError, navigate]);
+  }, [user, isAuthLoading, navigate]);
 
   // Fetch all ideas for admin management
   const { data: ideas, isLoading, error } = useQuery<IdeaWithUser[]>({
-    queryKey: ["/api/admin/ideas", refreshFlag],
+    queryKey: ["/api/ideas", refreshFlag],
     queryFn: async () => {
-      const res = await fetch("/api/admin/ideas");
+      const res = await fetch("/api/ideas");
       if (!res.ok) {
         throw new Error("Failed to fetch ideas");
       }
       return await res.json();
     },
-    enabled: !authQuery.isError,
+    enabled: !isAuthLoading && !!user && user.role === 'admin',
   });
+
+  const { logoutMutation } = useAuth();
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/auth/admin-logout", {
-        method: "POST",
+      logoutMutation.mutate(undefined, {
+        onSuccess: () => {
+          toast({
+            title: "Success",
+            description: "Logged out successfully",
+          });
+          navigate("/admin/login");
+        },
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: error instanceof Error ? error.message : "Failed to log out",
+            variant: "destructive",
+          });
+        }
       });
-      if (!res.ok) throw new Error("Logout failed");
-      
-      navigate("/admin/login");
     } catch (error) {
       toast({
         title: "Error",
@@ -66,10 +70,10 @@ export default function AdminDashboardPage() {
     setRefreshFlag(prev => prev + 1);
   };
 
-  if (authQuery.isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-700"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -79,7 +83,7 @@ export default function AdminDashboardPage() {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
-            <img src="/Logomark.png" alt="Fincra Logo" className="h-8 w-8" />
+            <img src="/assets/Logomark.png" alt="Fincra Logo" className="h-8 w-8" />
           </div>
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         </div>
