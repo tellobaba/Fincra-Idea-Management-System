@@ -792,11 +792,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Ideas by Category with formatted display for the dashboard
-  app.get("/api/ideas/by-category", async (_req, res) => {
+  // Let's create a new, distinct endpoint for the categories chart
+  // Since the /api/ideas/by-category endpoint seems to have issues
+  app.get("/api/chart/categories", async (_req, res) => {
     try {
       // Log the request for debugging
-      console.log('Fetching ideas by category');
+      console.log('Fetching categories chart data');
       
       const ideas = await dbStorage.getIdeas();
       
@@ -814,52 +815,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { name: 'Pain Points', value: categoryCounts['Pain Points'], fill: '#F44336' }, // red
       ];
       
-      res.json(result);
+      return res.json(result);
     } catch (error) {
-      console.error('Error fetching ideas by category:', error);
+      console.error('Error fetching categories chart data:', error);
       // Return default data with zeros instead of error
       const defaultData = [
         { name: 'Ideas', value: 0, fill: '#4CAF50' },
         { name: 'Challenges', value: 0, fill: '#2196F3' },
         { name: 'Pain Points', value: 0, fill: '#F44336' }
       ];
-      res.json(defaultData);
-    }
-  });
-  
-  // Add a special endpoint for ideas by category with ID parameter (for backward compatibility)
-  app.get("/api/ideas/by-category/:id", async (req, res) => {
-    try {
-      // Just redirect to the main endpoint without ID
-      // Log the request for debugging
-      console.log(`Received request with ID ${req.params.id}, redirecting to main endpoint`);
-      
-      const ideas = await dbStorage.getIdeas();
-      
-      // Count ideas by category (pain-point, opportunity, challenge)
-      const categoryCounts = {
-        'Ideas': ideas.filter(idea => idea.category === 'opportunity').length,
-        'Challenges': ideas.filter(idea => idea.category === 'challenge').length,
-        'Pain Points': ideas.filter(idea => idea.category === 'pain-point').length,
-      };
-      
-      // Format for bar chart display
-      const result = [
-        { name: 'Ideas', value: categoryCounts['Ideas'], fill: '#4CAF50' },           // green 
-        { name: 'Challenges', value: categoryCounts['Challenges'], fill: '#2196F3' },   // blue
-        { name: 'Pain Points', value: categoryCounts['Pain Points'], fill: '#F44336' }, // red
-      ];
-      
-      res.json(result);
-    } catch (error) {
-      console.error('Error fetching ideas by category with ID:', error);
-      // Return default data with zeros instead of error
-      const defaultData = [
-        { name: 'Ideas', value: 0, fill: '#4CAF50' },
-        { name: 'Challenges', value: 0, fill: '#2196F3' },
-        { name: 'Pain Points', value: 0, fill: '#F44336' }
-      ];
-      res.json(defaultData);
+      return res.json(defaultData);
     }
   });
   

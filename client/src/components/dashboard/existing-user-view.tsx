@@ -32,7 +32,7 @@ export function ExistingUserView() {
   });
   
   const { data: statusBreakdown = [], isLoading: statusLoading } = useQuery<any>({
-    queryKey: ["/api/ideas/by-category"],
+    queryKey: ["/api/chart/categories"],
   });
   
   // Category colors for the bar chart
