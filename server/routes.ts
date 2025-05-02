@@ -997,16 +997,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Define specialized routes before generic ones
   // Get ideas by category for bar chart
-  app.get("/api/ideas/by-category", async (req, res) => {
+  app.get("/api/ideas/by-category", async (_req, res) => {
     try {
       // This endpoint tallies ideas by their category
-      let ideas: Idea[] = [];
-      
-      try {
-        ideas = await dbStorage.getIdeas();
-      } catch (error) {
-        console.error('Error fetching ideas for category chart:', error);
-      }
+      const ideas = await dbStorage.getIdeas();
       
       // Count ideas by category (pain-point, opportunity, challenge)
       const categoryCounts = {
@@ -1035,43 +1029,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Backward compatibility endpoint - redirects to by-category
-  app.get("/api/ideas/by-status", async (req, res) => {
+  // Add endpoints to get ideas by specific category type
+  app.get("/api/ideas/opportunity", async (_req, res) => {
     try {
-      // This endpoint tallies ideas by their category
-      let ideas: Idea[] = [];
+      // Get all ideas
+      const ideas = await dbStorage.getIdeas();
       
-      try {
-        ideas = await dbStorage.getIdeas();
-      } catch (error) {
-        console.error('Error fetching ideas for category chart:', error);
+      // Filter to only get opportunities (ideas)
+      const opportunityIdeas = ideas.filter(idea => idea.category === 'opportunity');
+      
+      // Get user info for each idea
+      const ideasWithUsers = await Promise.all(
+        opportunityIdeas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching opportunity ideas:', error);
+      res.status(500).json({ message: "Failed to fetch ideas" });
+    }
+  });
+  
+  app.get("/api/ideas/challenge", async (_req, res) => {
+    try {
+      // Get all ideas
+      const ideas = await dbStorage.getIdeas();
+      
+      // Filter to only get challenges
+      const challengeIdeas = ideas.filter(idea => idea.category === 'challenge');
+      
+      // Get user info for each idea
+      const ideasWithUsers = await Promise.all(
+        challengeIdeas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching challenge ideas:', error);
+      res.status(500).json({ message: "Failed to fetch challenges" });
+    }
+  });
+  
+  app.get("/api/ideas/pain-point", async (_req, res) => {
+    try {
+      // Get all ideas
+      const ideas = await dbStorage.getIdeas();
+      
+      // Filter to only get pain points
+      const painPointIdeas = ideas.filter(idea => idea.category === 'pain-point');
+      
+      // Get user info for each idea
+      const ideasWithUsers = await Promise.all(
+        painPointIdeas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching pain point ideas:', error);
+      res.status(500).json({ message: "Failed to fetch pain points" });
+    }
+  });
+  
+  // Get voted ideas by current user
+  app.get("/api/ideas/my-votes", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to view your votes" });
       }
       
-      // Count ideas by category (pain-point, opportunity, challenge)
-      const categoryCounts = {
-        'Ideas': ideas.filter(idea => idea.category === 'opportunity').length,
-        'Challenges': ideas.filter(idea => idea.category === 'challenge').length,
-        'Pain Points': ideas.filter(idea => idea.category === 'pain-point').length,
-      };
+      // Get all ideas (later we'll implement actual voting tracking)
+      const ideas = await dbStorage.getIdeas();
       
-      // Format for bar chart display
-      const result = [
-        { name: 'Ideas', value: categoryCounts['Ideas'], fill: '#4CAF50' },           // green 
-        { name: 'Challenges', value: categoryCounts['Challenges'], fill: '#2196F3' },   // blue
-        { name: 'Pain Points', value: categoryCounts['Pain Points'], fill: '#F44336' }, // red
-      ];
+      // For now, return ideas with votes > 0 as a placeholder
+      // Later this will be replaced with actual user votes tracking
+      const votedIdeas = ideas.filter(idea => idea.votes && idea.votes > 0);
       
-      res.json(result);
+      // Get user info for each idea
+      const ideasWithUsers = await Promise.all(
+        votedIdeas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
     } catch (error) {
-      console.error('Error fetching ideas by category:', error);
-      // Return default data with zeros instead of error
-      const defaultData = [
-        { name: 'Ideas', value: 0, fill: '#4CAF50' },
-        { name: 'Challenges', value: 0, fill: '#2196F3' },
-        { name: 'Pain Points', value: 0, fill: '#F44336' }
-      ];
-      res.json(defaultData);
+      console.error('Error fetching voted ideas:', error);
+      res.status(500).json({ message: "Failed to fetch voted ideas" });
     }
+  });
+  
+  // Backward compatibility endpoint - redirects to by-category
+  app.get("/api/ideas/by-status", async (_req, res) => {
+    // Simply forward to the category endpoint for backward compatibility
+    const forwardRequest = async () => {
+      try {
+        const ideas = await dbStorage.getIdeas();
+        
+        // Count ideas by category (pain-point, opportunity, challenge)
+        const categoryCounts = {
+          'Ideas': ideas.filter(idea => idea.category === 'opportunity').length,
+          'Challenges': ideas.filter(idea => idea.category === 'challenge').length,
+          'Pain Points': ideas.filter(idea => idea.category === 'pain-point').length,
+        };
+        
+        // Format for bar chart display
+        const result = [
+          { name: 'Ideas', value: categoryCounts['Ideas'], fill: '#4CAF50' },           // green 
+          { name: 'Challenges', value: categoryCounts['Challenges'], fill: '#2196F3' },   // blue
+          { name: 'Pain Points', value: categoryCounts['Pain Points'], fill: '#F44336' }, // red
+        ];
+        
+        return result;
+      } catch (error) {
+        console.error('Error in by-status endpoint:', error);
+        // Default data with zeros as fallback
+        return [
+          { name: 'Ideas', value: 0, fill: '#4CAF50' },
+          { name: 'Challenges', value: 0, fill: '#2196F3' },
+          { name: 'Pain Points', value: 0, fill: '#F44336' }
+        ];
+      }
+    };
+    
+    const result = await forwardRequest();
+    res.json(result);
   });
 
   // Admin routes
