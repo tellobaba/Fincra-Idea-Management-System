@@ -24,6 +24,10 @@ export default function SubmitIdeaPage() {
       title: string;
       description: string;
       category: Category;
+      impact?: string;
+      organizationCategory?: string;
+      inspiration?: string;
+      similarSolutions?: string;
       tags: string[];
     }) => {
       const response = await apiRequest("POST", "/api/ideas", formData);
@@ -56,6 +60,10 @@ export default function SubmitIdeaPage() {
     title: string;
     description: string;
     category: Category;
+    impact?: string;
+    organizationCategory?: string;
+    inspiration?: string;
+    similarSolutions?: string;
     tags: string[];
   }) => {
     await submitIdeaMutation.mutateAsync(formData);

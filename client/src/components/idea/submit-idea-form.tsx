@@ -32,6 +32,10 @@ interface SubmitIdeaFormProps {
     title: string;
     description: string;
     category: Category;
+    impact?: string;
+    organizationCategory?: string;
+    inspiration?: string;
+    similarSolutions?: string;
     tags: string[];
   }) => void;
   onCancel?: () => void;
@@ -39,6 +43,10 @@ interface SubmitIdeaFormProps {
     title?: string;
     description?: string;
     category?: Category;
+    impact?: string;
+    organizationCategory?: string;
+    inspiration?: string;
+    similarSolutions?: string;
     tags?: string[];
   };
 }
@@ -72,6 +80,10 @@ export function SubmitIdeaForm({
     defaultValues: {
       title: initialData.title || "",
       description: initialData.description || "",
+      impact: "",
+      organizationCategory: "",
+      inspiration: "",
+      similarSolutions: "",
       category: initialData.category || initialCategory || "opportunity",
       tags: initialData.tags ? initialData.tags.join(", ") : "",  // this is converted to array by the schema transform
     },
@@ -125,7 +137,7 @@ export function SubmitIdeaForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Detailed Description</FormLabel>
               <div className="border rounded-md focus-within:ring-1 focus-within:ring-ring">
                 <div className="flex border-b">
                   <Button
@@ -175,7 +187,28 @@ export function SubmitIdeaForm({
                 </FormControl>
               </div>
               <FormDescription>
-                Supports Markdown formatting
+                Provide comprehensive details about your idea
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="impact"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Impact and Relevance</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Describe the potential impact and relevance of your idea..."
+                  rows={4}
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                How will this idea benefit the organization?
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -212,24 +245,91 @@ export function SubmitIdeaForm({
           
           <FormField
             control={form.control}
-            name="tags"
+            name="organizationCategory"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tags</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Enter tags separated by commas" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormDescription>
-                  E.g. performance, UX, API, mobile
-                </FormDescription>
+                <FormLabel>Organization Category</FormLabel>
+                <Select 
+                  defaultValue={field.value} 
+                  onValueChange={field.onChange}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select organization category" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Organisation Health">Organisation Health</SelectItem>
+                    <SelectItem value="Technology & Systems">Technology & Systems</SelectItem>
+                    <SelectItem value="Commercial & Strategy">Commercial & Strategy</SelectItem>
+                    <SelectItem value="Process">Process</SelectItem>
+                    <SelectItem value="Cost Leadership">Cost Leadership</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="inspiration"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Inspiration or Source</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="What inspired this idea? (customer feedback, competitor analysis, etc.)" 
+                    rows={4}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="similarSolutions"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Similar Solutions or Prior Attempts</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Are there any similar solutions already in place? Have we tried addressing this before?" 
+                    rows={4}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tags</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Enter tags separated by commas" 
+                  {...field} 
+                />
+              </FormControl>
+              <FormDescription>
+                E.g. performance, UX, API, mobile
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         <div>
           <FormLabel>Attachments</FormLabel>
