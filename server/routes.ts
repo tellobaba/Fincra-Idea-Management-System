@@ -503,7 +503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ideas/:id/vote", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "You must be logged in to vote" });
       }
       
       const id = parseInt(req.params.id);
@@ -524,9 +524,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to vote for idea" });
       }
       
-      res.json(updatedIdea);
+      // Get submitter details for the response
+      const submitter = await dbStorage.getUser(updatedIdea.submittedById);
+      
+      res.json({
+        ...updatedIdea,
+        submitter: submitter ? {
+          id: submitter.id,
+          displayName: submitter.displayName,
+          department: submitter.department,
+          avatarUrl: submitter.avatarUrl,
+        } : null,
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to vote for idea" });
+      console.error('Error voting for idea:', error);
+      res.status(500).json({ message: "Failed to register vote" });
     }
   });
 
@@ -1147,11 +1159,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/ideas/pain-point", async (_req, res) => {
     try {
-      // Get all ideas
-      const ideas = await dbStorage.getIdeas();
-      
-      // Filter to only get pain points
-      const painPointIdeas = ideas.filter(idea => idea.category === 'pain-point');
+      // Use the getIdeas method with category filter
+      const painPointIdeas = await dbStorage.getIdeas({ category: 'pain-point' });
       
       // Get user info for each idea
       const ideasWithUsers = await Promise.all(

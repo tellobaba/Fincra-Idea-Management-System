@@ -43,11 +43,15 @@ interface SubmitIdeaFormProps {
   };
 }
 
-// Simple form schema for input validation
+// Enhanced form schema for input validation with new fields
 const formSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }).max(100, { message: "Title must be less than 100 characters" }),
   description: z.string().min(20, { message: "Description must be at least 20 characters" }),
   category: z.enum(["pain-point", "opportunity", "challenge"] as const),
+  impact: z.string().optional(),
+  organizationCategory: z.string().optional(),
+  inspiration: z.string().optional(),
+  similarSolutions: z.string().optional(),
   tags: z.string(), // Keep as string in the form
 });
 
