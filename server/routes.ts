@@ -93,6 +93,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   setupAuth(app);
 
+  // Custom endpoints with specific paths must go first
+  
+  // Get ideas volume data
+  app.get("/api/ideas/volume", async (_req, res) => {
+    try {
+      // Example: return a 5-point data series for chart
+      // This would normally be calculated from database
+      res.json([
+        { name: "5D", value: 12 },
+        { name: "2W", value: 19 },
+        { name: "1M", value: 25 },
+        { name: "6M", value: 42 },
+        { name: "1Y", value: 58 }
+      ]);
+    } catch (error) {
+      console.error('Error fetching ideas volume:', error);
+      res.status(500).json({ message: "Failed to fetch ideas volume" });
+    }
+  });
+  
+  // Get recent activity data
+  app.get("/api/ideas/recent-activity", async (_req, res) => {
+    try {
+      // Get most recent ideas (limit to 5)
+      const recentIdeas = await dbStorage.getIdeas({sortBy: 'createdAt', sortDirection: 'desc', limit: 5});
+      
+      // Format ideas for activity feed
+      const activityData = await Promise.all(recentIdeas.map(async (idea) => {
+        const submitter = idea.submittedById ? await dbStorage.getUser(idea.submittedById) : null;
+        
+        return {
+          id: idea.id,
+          title: idea.title,
+          description: idea.description,
+          status: idea.status,
+          createdAt: idea.createdAt ? idea.createdAt.toISOString() : null,
+          updatedAt: idea.updatedAt ? idea.updatedAt.toISOString() : null,
+          submitter: submitter ? {
+            id: submitter.id,
+            displayName: submitter.displayName || 'Anonymous',
+            department: submitter.department || 'General'
+          } : null
+        };
+      }));
+      
+      res.json(activityData);
+    } catch (error) {
+      console.error('Error fetching recent activity:', error);
+      res.status(500).json({ message: "Failed to fetch recent activity" });
+    }
+  });
+  
+  // Get top ideas (most voted)
+  app.get("/api/ideas/top", async (_req, res) => {
+    try {
+      const topIdeas = await dbStorage.getTopIdeas(10);
+      
+      // Attach submitter info to each idea
+      const ideasWithUsers = await Promise.all(
+        topIdeas.map(async (idea) => {
+          const submitter = idea.submittedById ? await dbStorage.getUser(idea.submittedById) : null;
+          
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName || 'Anonymous',
+              department: submitter.department || 'General'
+            } : null
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching top ideas:', error);
+      res.status(500).json({ message: "Failed to fetch top ideas" });
+    }
+  });
+  
   // Ideas routes
   // Get all ideas (with optional filters)
   app.get("/api/ideas", async (req, res) => {
@@ -179,35 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get top ideas
-  app.get("/api/ideas/top", async (req, res) => {
-    try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
-      const ideas = await dbStorage.getTopIdeas(limit);
-      
-      // Attach user info to each idea
-      const ideasWithUsers = await Promise.all(
-        ideas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null,
-          };
-        })
-      );
-      
-      res.json(ideasWithUsers);
-    } catch (error) {
-      console.error('Error fetching top ideas:', error);
-      res.status(500).json({ message: "Failed to fetch top ideas" });
-    }
-  });
+  // Removed duplicate route
 
   // Get ideas for review (admin)
   app.get("/api/ideas/review", async (req, res) => {
@@ -870,7 +922,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get leaderboard data (top contributors)
-  app.get("/api/leaderboard", async (req, res) => {
+  app.get("/api/leaderboard", async (_req, res) => {
     try {
       const allIdeas = await dbStorage.getIdeas();
       const allUsers = await dbStorage.getUsers();
@@ -903,9 +955,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const leaderboard = allUsers.map(user => ({
         user: {
           id: user.id,
-          displayName: user.displayName,
-          department: user.department,
-          avatarUrl: user.avatarUrl
+          displayName: user.displayName || `User ${user.id}`,
+          department: user.department || 'General',
+          avatarUrl: user.avatarUrl || null
         },
         ideasSubmitted: submissionCounts[user.id] || 0,
         ideasImplemented: implementedCounts[user.id] || 0,
@@ -922,6 +974,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Define specialized routes before generic ones
   // Get ideas by status (for charts)
   app.get("/api/ideas/by-status", async (_req, res) => {
     try {
