@@ -285,11 +285,11 @@ export default function LeaderboardPage() {
                         <TableCell>
                           <div className="flex items-center">
                             <Avatar className="h-10 w-10 mr-3">
-                              <AvatarImage src={entry.user.avatarUrl} alt={entry.user.displayName || `User ${entry.user.id}`} />
-                              <AvatarFallback>{entry.user.displayName ? entry.user.displayName.charAt(0) : '?'}</AvatarFallback>
+                              <AvatarImage src={entry.user.avatarUrl} alt={entry.user.displayName || entry.user.username || `User ${entry.user.id}`} />
+                              <AvatarFallback>{entry.user.displayName ? entry.user.displayName.charAt(0) : (entry.user.username ? entry.user.username.charAt(0) : '?')}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="text-sm font-medium">{entry.user.displayName || `User ${entry.user.id}`}</div>
+                              <div className="text-sm font-medium">{entry.user.displayName || entry.user.username || `User ${entry.user.id}`}</div>
                               <div className="text-xs text-muted-foreground">{entry.user.email || `user-${entry.user.id}@fincra.com`}</div>
                             </div>
                           </div>
