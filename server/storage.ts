@@ -316,12 +316,39 @@ export class DatabaseStorage implements IStorage {
   
   async getUserVotedIdeas(userId: number): Promise<Idea[]> {
     // Get all ideas voted by the user using a join between userVotes and ideas
-    return await db
-      .select()
+    const result = await db
+      .select({
+        id: ideas.id,
+        title: ideas.title,
+        description: ideas.description,
+        category: ideas.category,
+        tags: ideas.tags,
+        department: ideas.department,
+        status: ideas.status,
+        priority: ideas.priority,
+        votes: ideas.votes,
+        submittedById: ideas.submittedById,
+        assignedToId: ideas.assignedToId,
+        createdAt: ideas.createdAt,
+        updatedAt: ideas.updatedAt,
+        impactScore: ideas.impactScore,
+        costSaved: ideas.costSaved,
+        revenueGenerated: ideas.revenueGenerated,
+        attachments: ideas.attachments,
+        mediaUrls: ideas.mediaUrls,
+        impact: ideas.impact,
+        adminNotes: ideas.adminNotes,
+        attachmentUrl: ideas.attachmentUrl,
+        organizationCategory: ideas.organizationCategory,
+        inspiration: ideas.inspiration,
+        similarSolutions: ideas.similarSolutions
+      })
       .from(ideas)
       .innerJoin(userVotes, eq(ideas.id, userVotes.ideaId))
       .where(eq(userVotes.userId, userId))
       .orderBy(desc(ideas.createdAt));
+      
+    return result;
   }
   
   async removeUserVote(userId: number, ideaId: number): Promise<boolean> {
