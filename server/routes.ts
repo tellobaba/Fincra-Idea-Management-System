@@ -580,29 +580,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get leaderboard
-  app.get("/api/leaderboard", async (req, res) => {
-    try {
-      const leaderboard = await dbStorage.getLeaderboard();
-      
-      // Map to simplified response
-      const response = leaderboard.map(entry => ({
-        user: {
-          id: entry.user.id,
-          displayName: entry.user.displayName,
-          department: entry.user.department,
-          avatarUrl: entry.user.avatarUrl,
-        },
-        ideasSubmitted: entry.ideasSubmitted,
-        ideasImplemented: entry.ideasImplemented,
-        impactScore: entry.impactScore,
-      }));
-      
-      res.json(response);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch leaderboard" });
-    }
-  });
+  // Old leaderboard endpoint removed to avoid duplication
+  // We now use the improved implementation below
 
   // Admin endpoint to assign reviewer/implementer
   app.post("/api/ideas/:id/assign", checkAdminRole, async (req, res) => {
@@ -1018,12 +997,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Define specialized routes before generic ones
   // Get ideas by category for bar chart
-  app.get("/api/ideas/by-status", async (_req, res) => {
+  app.get("/api/ideas/by-status", async (req, res) => {
     try {
+      // This endpoint is actually checking idea categories, not status
+      // The name was kept for backward compatibility
       let ideas: Idea[] = [];
       
       try {
-        ideas = await dbStorage.getIdeas();
+        const filters = {};
+        // No need to filter by ID - removing the param check that was causing the error
+        
+        ideas = await dbStorage.getIdeas(filters);
       } catch (error) {
         console.error('Error fetching ideas for category chart:', error);
       }
