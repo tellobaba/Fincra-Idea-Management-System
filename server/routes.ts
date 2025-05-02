@@ -761,42 +761,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get idea volume data for charts
-  app.get("/api/ideas/volume", async (req, res) => {
-    try {
-      // For demo purposes, return static data for chart
-      // In a real implementation, this would be aggregated from database
-      res.json([
-        { name: "5D", value: 10 },
-        { name: "2W", value: 35 },
-        { name: "1M", value: 80 },
-        { name: "6M", value: 120 },
-        { name: "1Y", value: 210 }
-      ]);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch idea volume data" });
-    }
-  });
-  
-  // Get ideas by category (for charts)
+  // Ideas by Category
   app.get("/api/ideas/by-category", async (req, res) => {
     try {
-      const ideas = await dbStorage.getIdeas();
+      const allIdeas = await dbStorage.getIdeas();
       
-      // Count ideas by category
-      const categoryCounts = {
-        'pain-point': ideas.filter(idea => idea.category === 'pain-point').length,
-        'opportunity': ideas.filter(idea => idea.category === 'opportunity').length,
-        'challenge': ideas.filter(idea => idea.category === 'challenge').length,
-      };
+      // Group the ideas by category and count them
+      const categoryCounts: Record<string, number> = {};
+      allIdeas.forEach(idea => {
+        if (!categoryCounts[idea.category]) {
+          categoryCounts[idea.category] = 0;
+        }
+        categoryCounts[idea.category]++;
+      });
       
-      // Format for chart display
-      const result = Object.entries(categoryCounts).map(([name, value]) => ({ name, value }));
+      // Format data for the frontend chart
+      const result = Object.entries(categoryCounts).map(([category, count]) => ({
+        name: category,
+        value: count,
+      }));
       
       res.json(result);
     } catch (error) {
       console.error('Error fetching ideas by category:', error);
       res.status(500).json({ message: "Failed to fetch ideas by category" });
+    }
+  });
+  
+  // Ideas Volume Over Time
+  app.get("/api/ideas/volume", async (req, res) => {
+    try {
+      const ideas = await dbStorage.getIdeas();
+      
+      // Get today's date and calculate dates for periods
+      const today = new Date();
+      const fiveDaysAgo = new Date(today);
+      fiveDaysAgo.setDate(today.getDate() - 5);
+      
+      const twoWeeksAgo = new Date(today);
+      twoWeeksAgo.setDate(today.getDate() - 14);
+      
+      const oneMonthAgo = new Date(today);
+      oneMonthAgo.setMonth(today.getMonth() - 1);
+      
+      const sixMonthsAgo = new Date(today);
+      sixMonthsAgo.setMonth(today.getMonth() - 6);
+      
+      const oneYearAgo = new Date(today);
+      oneYearAgo.setFullYear(today.getFullYear() - 1);
+      
+      // Count ideas in each period
+      const fiveDaysCount = ideas.filter(idea => new Date(idea.createdAt) >= fiveDaysAgo).length;
+      const twoWeeksCount = ideas.filter(idea => new Date(idea.createdAt) >= twoWeeksAgo).length;
+      const oneMonthCount = ideas.filter(idea => new Date(idea.createdAt) >= oneMonthAgo).length;
+      const sixMonthsCount = ideas.filter(idea => new Date(idea.createdAt) >= sixMonthsAgo).length;
+      const oneYearCount = ideas.filter(idea => new Date(idea.createdAt) >= oneYearAgo).length;
+      
+      const volumeData = [
+        { name: "5D", value: fiveDaysCount },
+        { name: "2W", value: twoWeeksCount },
+        { name: "1M", value: oneMonthCount },
+        { name: "6M", value: sixMonthsCount },
+        { name: "1Y", value: oneYearCount }
+      ];
+      
+      res.json(volumeData);
+    } catch (error) {
+      console.error('Error fetching idea volume:', error);
+      res.status(500).json({ message: "Failed to fetch idea volume" });
     }
   });
   
