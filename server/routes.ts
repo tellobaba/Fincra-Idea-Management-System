@@ -577,6 +577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const id = parseInt(req.params.id);
+      const userId = req.user!.id;
       
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid ID format" });
@@ -588,7 +589,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Idea not found" });
       }
       
-      const updatedIdea = await dbStorage.voteIdea(id);
+      // Check if user already voted
+      const hasVoted = await dbStorage.checkUserVote(userId, id);
+      
+      if (hasVoted) {
+        return res.status(200).json({ 
+          message: "You have already voted for this idea",
+          alreadyVoted: true,
+          idea: {
+            ...idea,
+            submitter: await dbStorage.getUser(idea.submittedById).then(submitter => {
+              return submitter ? {
+                id: submitter.id,
+                displayName: submitter.displayName,
+                department: submitter.department,
+                avatarUrl: submitter.avatarUrl,
+              } : null;
+            })
+          }
+        });
+      }
+      
+      const updatedIdea = await dbStorage.voteIdea(id, userId);
       
       if (!updatedIdea) {
         return res.status(500).json({ message: "Failed to vote for idea" });
@@ -1101,12 +1123,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "You must be logged in to view your votes" });
       }
       
-      // Get all ideas (later we'll implement actual voting tracking)
-      const ideas = await dbStorage.getIdeas();
+      const userId = req.user!.id;
       
-      // For now, return ideas with votes > 0 as a placeholder
-      // Later this will be replaced with actual user votes tracking
-      const votedIdeas = ideas.filter(idea => idea.votes && idea.votes > 0);
+      // Get ideas that the current user has voted for
+      const votedIdeas = await dbStorage.getUserVotedIdeas(userId);
       
       // Get user info for each idea
       const ideasWithUsers = await Promise.all(

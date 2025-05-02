@@ -1,4 +1,4 @@
-import { users, ideas, comments, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment } from "@shared/schema";
+import { users, ideas, comments, userVotes, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment, type InsertUserVote, type UserVote } from "@shared/schema";
 import session from "express-session";
 import { db } from "./db";
 import { eq, asc, desc, and, sql } from "drizzle-orm";
@@ -267,17 +267,99 @@ export class DatabaseStorage implements IStorage {
     return !!result;
   }
   
-  async voteIdea(id: number): Promise<Idea | undefined> {
-    const [idea] = await db
-      .update(ideas)
-      .set({ 
-        votes: sql`${ideas.votes} + 1`,
-        updatedAt: new Date()
-      })
-      .where(eq(ideas.id, id))
-      .returning();
+  async voteIdea(id: number, userId: number): Promise<Idea | undefined> {
+    // Check if the user has already voted for this idea
+    const hasVoted = await this.checkUserVote(userId, id);
     
-    return idea;
+    if (hasVoted) {
+      // User already voted, return the idea without changes
+      return await this.getIdea(id);
+    }
+    
+    // Start a transaction to ensure both the vote count update and the user vote record are created atomically
+    return await db.transaction(async (tx) => {
+      // Increment the idea's vote count
+      const [idea] = await tx
+        .update(ideas)
+        .set({ 
+          votes: sql`${ideas.votes} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(ideas.id, id))
+        .returning();
+      
+      // Record the user's vote
+      await tx
+        .insert(userVotes)
+        .values({
+          userId,
+          ideaId: id,
+        });
+      
+      return idea;
+    });
+  }
+  
+  async checkUserVote(userId: number, ideaId: number): Promise<boolean> {
+    const votes = await db
+      .select()
+      .from(userVotes)
+      .where(
+        and(
+          eq(userVotes.userId, userId),
+          eq(userVotes.ideaId, ideaId)
+        )
+      );
+    
+    return votes.length > 0;
+  }
+  
+  async getUserVotedIdeas(userId: number): Promise<Idea[]> {
+    // Get all ideas voted by the user using a join between userVotes and ideas
+    return await db
+      .select()
+      .from(ideas)
+      .innerJoin(userVotes, eq(ideas.id, userVotes.ideaId))
+      .where(eq(userVotes.userId, userId))
+      .orderBy(desc(ideas.createdAt));
+  }
+  
+  async removeUserVote(userId: number, ideaId: number): Promise<boolean> {
+    // Check if the user has voted for this idea
+    const hasVoted = await this.checkUserVote(userId, ideaId);
+    
+    if (!hasVoted) {
+      return false; // User hasn't voted, nothing to remove
+    }
+    
+    // Start a transaction to ensure both the vote count update and the user vote record are removed atomically
+    try {
+      await db.transaction(async (tx) => {
+        // Decrement the idea's vote count
+        await tx
+          .update(ideas)
+          .set({ 
+            votes: sql`${ideas.votes} - 1`,
+            updatedAt: new Date()
+          })
+          .where(eq(ideas.id, ideaId));
+        
+        // Remove the user's vote record
+        await tx
+          .delete(userVotes)
+          .where(
+            and(
+              eq(userVotes.userId, userId),
+              eq(userVotes.ideaId, ideaId)
+            )
+          );
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error removing user vote:", error);
+      return false;
+    }
   }
   
   async getTopIdeas(limit: number = 5): Promise<Idea[]> {
