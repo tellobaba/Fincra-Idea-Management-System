@@ -169,6 +169,7 @@ export default function AdminDashboardPage() {
     setSearchQuery("");
     setStatusFilter(null);
     setCategoryFilter(null);
+    setCurrentTab("all");
   };
 
   if (isAuthLoading) {
@@ -365,14 +366,14 @@ export default function AdminDashboardPage() {
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Select value={statusFilter || ""} onValueChange={(value) => setStatusFilter(value || null)}>
+            <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? null : value)}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Status</SelectLabel>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
                   {Object.entries(STATUS_CONFIG).map(([status, config]) => (
                     <SelectItem key={status} value={status}>
                       <div className="flex items-center">
@@ -385,14 +386,14 @@ export default function AdminDashboardPage() {
               </SelectContent>
             </Select>
 
-            <Select value={categoryFilter || ""} onValueChange={(value) => setCategoryFilter(value || null)}>
+            <Select value={categoryFilter || "all"} onValueChange={(value) => setCategoryFilter(value === "all" ? null : value)}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by Category" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Category</SelectLabel>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {Object.entries(CATEGORY_CONFIG).map(([category, config]) => (
                     <SelectItem key={category} value={category}>
                       <div className="flex items-center">
