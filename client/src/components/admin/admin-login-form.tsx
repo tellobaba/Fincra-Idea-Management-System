@@ -39,7 +39,8 @@ export function AdminLoginForm() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/admin-login", {
+      // First make the login request
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,20 +48,42 @@ export function AdminLoginForm() {
         body: JSON.stringify(data),
       });
 
+      // Handle non-200 responses
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Invalid credentials");
+        const errorText = await response.text();
+        let errorMessage = "Invalid credentials";
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // If it's not valid JSON, use the error text
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Parse the user data
+      let userData;
+      try {
+        userData = await response.json();
+      } catch (e) {
+        throw new Error("Invalid response from server");
+      }
+      
+      // Check if the user has admin role
+      if (!userData || userData.role !== "admin") {
+        throw new Error("You do not have admin privileges");
       }
 
       // On successful login
       toast({
-        title: "Login successful",
+        title: "Admin login successful",
         description: "Welcome to the admin dashboard",
       });
       navigate("/admin/dashboard");
     } catch (error) {
       toast({
-        title: "Login failed",
+        title: "Admin login failed",
         description: error instanceof Error ? error.message : "Invalid credentials",
         variant: "destructive",
       });
