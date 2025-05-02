@@ -824,6 +824,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Specific category endpoints for each page
+  app.get("/api/ideas/opportunity", async (_req, res) => {
+    try {
+      const ideas = await dbStorage.getIdeas({ category: 'opportunity' });
+      
+      // Get user details for each idea
+      const ideasWithUsers = await Promise.all(
+        ideas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching opportunity ideas:', error);
+      res.status(500).json({ message: "Failed to fetch ideas" });
+    }
+  });
+  
+  app.get("/api/ideas/challenge", async (_req, res) => {
+    try {
+      const ideas = await dbStorage.getIdeas({ category: 'challenge' });
+      
+      // Get user details for each idea
+      const ideasWithUsers = await Promise.all(
+        ideas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching challenge ideas:', error);
+      res.status(500).json({ message: "Failed to fetch ideas" });
+    }
+  });
+  
+  app.get("/api/ideas/pain-point", async (_req, res) => {
+    try {
+      const ideas = await dbStorage.getIdeas({ category: 'pain-point' });
+      
+      // Get user details for each idea
+      const ideasWithUsers = await Promise.all(
+        ideas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching pain-point ideas:', error);
+      res.status(500).json({ message: "Failed to fetch ideas" });
+    }
+  });
+  
   // Ideas Volume Over Time
   app.get("/api/ideas/volume", async (_req, res) => {
     try {
