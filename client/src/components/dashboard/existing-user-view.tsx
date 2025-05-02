@@ -63,22 +63,31 @@ export function ExistingUserView() {
     }
   };
   
-  // Fetch recent ideas data for activity section
-  const { data: activityIdeas = [] } = useQuery<IdeaWithUser[]>({
-    queryKey: ["/api/ideas"],
+  
+  // Fetch recent activity from dedicated endpoint
+  const { data: recentActivity = [] } = useQuery<any>({
+    queryKey: ["/api/ideas/recent-activity"],
   });
   
-  // Use the most recent ideas for the activity feed
-  const activityData = activityIdeas
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 3)
-    .map(idea => ({
-      id: idea.id,
-      title: idea.title,
-      description: idea.description.substring(0, 80) + (idea.description.length > 80 ? '...' : ''),
-      status: idea.status,
-      date: formatRelativeTime(new Date(idea.createdAt))
-    }));
+  // Define activity data type
+  type ActivityItem = {
+    id: number;
+    title: string;
+    description: string;
+    status: string;
+    date: string;
+    submitter?: any;
+  };
+  
+  // Transform the activity data for display
+  const activityData: ActivityItem[] = recentActivity.map((activity: any) => ({
+    id: activity.id,
+    title: activity.title,
+    description: activity.description.substring(0, 80) + (activity.description.length > 80 ? '...' : ''),
+    status: activity.status,
+    date: formatRelativeTime(new Date(activity.createdAt)),
+    submitter: activity.submitter
+  }));
   
   // Helper function to format dates in relative time
   function formatRelativeTime(date: Date): string {
@@ -236,7 +245,7 @@ export function ExistingUserView() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {activityData.map((item) => (
+              {activityData.map((item: ActivityItem) => (
                 <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                   <h3 className="font-medium text-sm">{item.title}</h3>
                   <p className="text-xs text-gray-500 mt-1">{item.description}</p>
@@ -260,7 +269,7 @@ export function ExistingUserView() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {contributorsData.map((contributor, index) => (
+              {contributorsData.map((contributor: any, index: number) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="h-8 w-8 rounded-full bg-gray-200 mr-3"></div>
@@ -290,13 +299,7 @@ export function ExistingUserView() {
                   <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-xs text-blue-700">{item.votes} Votes</span>
-                    <span className={`text-xs rounded-md py-1 px-2 ${
-                      item.status === "Need Review" 
-                        ? "bg-orange-100 text-orange-700" 
-                        : item.status === "Submitted"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-blue-100 text-blue-700"
-                    }`}>
+                    <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                       {item.status}
                     </span>
                   </div>

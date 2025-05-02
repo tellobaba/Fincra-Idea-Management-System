@@ -832,6 +832,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get recent activity (latest ideas)
+  app.get("/api/ideas/recent-activity", async (req, res) => {
+    try {
+      const allIdeas = await dbStorage.getIdeas();
+      
+      // Sort by createdAt (descending) and take most recent 5
+      const recentActivity = allIdeas
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5)
+        .map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          
+          return {
+            id: idea.id,
+            title: idea.title,
+            description: idea.description,
+            status: idea.status,
+            createdAt: idea.createdAt,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        });
+      
+      const results = await Promise.all(recentActivity);
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching recent activity:', error);
+      res.status(500).json({ message: "Failed to fetch recent activity" });
+    }
+  });
+  
+  // Get leaderboard data (top contributors)
+  app.get("/api/leaderboard", async (req, res) => {
+    try {
+      const allIdeas = await dbStorage.getIdeas();
+      const allUsers = await dbStorage.getUsers();
+      
+      // Count idea submissions per user
+      const submissionCounts: Record<number, number> = {};
+      allIdeas.forEach(idea => {
+        const userId = idea.submittedById;
+        if (!submissionCounts[userId]) {
+          submissionCounts[userId] = 0;
+        }
+        submissionCounts[userId]++;
+      });
+      
+      // Count implemented ideas per user
+      const implementedCounts: Record<number, number> = {};
+      allIdeas
+        .filter(idea => idea.status === 'implemented')
+        .forEach(idea => {
+          const userId = idea.submittedById;
+          if (!implementedCounts[userId]) {
+            implementedCounts[userId] = 0;
+          }
+          implementedCounts[userId]++;
+        });
+      
+      // Generate leaderboard entries
+      const leaderboard = allUsers.map(user => ({
+        user: {
+          id: user.id,
+          displayName: user.displayName,
+          department: user.department,
+          avatarUrl: user.avatarUrl
+        },
+        ideasSubmitted: submissionCounts[user.id] || 0,
+        ideasImplemented: implementedCounts[user.id] || 0,
+        impactScore: ((submissionCounts[user.id] || 0) * 10) + ((implementedCounts[user.id] || 0) * 25)
+      }));
+      
+      // Sort by impact score descending
+      leaderboard.sort((a, b) => b.impactScore - a.impactScore);
+      
+      res.json(leaderboard);
+    } catch (error) {
+      console.error('Error fetching leaderboard data:', error);
+      res.status(500).json({ message: "Failed to fetch leaderboard data" });
+    }
+  });
+  
   // Get ideas by status (for charts)
   app.get("/api/ideas/by-status", async (req, res) => {
     try {
