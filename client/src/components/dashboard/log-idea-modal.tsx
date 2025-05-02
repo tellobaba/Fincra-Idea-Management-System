@@ -61,6 +61,9 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
       impact: "",
       category: "",
       subcategory: "",
+      organizationCategory: "",
+      inspiration: "",
+      similarSolutions: "",
     },
   });
 
@@ -286,6 +289,69 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="organizationCategory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization Category</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select organization category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="business">Business</SelectItem>
+                      <SelectItem value="technology">Technology</SelectItem>
+                      <SelectItem value="operations">Operations</SelectItem>
+                      <SelectItem value="finance">Finance</SelectItem>
+                      <SelectItem value="customer-service">Customer Service</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="cross-functional">Cross-Functional</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="inspiration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Inspiration or Source</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="What inspired this idea? (customer feedback, competitor analysis, etc.)" 
+                      className="min-h-[80px]" 
+                      {...field} 
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="similarSolutions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Similar Solutions or Prior Attempts</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Are there any similar solutions already in place? Have we tried addressing this before?" 
+                      className="min-h-[80px]" 
+                      {...field} 
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />
