@@ -31,6 +31,9 @@ export const ideas = pgTable("ideas", {
   revenueGenerated: integer("revenue_generated"),
   attachments: json("attachments").$type<string[]>(),
   mediaUrls: json("media_urls").$type<{type: string, url: string}[]>(), // For images, videos, voice notes
+  impact: text("impact"), // Impact description
+  adminNotes: text("admin_notes"), // Admin notes
+  attachmentUrl: text("attachment_url"), // Single attachment URL for simpler implementation
 });
 
 export const comments = pgTable("comments", {

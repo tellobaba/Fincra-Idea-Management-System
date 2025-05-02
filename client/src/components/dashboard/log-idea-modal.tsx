@@ -118,11 +118,30 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Here we would upload the file and submit the form data to the API
-      console.log("Form values:", values);
-      console.log("File:", selectedFile);
+      const formData = new FormData();
       
-      // For now, just close the modal and show a success toast
+      // Add form values to FormData
+      Object.entries(values).forEach(([key, value]) => {
+        if (value) formData.append(key, value);
+      });
+      
+      // Add file if selected
+      if (selectedFile) {
+        formData.append('attachment', selectedFile);
+      }
+      
+      // Submit the idea to the API
+      const response = await fetch('/api/ideas', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to submit idea: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
       toast({
         title: "Idea submitted",
         description: "Your idea has been submitted successfully!",
@@ -131,15 +150,17 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
       // Invalidate the ideas query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
       queryClient.invalidateQueries({ queryKey: ["/api/ideas/top"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/metrics"] });
       
       // Reset form and close modal
       form.reset();
       setSelectedFile(null);
       onOpenChange(false);
     } catch (error) {
+      console.error('Error submitting idea:', error);
       toast({
         title: "Error",
-        description: "Failed to submit your idea. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to submit your idea. Please try again.",
         variant: "destructive",
       });
     }
