@@ -35,24 +35,20 @@ export function ExistingUserView() {
     queryKey: ["/api/ideas/by-status"],
   });
   
-  // Map status data with appropriate colors
-  const statusColors = {
-    "submitted": "#FF9800", // orange
-    "in-review": "#00BCD4", // teal
-    "merged": "#4CAF50", // green
-    "parked": "#F06292", // pink
-    "implemented": "#2196F3", // blue
+  // Category colors for the bar chart
+  const categoryColors = {
+    "Ideas": "#4CAF50", // green 
+    "Challenges": "#2196F3", // blue
+    "Pain Points": "#F44336", // red
   };
   
-  // Format status data for chart
+  // Format ideas by category data for chart
   const statusData: ChartData[] = statusBreakdown.length > 0 
     ? statusBreakdown 
     : [
-        { name: 'Ideas Submitted', value: 0, fill: '#8bc34a' },
-        { name: 'Implemented', value: 0, fill: '#2196f3' },
-        { name: 'Needs Review', value: 0, fill: '#ffc107' },
-        { name: 'Planned', value: 0, fill: '#03a9f4' },
-        { name: 'Future Consideration', value: 0, fill: '#e91e63' }
+        { name: 'Ideas', value: 0, fill: '#4CAF50' },
+        { name: 'Challenges', value: 0, fill: '#2196F3' },
+        { name: 'Pain Points', value: 0, fill: '#F44336' }
       ];
   
   // Helper function to get status badge styling
@@ -137,8 +133,12 @@ export function ExistingUserView() {
         .map((entry: any) => ({
           id: entry.user?.id || 0,
           name: entry.user?.displayName || 'Anonymous User',
+          email: entry.user?.email || '',
           department: entry.user?.department || "N/A",
-          value: entry.ideasSubmitted || 0
+          value: entry.totalSubmissions || 0,
+          ideas: entry.ideas || 0,
+          challenges: entry.challenges || 0,
+          painPoints: entry.painPoints || 0
         }))
     : [];
   
@@ -177,10 +177,10 @@ export function ExistingUserView() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Status chart */}
+        {/* Ideas by Category chart */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-medium">Status</CardTitle>
+            <CardTitle className="text-lg font-medium">Submissions by Category</CardTitle>
             <button className="text-sm text-blue-600 hover:underline">See Report</button>
           </CardHeader>
           <CardContent>
@@ -311,15 +311,22 @@ export function ExistingUserView() {
             <div className="space-y-4">
               {contributorsData.length > 0 ? (
                 contributorsData.map((contributor: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 rounded-full bg-gray-200 mr-3"></div>
-                      <div>
-                        <div className="text-sm font-medium">{contributor.name}</div>
-                        <div className="text-xs text-gray-500">{contributor.department}</div>
+                  <div key={index} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <div className="h-8 w-8 rounded-full bg-gray-200 mr-3"></div>
+                        <div>
+                          <div className="text-sm font-medium">{contributor.name}</div>
+                          <div className="text-xs text-gray-500">{contributor.email || contributor.department}</div>
+                        </div>
                       </div>
+                      <div className="text-gray-700 font-medium">{contributor.value}</div>
                     </div>
-                    <div className="text-gray-700">{contributor.value}</div>
+                    <div className="flex justify-between mt-1 text-xs text-gray-500">
+                      <span>Ideas: {contributor.ideas}</span>
+                      <span>Challenges: {contributor.challenges}</span>
+                      <span>Pain Points: {contributor.painPoints}</span>
+                    </div>
                   </div>
                 ))
               ) : (
