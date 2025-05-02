@@ -43,13 +43,15 @@ interface SubmitIdeaFormProps {
   };
 }
 
+// Simple form schema for input validation
 const formSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }).max(100, { message: "Title must be less than 100 characters" }),
   description: z.string().min(20, { message: "Description must be at least 20 characters" }),
   category: z.enum(["pain-point", "opportunity", "challenge"] as const),
-  tags: z.string().transform((val) => val ? val.split(',').map(tag => tag.trim()).filter(Boolean) : []),
+  tags: z.string(), // Keep as string in the form
 });
 
+// Type for form values
 type FormValues = z.infer<typeof formSchema>;
 
 export function SubmitIdeaForm({ 
@@ -60,6 +62,7 @@ export function SubmitIdeaForm({
 }: SubmitIdeaFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   
+  // Use FormValues for the form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,7 +76,12 @@ export function SubmitIdeaForm({
   const onFormSubmit: SubmitHandler<FormValues> = async (values) => {
     setIsSaving(true);
     try {
-      await onSubmit(values);
+      // Transform tags string into array before submission
+      const transformedValues = {
+        ...values,
+        tags: values.tags ? values.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [],
+      };
+      await onSubmit(transformedValues);
     } finally {
       setIsSaving(false);
     }
