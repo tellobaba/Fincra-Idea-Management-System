@@ -26,8 +26,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit, Eye, Filter, MoreHorizontal, Search, Trash } from "lucide-react";
+import { Edit, Eye, Filter, Search } from "lucide-react";
 import { IdeaWithUser, Status, getCategoryConfig, getStatusConfig } from "@/types/ideas";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,9 +48,10 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Apply filters to ideas
+  // Filter ideas based on search query and filters
   const filteredIdeas = ideas.filter(idea => {
-    const matchesSearch = searchQuery === "" || 
+    const matchesSearch = 
+      searchQuery === "" ||
       idea.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       idea.description.toLowerCase().includes(searchQuery.toLowerCase());
     
@@ -66,188 +66,162 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
 
     try {
       const response = await fetch(`/api/ideas/${editIdea.id}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           status: newStatus,
-          adminNotes: adminNote.trim() ? adminNote : undefined,
-        }),
+          adminNotes: adminNote
+        })
       });
 
-      if (!response.ok) throw new Error("Failed to update idea");
+      if (!response.ok) {
+        throw new Error('Failed to update idea status');
+      }
 
-      // Success
       toast({
-        title: "Idea updated",
-        description: `Status changed to ${getStatusConfig(newStatus).label}`,
+        title: "Status Updated",
+        description: `The idea status has been updated to ${getStatusConfig(newStatus).label}`,
       });
 
-      // Clean up
       setEditIdea(null);
-      setNewStatus("");
-      setAdminNote("");
-
-      // Invalidate queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/ideas/top"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/metrics"] });
       onRefresh();
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update idea",
-        variant: "destructive",
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
       });
     }
   };
 
   return (
     <>
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>
-            <div className="flex items-center justify-between">
-              <span>Idea Management</span>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={onRefresh}
-                >
-                  Refresh
-                </Button>
-              </div>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search ideas..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-4">
-              <div className="w-40">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      <span>{statusFilter || "Status"}</span>
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
-                    <SelectItem value="submitted">Submitted</SelectItem>
-                    <SelectItem value="in-review">In Review</SelectItem>
-                    <SelectItem value="merged">Merged</SelectItem>
-                    <SelectItem value="parked">Parked</SelectItem>
-                    <SelectItem value="implemented">Implemented</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="w-40">
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger>
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      <span>{categoryFilter || "Category"}</span>
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
-                    <SelectItem value="pain-point">Pain Point</SelectItem>
-                    <SelectItem value="opportunity">Opportunity</SelectItem>
-                    <SelectItem value="challenge">Challenge</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search ideas..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-4">
+          <div className="w-40">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <span>{statusFilter || "Status"}</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="submitted">Submitted</SelectItem>
+                <SelectItem value="in-review">In Review</SelectItem>
+                <SelectItem value="merged">Merged</SelectItem>
+                <SelectItem value="parked">Parked</SelectItem>
+                <SelectItem value="implemented">Implemented</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          <div className="w-40">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <span>{categoryFilter || "Category"}</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="pain-point">Pain Point</SelectItem>
+                <SelectItem value="opportunity">Opportunity</SelectItem>
+                <SelectItem value="challenge">Challenge</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Submitter</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Submitted</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Submitter</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Submitted</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-4">Loading ideas...</TableCell>
+              </TableRow>
+            ) : filteredIdeas.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-4">No ideas found</TableCell>
+              </TableRow>
+            ) : (
+              filteredIdeas.map((idea) => (
+                <TableRow key={idea.id}>
+                  <TableCell className="font-medium max-w-xs truncate">{idea.title}</TableCell>
+                  <TableCell>{idea.submitter?.displayName || 'Unknown'}</TableCell>
+                  <TableCell>
+                    {idea.category && (
+                      <Badge 
+                        variant="outline" 
+                        className={`border-${getCategoryConfig(idea.category).color}-500 text-${getCategoryConfig(idea.category).color}-700 bg-${getCategoryConfig(idea.category).color}-50`}
+                      >
+                        {getCategoryConfig(idea.category).label}
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {idea.status && (
+                      <Badge 
+                        variant="outline" 
+                        className={`border-${getStatusConfig(idea.status).color} text-${getStatusConfig(idea.status).color} bg-${getStatusConfig(idea.status).color}/10`}
+                      >
+                        {getStatusConfig(idea.status).label}
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>{new Date(idea.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setViewIdea(idea)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setEditIdea(idea);
+                          setNewStatus(idea.status as Status);
+                          setAdminNote(idea.adminNotes || '');
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">Loading ideas...</TableCell>
-                  </TableRow>
-                ) : filteredIdeas.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">No ideas found</TableCell>
-                  </TableRow>
-                ) : (
-                  filteredIdeas.map((idea) => (
-                    <TableRow key={idea.id}>
-                      <TableCell className="font-medium max-w-xs truncate">{idea.title}</TableCell>
-                      <TableCell>{idea.submitter?.displayName || 'Unknown'}</TableCell>
-                      <TableCell>
-                        {idea.category && (
-                          <Badge 
-                            variant="outline" 
-                            className={`border-${getCategoryConfig(idea.category).color}-500 text-${getCategoryConfig(idea.category).color}-700 bg-${getCategoryConfig(idea.category).color}-50`}
-                          >
-                            {getCategoryConfig(idea.category).label}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {idea.status && (
-                          <Badge 
-                            variant="outline" 
-                            className={`border-${getStatusConfig(idea.status).color} text-${getStatusConfig(idea.status).color} bg-${getStatusConfig(idea.status).color}/10`}
-                          >
-                            {getStatusConfig(idea.status).label}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{new Date(idea.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => setViewIdea(idea)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => {
-                              setEditIdea(idea);
-                              setNewStatus(idea.status as Status);
-                              setAdminNote(idea.adminNotes || '');
-                            }}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       {/* View Idea Dialog */}
       <Dialog open={!!viewIdea} onOpenChange={(open) => !open && setViewIdea(null)}>
@@ -408,17 +382,21 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
             <div className="space-y-2">
               <label className="text-sm font-medium">Admin Notes</label>
               <Textarea 
-                placeholder="Add internal notes about this idea"
+                placeholder="Add any notes about this idea..." 
                 value={adminNote}
                 onChange={(e) => setAdminNote(e.target.value)}
-                rows={4}
+                className="h-32"
               />
             </div>
           </div>
           
           <DialogFooter className="mt-6">
-            <Button variant="outline" onClick={() => setEditIdea(null)}>Cancel</Button>
-            <Button onClick={handleUpdateStatus}>Update Status</Button>
+            <Button variant="outline" onClick={() => setEditIdea(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateStatus}>
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

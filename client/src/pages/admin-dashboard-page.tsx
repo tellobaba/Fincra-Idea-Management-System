@@ -5,9 +5,10 @@ import { IdeaWithUser } from "@/types/ideas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IdeaManagementTable } from "@/components/admin/idea-management-table";
 import { Button } from "@/components/ui/button";
-import { LogOut, RefreshCw, Settings, Loader2 } from "lucide-react";
+import { LogOut, RefreshCw, Settings, Loader2, LayoutDashboard, Database } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminDashboardPage() {
   const [, navigate] = useLocation();
@@ -144,28 +145,67 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      {error ? (
-        <Card>
-          <CardContent className="py-10">
-            <div className="text-center text-red-500">
-              <p>Failed to load ideas. Please try refreshing the page.</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={handleRefresh}
-              >
-                Try Again
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <IdeaManagementTable 
-          ideas={ideas || []} 
-          isLoading={isLoading} 
-          onRefresh={handleRefresh}
-        />
-      )}
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            All Ideas
+          </TabsTrigger>
+          <TabsTrigger value="submitted" className="flex items-center gap-2">
+            <LayoutDashboard className="h-4 w-4" />
+            Pending Review ({ideas?.filter(idea => idea.status === "submitted").length || 0})
+          </TabsTrigger>
+        </TabsList>
+        
+        {error ? (
+          <Card>
+            <CardContent className="py-10">
+              <div className="text-center text-red-500">
+                <p>Failed to load ideas. Please try refreshing the page.</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={handleRefresh}
+                >
+                  Try Again
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <TabsContent value="all" className="mt-0">
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Submitted Ideas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <IdeaManagementTable 
+                    ideas={ideas || []} 
+                    isLoading={isLoading} 
+                    onRefresh={handleRefresh}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="submitted" className="mt-0">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ideas Pending Review</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <IdeaManagementTable 
+                    ideas={(ideas || []).filter(idea => idea.status === "submitted")} 
+                    isLoading={isLoading} 
+                    onRefresh={handleRefresh}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </>
+        )}
+      </Tabs>
     </div>
   );
 }
