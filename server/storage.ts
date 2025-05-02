@@ -34,7 +34,10 @@ export interface IStorage {
   }): Promise<Idea[]>;
   updateIdea(id: number, updates: Partial<Idea>): Promise<Idea | undefined>;
   deleteIdea(id: number): Promise<boolean>;
-  voteIdea(id: number): Promise<Idea | undefined>;
+  voteIdea(id: number, userId: number): Promise<Idea | undefined>;
+  getUserVotedIdeas(userId: number): Promise<Idea[]>;
+  checkUserVote(userId: number, ideaId: number): Promise<boolean>;
+  removeUserVote(userId: number, ideaId: number): Promise<boolean>;
   getTopIdeas(limit?: number): Promise<Idea[]>;
   assignIdea(id: number, userId: number): Promise<Idea | undefined>;
   changeIdeaStatus(id: number, status: string): Promise<Idea | undefined>;

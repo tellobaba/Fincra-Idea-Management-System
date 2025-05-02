@@ -48,6 +48,15 @@ export const comments = pgTable("comments", {
   parentId: integer("parent_id"),
 });
 
+// Table to track user votes on ideas
+export const userVotes = pgTable("user_votes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  ideaId: integer("idea_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -82,6 +91,11 @@ export const insertCommentSchema = createInsertSchema(comments).pick({
   parentId: true,
 });
 
+export const insertUserVoteSchema = createInsertSchema(userVotes).pick({
+  userId: true,
+  ideaId: true,
+});
+
 // Type exports
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -91,6 +105,9 @@ export type Idea = typeof ideas.$inferSelect;
 
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Comment = typeof comments.$inferSelect;
+
+export type InsertUserVote = z.infer<typeof insertUserVoteSchema>;
+export type UserVote = typeof userVotes.$inferSelect;
 
 // Category type
 export const categorySchema = z.enum(['pain-point', 'opportunity', 'challenge']);
