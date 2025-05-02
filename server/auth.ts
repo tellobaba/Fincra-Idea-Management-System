@@ -22,14 +22,23 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
+  console.log('Password comparison started');
   // Check if it's a bcrypt hash (starts with $2a$ or $2b$)
   if (stored.startsWith('$2')) {
-    // Use bcrypt for comparison of bcrypt hashes
-    return bcrypt.compareSync(supplied, stored);
+    console.log('Using bcrypt comparison');
+    try {
+      const result = bcrypt.compareSync(supplied, stored);
+      console.log(`bcrypt result: ${result}`);
+      return result;
+    } catch (error) {
+      console.error('bcrypt comparison error:', error);
+      return false;
+    }
   }
   
   // Fallback to original scrypt method for any legacy passwords
   try {
+    console.log('Using scrypt comparison');
     const [hashed, salt] = stored.split(".");
     if (!hashed || !salt) {
       console.error("Invalid password format:", stored);
@@ -37,7 +46,9 @@ async function comparePasswords(supplied: string, stored: string) {
     }
     const hashedBuf = Buffer.from(hashed, "hex");
     const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-    return timingSafeEqual(hashedBuf, suppliedBuf);
+    const result = timingSafeEqual(hashedBuf, suppliedBuf);
+    console.log(`scrypt result: ${result}`);
+    return result;
   } catch (err) {
     console.error("Password comparison error:", err);
     return false;
@@ -63,13 +74,29 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
+        console.log(`Login attempt for user: ${username}`);
         const user = await dbStorage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
+        if (!user) {
+          console.log(`User not found: ${username}`);
           return done(null, false);
-        } else {
+        }
+        
+        // Log password comparison details for debugging
+        console.log(`Password stored type: ${user.password.substring(0, 6)}...`);
+        console.log(`Password supplied: ${password.substring(0, 2)}...`);
+        
+        const isMatch = await comparePasswords(password, user.password);
+        console.log(`Password match result: ${isMatch}`);
+        
+        if (isMatch) {
+          console.log(`Login successful for: ${username}, role: ${user.role}`);
           return done(null, user);
+        } else {
+          console.log(`Invalid password for: ${username}`);
+          return done(null, false);
         }
       } catch (err) {
+        console.error(`Login error for ${username}:`, err);
         return done(err);
       }
     }),
