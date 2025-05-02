@@ -32,16 +32,16 @@ type SortBy = 'ideas' | 'impact' | 'votes' | 'approved';
 export default function LeaderboardPage() {
   const [sortBy, setSortBy] = useState<SortBy>("ideas");
   const [timeRange, setTimeRange] = useState<TimeRange>("all-time");
-  const [category, setCategory] = useState<string>("");
-  const [department, setDepartment] = useState<string>("");
+  const [category, setCategory] = useState<string>("none");
+  const [department, setDepartment] = useState<string>("none");
   
   const { data: leaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ["/api/leaderboard", timeRange, category, department, sortBy],
     queryFn: async () => {
       const searchParams = new URLSearchParams();
       if (timeRange !== 'all-time') searchParams.set('timeRange', timeRange);
-      if (category) searchParams.set('category', category);
-      if (department) searchParams.set('department', department);
+      if (category && category !== 'none') searchParams.set('category', category);
+      if (department && department !== 'none') searchParams.set('department', department);
       if (sortBy) searchParams.set('sortBy', mapSortByToApiParam(sortBy));
       
       const url = `/api/leaderboard${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
@@ -74,7 +74,7 @@ export default function LeaderboardPage() {
   
   // Format category for display
   function formatCategory(category: string): string {
-    if (!category) return 'All Categories';
+    if (!category || category === 'none') return 'All Categories';
     
     switch (category) {
       case 'opportunity': return 'Ideas';
@@ -142,7 +142,7 @@ export default function LeaderboardPage() {
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="none">All Categories</SelectItem>
                     {categoryValues.map(cat => (
                       <SelectItem key={cat} value={cat}>
                         {formatCategory(cat)}
@@ -163,7 +163,7 @@ export default function LeaderboardPage() {
                     <SelectValue placeholder="All Departments" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Departments</SelectItem>
+                    <SelectItem value="none">All Departments</SelectItem>
                     {departmentSchema.options.map(dept => (
                       <SelectItem key={dept} value={dept}>{dept}</SelectItem>
                     ))}
@@ -198,19 +198,19 @@ export default function LeaderboardPage() {
                 </h2>
                 <div className="text-sm text-muted-foreground">
                   Showing results for: {formatTimeRange(timeRange)}
-                  {category && <span> · {formatCategory(category)}</span>}
-                  {department && <span> · {department}</span>}
+                  {category && category !== 'none' && <span> · {formatCategory(category)}</span>}
+                  {department && department !== 'none' && <span> · {department}</span>}
                 </div>
               </div>
               
               <div className="flex items-center gap-2">
-                {(category || department || timeRange !== 'all-time') && (
+                {(category !== 'none' || department !== 'none' || timeRange !== 'all-time') && (
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={() => {
-                      setCategory('');
-                      setDepartment('');
+                      setCategory('none');
+                      setDepartment('none');
                       setTimeRange('all-time');
                     }}
                   >
@@ -229,13 +229,13 @@ export default function LeaderboardPage() {
               ) : !leaderboard || leaderboard.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <div className="mb-2">No data available with the current filters.</div>
-                  {(category || department || timeRange !== 'all-time') && (
+                  {(category !== 'none' || department !== 'none' || timeRange !== 'all-time') && (
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => {
-                        setCategory('');
-                        setDepartment('');
+                        setCategory('none');
+                        setDepartment('none');
                         setTimeRange('all-time');
                       }}
                     >
