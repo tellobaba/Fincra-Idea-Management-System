@@ -21,7 +21,13 @@ export function ExistingUserView() {
     queryKey: ["/api/ideas/top"],
   });
   
-  const { data: idealVolume = [] } = useQuery<any>({
+  const { data: idealVolume = [
+    { name: "5D", value: 0 },
+    { name: "2W", value: 0 },
+    { name: "1M", value: 0 },
+    { name: "6M", value: 0 },
+    { name: "1Y", value: 0 }
+  ] } = useQuery<any>({
     queryKey: ["/api/ideas/volume"],
   });
   
@@ -39,11 +45,15 @@ export function ExistingUserView() {
   };
   
   // Format status data for chart
-  const statusData: ChartData[] = statusBreakdown.map((item: any) => ({
-    name: item.name,
-    value: item.value,
-    fill: statusColors[item.name as keyof typeof statusColors] || "#9E9E9E"
-  }));
+  const statusData: ChartData[] = statusBreakdown.length > 0 
+    ? statusBreakdown 
+    : [
+        { name: 'Ideas Submitted', value: 0, fill: '#8bc34a' },
+        { name: 'Implemented', value: 0, fill: '#2196f3' },
+        { name: 'Needs Review', value: 0, fill: '#ffc107' },
+        { name: 'Planned', value: 0, fill: '#03a9f4' },
+        { name: 'Future Consideration', value: 0, fill: '#e91e63' }
+      ];
   
   // Helper function to get status badge styling
   const getStatusBadgeClasses = (status: string) => {
@@ -79,15 +89,19 @@ export function ExistingUserView() {
     submitter?: any;
   };
   
-  // Transform the activity data for display
-  const activityData: ActivityItem[] = recentActivity.map((activity: any) => ({
-    id: activity.id,
-    title: activity.title,
-    description: activity.description.substring(0, 80) + (activity.description.length > 80 ? '...' : ''),
-    status: activity.status,
-    date: formatRelativeTime(new Date(activity.createdAt)),
-    submitter: activity.submitter
-  }));
+  // Transform the activity data for display with some error handling
+  const activityData: ActivityItem[] = recentActivity && recentActivity.length > 0 
+    ? recentActivity.map((activity: any) => ({
+        id: activity.id,
+        title: activity.title || 'Untitled Idea',
+        description: activity.description 
+          ? activity.description.substring(0, 80) + (activity.description.length > 80 ? '...' : '')
+          : 'No description provided',
+        status: activity.status || 'submitted',
+        date: activity.createdAt ? formatRelativeTime(new Date(activity.createdAt)) : 'Recently',
+        submitter: activity.submitter
+      }))
+    : [];
   
   // Helper function to format dates in relative time
   function formatRelativeTime(date: Date): string {
@@ -116,27 +130,33 @@ export function ExistingUserView() {
     queryKey: ["/api/leaderboard"]
   });
   
-  // Map leaderboard data to contributors format
-  const contributorsData = leaderboardData
-    .slice(0, 5)
-    .map((entry: any) => ({
-      id: entry.user.id,
-      name: entry.user.displayName,
-      department: entry.user.department || "N/A",
-      value: entry.ideasSubmitted
-    }));
+  // Map leaderboard data to contributors format with error handling
+  const contributorsData = leaderboardData && leaderboardData.length > 0
+    ? leaderboardData
+        .slice(0, 5)
+        .map((entry: any) => ({
+          id: entry.user?.id || 0,
+          name: entry.user?.displayName || 'Anonymous User',
+          department: entry.user?.department || "N/A",
+          value: entry.ideasSubmitted || 0
+        }))
+    : [];
   
-  // Use topIdeas for the Top Voted section
-  const topVotedData = topIdeas
-    .slice(0, 3)
-    .map(idea => ({
-      id: idea.id,
-      title: idea.title,
-      description: idea.description.substring(0, 80) + (idea.description.length > 80 ? '...' : ''),
-      votes: idea.votes,
-      status: idea.status,
-      date: formatRelativeTime(new Date(idea.createdAt))
-    }));
+  // Use topIdeas for the Top Voted section with error handling
+  const topVotedData = topIdeas && topIdeas.length > 0
+    ? topIdeas
+        .slice(0, 3)
+        .map(idea => ({
+          id: idea.id,
+          title: idea.title || 'Untitled Idea',
+          description: idea.description 
+            ? idea.description.substring(0, 80) + (idea.description.length > 80 ? '...' : '')
+            : 'No description provided',
+          votes: idea.votes || 0,
+          status: idea.status || 'submitted',
+          date: idea.createdAt ? formatRelativeTime(new Date(idea.createdAt)) : 'Recently'
+        }))
+    : [];
 
   return (
     <div className="p-6">
@@ -245,18 +265,24 @@ export function ExistingUserView() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {activityData.map((item: ActivityItem) => (
-                <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                  <h3 className="font-medium text-sm">{item.title}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{item.description}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
-                      {item.status}
-                    </span>
-                    <span className="text-xs text-gray-400">{item.date}</span>
+              {activityData.length > 0 ? (
+                activityData.map((item: ActivityItem) => (
+                  <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                    <h3 className="font-medium text-sm">{item.title}</h3>
+                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
+                        {item.status}
+                      </span>
+                      <span className="text-xs text-gray-400">{item.date}</span>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <p className="text-gray-500 text-sm">No recent activity to show</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>

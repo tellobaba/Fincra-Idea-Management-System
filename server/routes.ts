@@ -789,7 +789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Ideas Volume Over Time
-  app.get("/api/ideas/volume", async (req, res) => {
+  app.get("/api/ideas/volume", async (_req, res) => {
     try {
       const ideas = await dbStorage.getIdeas();
       
@@ -811,11 +811,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       oneYearAgo.setFullYear(today.getFullYear() - 1);
       
       // Count ideas in each period (handling missing createdAt)
-      const fiveDaysCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= fiveDaysAgo).length;
-      const twoWeeksCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= twoWeeksAgo).length;
-      const oneMonthCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= oneMonthAgo).length;
-      const sixMonthsCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= sixMonthsAgo).length;
-      const oneYearCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= oneYearAgo).length;
+      const fiveDaysCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= fiveDaysAgo).length;
+      const twoWeeksCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= twoWeeksAgo).length;
+      const oneMonthCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= oneMonthAgo).length;
+      const sixMonthsCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= sixMonthsAgo).length;
+      const oneYearCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= oneYearAgo).length;
       
       const volumeData = [
         { name: "5D", value: fiveDaysCount },
@@ -833,7 +833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get recent activity (latest ideas)
-  app.get("/api/ideas/recent-activity", async (req, res) => {
+  app.get("/api/ideas/recent-activity", async (_req, res) => {
     try {
       const allIdeas = await dbStorage.getIdeas();
       
@@ -841,7 +841,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter out items without createdAt first to avoid comparison errors
       const ideasWithDates = allIdeas.filter(idea => idea.createdAt);
       const recentActivity = ideasWithDates
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime())
         .slice(0, 5)
         .map(async (idea) => {
           const submitter = idea.submittedById ? await dbStorage.getUser(idea.submittedById) : null;
@@ -923,7 +923,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get ideas by status (for charts)
-  app.get("/api/ideas/by-status", async (req, res) => {
+  app.get("/api/ideas/by-status", async (_req, res) => {
     try {
       const ideas = await dbStorage.getIdeas();
       
@@ -936,7 +936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const counts = {
         'Ideas Submitted': ideas.length,
         'Implemented': ideas.filter(idea => idea.status === 'implemented').length,
-        'Needs Review': ideas.filter(idea => ['submitted', 'in-review'].includes(idea.status)).length,
+        'Needs Review': ideas.filter(idea => ['submitted', 'in-review'].includes(idea.status as string)).length,
         'Planned': ideas.filter(idea => idea.status === 'merged').length,
         'Future Consideration': ideas.filter(idea => idea.status === 'parked').length,
       };
