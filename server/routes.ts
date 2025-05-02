@@ -376,7 +376,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user!.id;
       
       // Get ideas that the current user has voted for
-      const votedIdeas = await dbStorage.getUserVotedIdeas(userId);
+      let votedIdeas: Idea[] = [];
+      try {
+        console.log('Getting voted ideas for user:', userId);
+        votedIdeas = await dbStorage.getUserVotedIdeas(userId);
+        console.log('Found voted ideas:', votedIdeas.length);
+      } catch (error: any) {
+        console.error('Error in getUserVotedIdeas:', error);
+        return res.status(500).json({ message: "Error fetching voted ideas", error: error.message });
+      }
       
       // Get user info for each idea
       const ideasWithUsers = await Promise.all(
