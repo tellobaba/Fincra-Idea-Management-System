@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Edit, Eye, Filter, MoreHorizontal, Search, Trash } from "lucide-react";
-import { IdeaWithUser, STATUS_CONFIG, CATEGORY_CONFIG, Status } from "@/types/ideas";
+import { IdeaWithUser, Status, getCategoryConfig, getStatusConfig } from "@/types/ideas";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -81,7 +81,7 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
       // Success
       toast({
         title: "Idea updated",
-        description: `Status changed to ${STATUS_CONFIG[newStatus as Status].label}`,
+        description: `Status changed to ${getStatusConfig(newStatus).label}`,
       });
 
       // Clean up
@@ -202,9 +202,9 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
                         {idea.category && (
                           <Badge 
                             variant="outline" 
-                            className={`border-${CATEGORY_CONFIG[idea.category].color}-500 text-${CATEGORY_CONFIG[idea.category].color}-700 bg-${CATEGORY_CONFIG[idea.category].color}-50`}
+                            className={`border-${getCategoryConfig(idea.category).color}-500 text-${getCategoryConfig(idea.category).color}-700 bg-${getCategoryConfig(idea.category).color}-50`}
                           >
-                            {CATEGORY_CONFIG[idea.category].label}
+                            {getCategoryConfig(idea.category).label}
                           </Badge>
                         )}
                       </TableCell>
@@ -212,9 +212,9 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
                         {idea.status && (
                           <Badge 
                             variant="outline" 
-                            className={`border-${STATUS_CONFIG[idea.status].color} text-${STATUS_CONFIG[idea.status].color} bg-${STATUS_CONFIG[idea.status].color}/10`}
+                            className={`border-${getStatusConfig(idea.status).color} text-${getStatusConfig(idea.status).color} bg-${getStatusConfig(idea.status).color}/10`}
                           >
-                            {STATUS_CONFIG[idea.status].label}
+                            {getStatusConfig(idea.status).label}
                           </Badge>
                         )}
                       </TableCell>
@@ -259,17 +259,17 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
               {viewIdea?.category && (
                 <Badge 
                   variant="outline" 
-                  className={`border-${CATEGORY_CONFIG[viewIdea.category].color}-500 text-${CATEGORY_CONFIG[viewIdea.category].color}-700 bg-${CATEGORY_CONFIG[viewIdea.category].color}-50`}
+                  className={`border-${getCategoryConfig(viewIdea.category).color}-500 text-${getCategoryConfig(viewIdea.category).color}-700 bg-${getCategoryConfig(viewIdea.category).color}-50`}
                 >
-                  {CATEGORY_CONFIG[viewIdea.category].label}
+                  {getCategoryConfig(viewIdea.category).label}
                 </Badge>
               )}
               {viewIdea?.status && (
                 <Badge 
                   variant="outline" 
-                  className={`border-${STATUS_CONFIG[viewIdea.status].color} text-${STATUS_CONFIG[viewIdea.status].color} bg-${STATUS_CONFIG[viewIdea.status].color}/10`}
+                  className={`border-${getStatusConfig(viewIdea.status).color} text-${getStatusConfig(viewIdea.status).color} bg-${getStatusConfig(viewIdea.status).color}/10`}
                 >
-                  {STATUS_CONFIG[viewIdea.status].label}
+                  {getStatusConfig(viewIdea.status).label}
                 </Badge>
               )}
             </DialogDescription>
@@ -383,9 +383,9 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
               {editIdea?.status && (
                 <Badge 
                   variant="outline" 
-                  className={`border-${STATUS_CONFIG[editIdea.status].color} text-${STATUS_CONFIG[editIdea.status].color} bg-${STATUS_CONFIG[editIdea.status].color}/10`}
+                  className={`border-${getStatusConfig(editIdea.status).color} text-${getStatusConfig(editIdea.status).color} bg-${getStatusConfig(editIdea.status).color}/10`}
                 >
-                  {STATUS_CONFIG[editIdea.status].label}
+                  {getStatusConfig(editIdea.status).label}
                 </Badge>
               )}
             </div>

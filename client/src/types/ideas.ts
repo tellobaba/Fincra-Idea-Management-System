@@ -1,5 +1,9 @@
 // Import types from shared schema
-import { Idea, Comment, User, Category, Status } from "@shared/schema";
+import { Idea, Comment, User, Status, categoryValues, statusValues } from "@shared/schema";
+
+// Define types for frontend use
+export type Category = "pain-point" | "opportunity" | "challenge";
+export type Status = "submitted" | "in-review" | "merged" | "parked" | "implemented";
 
 // Extended types with additional frontend properties
 export interface IdeaWithUser extends Idea {
@@ -15,9 +19,10 @@ export interface IdeaWithUser extends Idea {
     department?: string;
     avatarUrl?: string;
   } | null;
-  impact?: string;
-  adminNotes?: string;
-  attachmentUrl?: string;
+  // Note: These fields are already in the schema, here for clarity
+  // impact: string | null;
+  // adminNotes: string | null;
+  // attachmentUrl: string | null;
 }
 
 export interface CommentWithUser extends Comment {
@@ -95,3 +100,19 @@ export const CATEGORY_CONFIG: Record<Category, { label: string; color: string; i
     icon: 'flag'
   },
 };
+
+// Helper function to safely access configs with string values
+export function getCategoryConfig(category: string) {
+  return CATEGORY_CONFIG[category as Category] || {
+    label: category,
+    color: 'bg-gray-100 text-gray-800',
+    icon: 'help-circle'
+  };
+}
+
+export function getStatusConfig(status: string) {
+  return STATUS_CONFIG[status as Status] || {
+    label: status,
+    color: 'gray'
+  };
+}

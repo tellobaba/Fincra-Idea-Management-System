@@ -96,6 +96,11 @@ export type Status = z.infer<typeof statusSchema>;
 export const prioritySchema = z.enum(['high', 'medium', 'low']);
 export type Priority = z.infer<typeof prioritySchema>;
 
+// Export values for easier usage in frontend
+export const categoryValues = categorySchema.options;
+export const statusValues = statusSchema.options;
+export const priorityValues = prioritySchema.options;
+
 // Department type
 export const departmentSchema = z.enum([
   'Organisation Health', 

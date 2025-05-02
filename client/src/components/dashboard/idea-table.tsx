@@ -3,7 +3,7 @@ import { IdeaWithUser } from "@/types/ideas";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { STATUS_CONFIG, CATEGORY_CONFIG } from "@/types/ideas";
+import { getCategoryConfig, getStatusConfig } from "@/types/ideas";
 import {
   Table,
   TableBody,
@@ -116,9 +116,9 @@ export function IdeaTable({
                     <TableCell>
                       <Badge 
                         variant="outline" 
-                        className={CATEGORY_CONFIG[idea.category as keyof typeof CATEGORY_CONFIG]?.color}
+                        className={getCategoryConfig(idea.category).color}
                       >
-                        {CATEGORY_CONFIG[idea.category as keyof typeof CATEGORY_CONFIG]?.label}
+                        {getCategoryConfig(idea.category).label}
                       </Badge>
                     </TableCell>
                   )}
@@ -149,9 +149,9 @@ export function IdeaTable({
                     <TableCell>
                       <Badge 
                         variant="outline" 
-                        className={STATUS_CONFIG[idea.status as keyof typeof STATUS_CONFIG]?.color}
+                        className={getStatusConfig(idea.status).color}
                       >
-                        {STATUS_CONFIG[idea.status as keyof typeof STATUS_CONFIG]?.label}
+                        {getStatusConfig(idea.status).label}
                       </Badge>
                     </TableCell>
                   )}

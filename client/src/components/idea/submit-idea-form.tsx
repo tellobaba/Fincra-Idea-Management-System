@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Category } from "@shared/schema";
-import { CATEGORY_CONFIG } from "@/types/ideas";
+import { Category } from "@/types/ideas";
+import { getCategoryConfig } from "@/types/ideas";
 import { Bold, Italic, List, Link as LinkIcon, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -66,7 +66,7 @@ export function SubmitIdeaForm({
       title: initialData.title || "",
       description: initialData.description || "",
       category: initialData.category || initialCategory || "opportunity",
-      tags: initialData.tags ? initialData.tags.join(", ") : "",
+      tags: initialData.tags ? initialData.tags.join(", ") : "",  // this is converted to array by the schema transform
     },
   });
 
@@ -188,11 +188,9 @@ export function SubmitIdeaForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {Object.entries(CATEGORY_CONFIG).map(([value, config]) => (
-                      <SelectItem key={value} value={value}>
-                        {config.label}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="pain-point">Pain-point</SelectItem>
+                    <SelectItem value="opportunity">Opportunity</SelectItem>
+                    <SelectItem value="challenge">Challenge</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

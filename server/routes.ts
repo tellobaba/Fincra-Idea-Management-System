@@ -9,6 +9,19 @@ import { z } from "zod";
 import multer from 'multer';
 import { categorySchema, statusSchema, prioritySchema, departmentSchema, roleSchema } from '@shared/schema';
 
+// Middleware to check if user is admin
+const checkAdminRole = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden: Admin access required" });
+  }
+  
+  next();
+};
+
 // Setup for file uploads
 const multerStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -46,18 +59,7 @@ const upload = multer({
   }
 });
 
-// Middleware to check if user has admin role
-const checkAdminRole = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-  
-  if (!['admin', 'reviewer', 'transformer', 'implementer'].includes(req.user.role)) {
-    return res.status(403).json({ message: "Forbidden - Admin role required" });
-  }
-  
-  next();
-};
+// This middleware was moved to the top of the file
 
 // Serve uploaded files
 const serveUploads = (app: Express) => {
@@ -802,6 +804,174 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching ideas by status:', error);
       res.status(500).json({ message: "Failed to fetch ideas by status" });
+    }
+  });
+
+  // Admin routes
+  // Get all ideas (admin view)
+  app.get("/api/admin/ideas", checkAdminRole, async (req, res) => {
+    try {
+      const ideas = await dbStorage.getIdeas(req.query);
+      
+      // Attach user info to each idea
+      const ideasWithUsers = await Promise.all(
+        ideas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          let assignedTo = null;
+          
+          if (idea.assignedToId) {
+            assignedTo = await dbStorage.getUser(idea.assignedToId);
+          }
+          
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+            assignedTo: assignedTo ? {
+              id: assignedTo.id,
+              displayName: assignedTo.displayName,
+              department: assignedTo.department,
+              avatarUrl: assignedTo.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching ideas for admin:', error);
+      res.status(500).json({ message: "Failed to fetch ideas" });
+    }
+  });
+
+  // Update idea status (admin only)
+  app.patch("/api/admin/ideas/:id/status", checkAdminRole, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const { status } = req.body;
+      
+      if (!status || !statusSchema.safeParse(status).success) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+      
+      const updatedIdea = await dbStorage.changeIdeaStatus(id, status);
+      
+      if (!updatedIdea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      res.json(updatedIdea);
+    } catch (error) {
+      console.error('Error updating idea status:', error);
+      res.status(500).json({ message: "Failed to update idea status" });
+    }
+  });
+
+  // Assign idea to user (admin only)
+  app.patch("/api/admin/ideas/:id/assign", checkAdminRole, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const { userId } = req.body;
+      
+      if (!userId || isNaN(parseInt(userId))) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const updatedIdea = await dbStorage.assignIdea(id, parseInt(userId));
+      
+      if (!updatedIdea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      res.json(updatedIdea);
+    } catch (error) {
+      console.error('Error assigning idea:', error);
+      res.status(500).json({ message: "Failed to assign idea" });
+    }
+  });
+
+  // Update idea with admin notes and impact (admin only)
+  app.patch("/api/admin/ideas/:id", checkAdminRole, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const { adminNotes, impact, priority } = req.body;
+      const updates: any = {};
+      
+      if (adminNotes !== undefined) {
+        updates.adminNotes = adminNotes;
+      }
+      
+      if (impact !== undefined) {
+        updates.impact = impact;
+      }
+      
+      if (priority !== undefined && prioritySchema.safeParse(priority).success) {
+        updates.priority = priority;
+      }
+      
+      const updatedIdea = await dbStorage.updateIdea(id, updates);
+      
+      if (!updatedIdea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Attach user info
+      const submitter = await dbStorage.getUser(updatedIdea.submittedById);
+      let assignedTo = null;
+      
+      if (updatedIdea.assignedToId) {
+        assignedTo = await dbStorage.getUser(updatedIdea.assignedToId);
+      }
+      
+      res.json({
+        ...updatedIdea,
+        submitter: submitter ? {
+          id: submitter.id,
+          displayName: submitter.displayName,
+          department: submitter.department,
+          avatarUrl: submitter.avatarUrl,
+        } : null,
+        assignedTo: assignedTo ? {
+          id: assignedTo.id,
+          displayName: assignedTo.displayName,
+          department: assignedTo.department,
+          avatarUrl: assignedTo.avatarUrl,
+        } : null,
+      });
+    } catch (error) {
+      console.error('Error updating idea:', error);
+      res.status(500).json({ message: "Failed to update idea" });
+    }
+  });
+
+  // Get all users (admin only)
+  app.get("/api/admin/users", checkAdminRole, async (req, res) => {
+    try {
+      const role = typeof req.query.role === 'string' ? req.query.role : undefined;
+      const users = await dbStorage.getUsers(role);
+      res.json(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ message: "Failed to fetch users" });
     }
   });
 
