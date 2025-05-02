@@ -1,5 +1,5 @@
 // Import types from shared schema
-import { Idea, Comment, User, Status, categoryValues, statusValues } from "@shared/schema";
+import { Idea, Comment, User, categoryValues, statusValues } from "@shared/schema";
 
 // Define types for frontend use
 export type Category = "pain-point" | "opportunity" | "challenge";

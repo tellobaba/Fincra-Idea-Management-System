@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Category } from "@/types/ideas";
-import { getCategoryConfig } from "@/types/ideas";
+import { Category, getCategoryConfig } from "@/types/ideas";
+import { Link } from "wouter";
 import { Bold, Italic, List, Link as LinkIcon, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -70,7 +70,7 @@ export function SubmitIdeaForm({
     },
   });
 
-  const handleSubmit = async (values: FormValues) => {
+  const onFormSubmit: SubmitHandler<FormValues> = async (values) => {
     setIsSaving(true);
     try {
       await onSubmit(values);
@@ -90,7 +90,7 @@ export function SubmitIdeaForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="title"
