@@ -34,6 +34,9 @@ export const ideas = pgTable("ideas", {
   impact: text("impact"), // Impact description
   adminNotes: text("admin_notes"), // Admin notes
   attachmentUrl: text("attachment_url"), // Single attachment URL for simpler implementation
+  organizationCategory: text("organization_category"), // 'Organisation Health', 'Technology & Systems', 'Commercial & Strategy', 'Process', 'Cost Leadership', 'Other'
+  inspiration: text("inspiration"), // Inspiration or context behind the submission
+  similarSolutions: text("similar_solutions"), // Awareness of similar solutions
 });
 
 export const comments = pgTable("comments", {
