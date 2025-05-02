@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { categorySchema } from "@shared/schema";
+import { categorySchema, organizationCategorySchema } from "@shared/schema";
 import { Label } from "@/components/ui/label";
 import { UploadCloud } from "lucide-react";
 import { z } from "zod";
@@ -134,6 +134,11 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
       // Add file if selected
       if (selectedFile) {
         formData.append('attachment', selectedFile);
+      }
+      
+      // Make sure submittedById is passed
+      if (user) {
+        formData.append('submittedById', user.id.toString());
       }
       
       // Submit the idea to the API
@@ -309,13 +314,12 @@ export function LogYourIdeaModal({ open, onOpenChange }: LogYourIdeaModalProps) 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="business">Business</SelectItem>
-                      <SelectItem value="technology">Technology</SelectItem>
-                      <SelectItem value="operations">Operations</SelectItem>
-                      <SelectItem value="finance">Finance</SelectItem>
-                      <SelectItem value="customer-service">Customer Service</SelectItem>
-                      <SelectItem value="marketing">Marketing</SelectItem>
-                      <SelectItem value="cross-functional">Cross-Functional</SelectItem>
+                      <SelectItem value="Organisation Health">Organisation Health</SelectItem>
+                      <SelectItem value="Technology & Systems">Technology & Systems</SelectItem>
+                      <SelectItem value="Commercial & Strategy">Commercial & Strategy</SelectItem>
+                      <SelectItem value="Process">Process</SelectItem>
+                      <SelectItem value="Cost Leadership">Cost Leadership</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>

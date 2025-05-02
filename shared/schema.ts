@@ -68,6 +68,11 @@ export const insertIdeaSchema = createInsertSchema(ideas).pick({
   submittedById: true,
   attachments: true,
   mediaUrls: true,
+  impact: true,
+  organizationCategory: true,
+  inspiration: true,
+  similarSolutions: true,
+  attachmentUrl: true,
 });
 
 export const insertCommentSchema = createInsertSchema(comments).pick({
@@ -117,6 +122,18 @@ export const departmentSchema = z.enum([
   'Other'
 ]);
 export type Department = z.infer<typeof departmentSchema>;
+
+// Organization Category type
+export const organizationCategorySchema = z.enum([
+  'Organisation Health',
+  'Technology & Systems',
+  'Commercial & Strategy',
+  'Process',
+  'Cost Leadership',
+  'Other'
+]);
+export type OrganizationCategory = z.infer<typeof organizationCategorySchema>;
+export const organizationCategoryValues = organizationCategorySchema.options;
 
 // Role type
 export const roleSchema = z.enum(['user', 'reviewer', 'transformer', 'implementer', 'admin']);
