@@ -810,12 +810,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const oneYearAgo = new Date(today);
       oneYearAgo.setFullYear(today.getFullYear() - 1);
       
-      // Count ideas in each period
-      const fiveDaysCount = ideas.filter(idea => new Date(idea.createdAt) >= fiveDaysAgo).length;
-      const twoWeeksCount = ideas.filter(idea => new Date(idea.createdAt) >= twoWeeksAgo).length;
-      const oneMonthCount = ideas.filter(idea => new Date(idea.createdAt) >= oneMonthAgo).length;
-      const sixMonthsCount = ideas.filter(idea => new Date(idea.createdAt) >= sixMonthsAgo).length;
-      const oneYearCount = ideas.filter(idea => new Date(idea.createdAt) >= oneYearAgo).length;
+      // Count ideas in each period (handling missing createdAt)
+      const fiveDaysCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= fiveDaysAgo).length;
+      const twoWeeksCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= twoWeeksAgo).length;
+      const oneMonthCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= oneMonthAgo).length;
+      const sixMonthsCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= sixMonthsAgo).length;
+      const oneYearCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt) >= oneYearAgo).length;
       
       const volumeData = [
         { name: "5D", value: fiveDaysCount },
@@ -838,11 +838,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allIdeas = await dbStorage.getIdeas();
       
       // Sort by createdAt (descending) and take most recent 5
-      const recentActivity = allIdeas
+      // Filter out items without createdAt first to avoid comparison errors
+      const ideasWithDates = allIdeas.filter(idea => idea.createdAt);
+      const recentActivity = ideasWithDates
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 5)
         .map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
+          const submitter = idea.submittedById ? await dbStorage.getUser(idea.submittedById) : null;
           
           return {
             id: idea.id,
@@ -876,19 +878,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Count idea submissions per user
       const submissionCounts: Record<number, number> = {};
       allIdeas.forEach(idea => {
-        const userId = idea.submittedById;
-        if (!submissionCounts[userId]) {
-          submissionCounts[userId] = 0;
+        if (idea.submittedById) {
+          const userId = idea.submittedById;
+          if (!submissionCounts[userId]) {
+            submissionCounts[userId] = 0;
+          }
+          submissionCounts[userId]++;
         }
-        submissionCounts[userId]++;
       });
       
       // Count implemented ideas per user
       const implementedCounts: Record<number, number> = {};
       allIdeas
-        .filter(idea => idea.status === 'implemented')
+        .filter(idea => idea.status === 'implemented' && idea.submittedById)
         .forEach(idea => {
-          const userId = idea.submittedById;
+          const userId = idea.submittedById!;
           if (!implementedCounts[userId]) {
             implementedCounts[userId] = 0;
           }
@@ -923,17 +927,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const ideas = await dbStorage.getIdeas();
       
-      // Count ideas by status
-      const statusCounts = {
-        'submitted': ideas.filter(idea => idea.status === 'submitted').length,
-        'in-review': ideas.filter(idea => idea.status === 'in-review').length,
-        'merged': ideas.filter(idea => idea.status === 'merged').length,
-        'parked': ideas.filter(idea => idea.status === 'parked').length,
-        'implemented': ideas.filter(idea => idea.status === 'implemented').length,
+      // Map our database statuses to the display categories
+      // Ideas Submitted = total of all ideas
+      // Implemented = status 'implemented'
+      // Needs Review = status 'submitted' and 'in-review'
+      // Planned = status 'merged'
+      // Future Consideration = status 'parked'
+      const counts = {
+        'Ideas Submitted': ideas.length,
+        'Implemented': ideas.filter(idea => idea.status === 'implemented').length,
+        'Needs Review': ideas.filter(idea => ['submitted', 'in-review'].includes(idea.status)).length,
+        'Planned': ideas.filter(idea => idea.status === 'merged').length,
+        'Future Consideration': ideas.filter(idea => idea.status === 'parked').length,
       };
       
       // Format for chart display
-      const result = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
+      const result = [
+        { name: 'Ideas Submitted', value: counts['Ideas Submitted'], fill: '#8bc34a' }, // green
+        { name: 'Implemented', value: counts['Implemented'], fill: '#2196f3' },       // blue
+        { name: 'Needs Review', value: counts['Needs Review'], fill: '#ffc107' },      // yellow
+        { name: 'Planned', value: counts['Planned'], fill: '#03a9f4' },               // light blue
+        { name: 'Future Consideration', value: counts['Future Consideration'], fill: '#e91e63' }  // pink
+      ];
       
       res.json(result);
     } catch (error) {
