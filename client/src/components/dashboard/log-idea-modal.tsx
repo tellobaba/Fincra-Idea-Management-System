@@ -38,6 +38,9 @@ const formSchema = z.object({
   impact: z.string().optional(),
   category: z.string(),
   subcategory: z.string().optional(),
+  organizationCategory: z.string().optional(),
+  inspiration: z.string().optional(),
+  similarSolutions: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
