@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage as dbStorage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import * as bcrypt from "bcryptjs";
 
 declare global {
   namespace Express {
@@ -16,16 +17,31 @@ declare global {
 const scryptAsync = promisify(scrypt);
 
 async function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
+  // Use bcrypt for new password hashes
+  return bcrypt.hashSync(password, 10);
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  // Check if it's a bcrypt hash (starts with $2a$ or $2b$)
+  if (stored.startsWith('$2')) {
+    // Use bcrypt for comparison of bcrypt hashes
+    return bcrypt.compareSync(supplied, stored);
+  }
+  
+  // Fallback to original scrypt method for any legacy passwords
+  try {
+    const [hashed, salt] = stored.split(".");
+    if (!hashed || !salt) {
+      console.error("Invalid password format:", stored);
+      return false;
+    }
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (err) {
+    console.error("Password comparison error:", err);
+    return false;
+  }
 }
 
 export function setupAuth(app: Express) {
