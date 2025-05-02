@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function MyVotesPage() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch user's voted ideas
@@ -26,6 +27,17 @@ export default function MyVotesPage() {
         title: "Feature Coming Soon",
         description: "Vote removal will be available in a future update.",
       });
+      
+      // When this functionality is implemented, we'll need to invalidate these queries
+      // For now just showing the comment for reference
+      /*
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/my-votes"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/ideas/${id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/opportunity"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/challenge"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/pain-point"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/top"] });
+      */
     } catch (error) {
       toast({
         title: "Action Failed",

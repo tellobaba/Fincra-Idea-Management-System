@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,7 @@ interface IdeasPageProps {
 export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPageProps) {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const queryClient = useQueryClient();
 
   // Determine the API endpoint based on the category type
   const apiEndpoint = categoryType === 'opportunity' 
@@ -55,7 +56,13 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
 
   // Calculate weekly submission data for the chart
   const getWeeklyData = () => {
-    const weeks = [];
+    interface WeekData {
+      name: string;
+      date: Date;
+      value: number;
+    }
+    
+    const weeks: WeekData[] = [];
     const now = new Date();
     
     // Generate last 5 weeks dates
@@ -119,7 +126,7 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
 
   const weeklyData = getWeeklyData();
   const contributorsData = getContributorsData();
-
+  
   // Function to handle upvoting
   const handleVote = async (id: number) => {
     try {
@@ -141,7 +148,10 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
       });
       
       // Invalidate queries to refresh data
-      // This would be implemented with react-query invalidation
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+      queryClient.invalidateQueries({ queryKey: [`/api/ideas/${id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/top"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/my-votes"] });
     } catch (error) {
       toast({
         title: "Voting Failed",
