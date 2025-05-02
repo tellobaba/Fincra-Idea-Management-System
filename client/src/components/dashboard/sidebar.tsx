@@ -16,6 +16,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
 
 interface SidebarProps {
   className?: string;
@@ -25,6 +26,28 @@ export function Sidebar({ className }: SidebarProps) {
   const { user } = useAuth();
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  
+  // Fetch metrics for sidebar badges
+  const { data: metrics } = useQuery({
+    queryKey: ["/api/metrics"],
+  });
+  
+  // Get idea counts by category
+  const { data: ideas = [] } = useQuery<any[]>({
+    queryKey: ["/api/ideas"],
+  });
+  
+  // Count ideas by category
+  const challenges = ideas.filter(idea => idea.category === 'challenge').length || 0;
+  const painPoints = ideas.filter(idea => idea.category === 'pain-point').length || 0;
+  
+  // Calculate my votes (ideas where current user voted)
+  // Assuming votes is stored as an array in the database
+  const myVotes = ideas.filter(idea => {
+    // Handle votes being undefined or not an array
+    if (!idea.votes || !Array.isArray(idea.votes)) return false;
+    return idea.votes.includes(user?.id);
+  }).length || 0;
   
   const isAdmin = user?.role && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role);
   
@@ -41,28 +64,28 @@ export function Sidebar({ className }: SidebarProps) {
       href: "/ideas",
       icon: LightbulbIcon,
       active: location === "/ideas" || location.startsWith("/ideas/"),
-      badge: "27",
+      badge: metrics?.ideasSubmitted?.toString(),
     },
     {
       name: "Challenges",
       href: "/challenges",
       icon: AlertCircle,
       active: location === "/challenges",
-      badge: "12",
+      badge: challenges ? challenges.toString() : undefined,
     },
     {
       name: "Pain Points",
       href: "/pain-points",
       icon: AlertCircle,
       active: location === "/pain-points",
-      badge: "9",
+      badge: painPoints ? painPoints.toString() : undefined,
     },
     {
       name: "My Votes",
       href: "/my-votes",
       icon: Vote,
       active: location === "/my-votes",
-      badge: "18",
+      badge: myVotes ? myVotes.toString() : undefined,
     },
     {
       name: "Pinned Ideas",
