@@ -95,7 +95,15 @@ export function Sidebar({ className }: SidebarProps) {
       name: "Admin Panel",
       href: "/admin",
       icon: LayoutDashboard,
-      active: location === "/admin",
+      active: location === "/admin" || location.startsWith("/admin/"),
+      badge: undefined,
+    });
+    
+    mainNavigationItems.push({
+      name: "Admin Dashboard",
+      href: "/admin/dashboard",
+      icon: BarChart,
+      active: location === "/admin/dashboard",
       badge: undefined,
     });
   }

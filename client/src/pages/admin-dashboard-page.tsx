@@ -36,7 +36,7 @@ export default function AdminDashboardPage() {
       }
       return await res.json();
     },
-    enabled: !isAuthLoading && !!user && user.role === 'admin',
+    enabled: !isAuthLoading && !!user && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role),
   });
 
   const { logoutMutation } = useAuth();
