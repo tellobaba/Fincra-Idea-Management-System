@@ -792,30 +792,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Ideas by Category
-  app.get("/api/ideas/by-category", async (req, res) => {
+  // Ideas by Category with formatted display for the dashboard
+  app.get("/api/ideas/by-category", async (_req, res) => {
     try {
-      const allIdeas = await dbStorage.getIdeas();
+      const ideas = await dbStorage.getIdeas();
       
-      // Group the ideas by category and count them
-      const categoryCounts: Record<string, number> = {};
-      allIdeas.forEach(idea => {
-        if (!categoryCounts[idea.category]) {
-          categoryCounts[idea.category] = 0;
-        }
-        categoryCounts[idea.category]++;
-      });
+      // Count ideas by category (pain-point, opportunity, challenge)
+      const categoryCounts = {
+        'Ideas': ideas.filter(idea => idea.category === 'opportunity').length,
+        'Challenges': ideas.filter(idea => idea.category === 'challenge').length,
+        'Pain Points': ideas.filter(idea => idea.category === 'pain-point').length,
+      };
       
-      // Format data for the frontend chart
-      const result = Object.entries(categoryCounts).map(([category, count]) => ({
-        name: category,
-        value: count,
-      }));
+      // Format for bar chart display
+      const result = [
+        { name: 'Ideas', value: categoryCounts['Ideas'], fill: '#4CAF50' },           // green 
+        { name: 'Challenges', value: categoryCounts['Challenges'], fill: '#2196F3' },   // blue
+        { name: 'Pain Points', value: categoryCounts['Pain Points'], fill: '#F44336' }, // red
+      ];
       
       res.json(result);
     } catch (error) {
       console.error('Error fetching ideas by category:', error);
-      res.status(500).json({ message: "Failed to fetch ideas by category" });
+      // Return default data with zeros instead of error
+      const defaultData = [
+        { name: 'Ideas', value: 0, fill: '#4CAF50' },
+        { name: 'Challenges', value: 0, fill: '#2196F3' },
+        { name: 'Pain Points', value: 0, fill: '#F44336' }
+      ];
+      res.json(defaultData);
     }
   });
   
@@ -996,38 +1001,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Define specialized routes before generic ones
-  // Get ideas by category for bar chart
-  app.get("/api/ideas/by-category", async (_req, res) => {
-    try {
-      // This endpoint tallies ideas by their category
-      const ideas = await dbStorage.getIdeas();
-      
-      // Count ideas by category (pain-point, opportunity, challenge)
-      const categoryCounts = {
-        'Ideas': ideas.filter(idea => idea.category === 'opportunity').length,
-        'Challenges': ideas.filter(idea => idea.category === 'challenge').length,
-        'Pain Points': ideas.filter(idea => idea.category === 'pain-point').length,
-      };
-      
-      // Format for bar chart display
-      const result = [
-        { name: 'Ideas', value: categoryCounts['Ideas'], fill: '#4CAF50' },           // green 
-        { name: 'Challenges', value: categoryCounts['Challenges'], fill: '#2196F3' },   // blue
-        { name: 'Pain Points', value: categoryCounts['Pain Points'], fill: '#F44336' }, // red
-      ];
-      
-      res.json(result);
-    } catch (error) {
-      console.error('Error fetching ideas by category:', error);
-      // Return default data with zeros instead of error
-      const defaultData = [
-        { name: 'Ideas', value: 0, fill: '#4CAF50' },
-        { name: 'Challenges', value: 0, fill: '#2196F3' },
-        { name: 'Pain Points', value: 0, fill: '#F44336' }
-      ];
-      res.json(defaultData);
-    }
-  });
   
   // Add endpoints to get ideas by specific category type
   app.get("/api/ideas/opportunity", async (_req, res) => {

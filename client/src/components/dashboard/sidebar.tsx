@@ -47,12 +47,12 @@ export function Sidebar({ className }: SidebarProps) {
   });
   
   // Count ideas by category
+  const ideasCount = ideas.filter(idea => idea.category === 'opportunity').length || 0;
   const challenges = ideas.filter(idea => idea.category === 'challenge').length || 0;
   const painPoints = ideas.filter(idea => idea.category === 'pain-point').length || 0;
   
-  // For My Votes - in our schema votes is a number not an array, so we'd need a different query
-  // This is a placeholder until we implement the actual votes tracking
-  const myVotes: number = 0;
+  // For My Votes - using ideas with votes > 0 as a proxy
+  const myVotes = ideas.filter(idea => idea.votes && idea.votes > 0).length || 0;
   
   const isAdmin = user?.role && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role);
   
@@ -69,7 +69,7 @@ export function Sidebar({ className }: SidebarProps) {
       href: "/ideas",
       icon: LightbulbIcon,
       active: location === "/ideas" || location.startsWith("/ideas/"),
-      badge: metrics?.ideasSubmitted?.toString(),
+      badge: ideasCount ? ideasCount.toString() : undefined,
     },
     {
       name: "Challenges",
