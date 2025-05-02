@@ -7,7 +7,7 @@ import { storage as dbStorage } from "./storage";
 import { insertIdeaSchema, insertCommentSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from 'multer';
-import { categorySchema, statusSchema, prioritySchema, departmentSchema, roleSchema } from '@shared/schema';
+import { categorySchema, statusSchema, prioritySchema, departmentSchema, roleSchema, type Idea, type User } from '@shared/schema';
 
 // Middleware to check if user is admin
 const checkAdminRole = (req: Request, res: Response, next: NextFunction) => {
@@ -863,11 +863,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       oneYearAgo.setFullYear(today.getFullYear() - 1);
       
       // Count ideas in each period (handling missing createdAt)
-      const fiveDaysCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= fiveDaysAgo).length;
-      const twoWeeksCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= twoWeeksAgo).length;
-      const oneMonthCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= oneMonthAgo).length;
-      const sixMonthsCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= sixMonthsAgo).length;
-      const oneYearCount = ideas.filter(idea => idea.createdAt && new Date(idea.createdAt as string) >= oneYearAgo).length;
+      const fiveDaysCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= fiveDaysAgo).length;
+      const twoWeeksCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= twoWeeksAgo).length;
+      const oneMonthCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= oneMonthAgo).length;
+      const sixMonthsCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= sixMonthsAgo).length;
+      const oneYearCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= oneYearAgo).length;
       
       const volumeData = [
         { name: "5D", value: fiveDaysCount },
@@ -893,7 +893,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter out items without createdAt first to avoid comparison errors
       const ideasWithDates = allIdeas.filter(idea => idea.createdAt);
       const recentActivity = ideasWithDates
-        .sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime())
+        .sort((a, b) => {
+          const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+          const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+          return dateB.getTime() - dateA.getTime();
+        })
         .slice(0, 5)
         .map(async (idea) => {
           const submitter = idea.submittedById ? await dbStorage.getUser(idea.submittedById) : null;
@@ -925,8 +929,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/leaderboard", async (_req, res) => {
     try {
       // Wrap in try/catch blocks to handle individual query errors
-      let allIdeas = [];
-      let allUsers = [];
+      let allIdeas: Idea[] = [];
+      let allUsers: User[] = [];
       
       try {
         allIdeas = await dbStorage.getIdeas();
@@ -947,45 +951,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      // Count idea submissions per user
-      const submissionCounts: Record<number, number> = {};
+      // Count submissions by category (pain-point, opportunity, challenge) per user
+      const submissionsByUser: Record<number, { 
+        total: number,
+        ideas: number,     // opportunity
+        challenges: number,
+        painPoints: number
+      }> = {};
+      
+      // Initialize counters for each user
+      allUsers.forEach(user => {
+        submissionsByUser[user.id] = {
+          total: 0,
+          ideas: 0,
+          challenges: 0,
+          painPoints: 0
+        };
+      });
+      
+      // Count submissions for each user by category
       allIdeas.forEach(idea => {
-        if (idea.submittedById) {
+        if (idea.submittedById && submissionsByUser[idea.submittedById]) {
           const userId = idea.submittedById;
-          if (!submissionCounts[userId]) {
-            submissionCounts[userId] = 0;
+          
+          // Increment total count
+          submissionsByUser[userId].total++;
+          
+          // Increment category-specific count
+          if (idea.category === 'opportunity') {
+            submissionsByUser[userId].ideas++;
+          } else if (idea.category === 'challenge') {
+            submissionsByUser[userId].challenges++;
+          } else if (idea.category === 'pain-point') {
+            submissionsByUser[userId].painPoints++;
           }
-          submissionCounts[userId]++;
         }
       });
       
-      // Count implemented ideas per user
-      const implementedCounts: Record<number, number> = {};
-      allIdeas
-        .filter(idea => idea.status === 'implemented' && idea.submittedById)
-        .forEach(idea => {
-          const userId = idea.submittedById!;
-          if (!implementedCounts[userId]) {
-            implementedCounts[userId] = 0;
-          }
-          implementedCounts[userId]++;
-        });
+      // Generate leaderboard entries with actual submission counts
+      const leaderboard = allUsers
+        .filter(user => submissionsByUser[user.id]?.total > 0) // Only include users with submissions
+        .map(user => ({
+          user: {
+            id: user.id,
+            displayName: user.displayName || `User ${user.id}`,
+            department: user.department || 'General',
+            email: user.username, // Add email (username is email in this app)
+            avatarUrl: user.avatarUrl || null
+          },
+          totalSubmissions: submissionsByUser[user.id].total,
+          ideas: submissionsByUser[user.id].ideas,
+          challenges: submissionsByUser[user.id].challenges,
+          painPoints: submissionsByUser[user.id].painPoints
+        }));
       
-      // Generate leaderboard entries
-      const leaderboard = allUsers.map(user => ({
-        user: {
-          id: user.id,
-          displayName: user.displayName || `User ${user.id}`,
-          department: user.department || 'General',
-          avatarUrl: user.avatarUrl || null
-        },
-        ideasSubmitted: submissionCounts[user.id] || 0,
-        ideasImplemented: implementedCounts[user.id] || 0,
-        impactScore: ((submissionCounts[user.id] || 0) * 10) + ((implementedCounts[user.id] || 0) * 25)
-      }));
-      
-      // Sort by impact score descending
-      leaderboard.sort((a, b) => b.impactScore - a.impactScore);
+      // Sort by total submissions descending
+      leaderboard.sort((a, b) => b.totalSubmissions - a.totalSubmissions);
       
       res.json(leaderboard);
     } catch (error) {
@@ -996,50 +1017,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Define specialized routes before generic ones
-  // Get ideas by status (for charts)
+  // Get ideas by category for bar chart
   app.get("/api/ideas/by-status", async (_req, res) => {
     try {
-      let ideas = [];
+      let ideas: Idea[] = [];
       
       try {
         ideas = await dbStorage.getIdeas();
       } catch (error) {
-        console.error('Error fetching ideas for status chart:', error);
+        console.error('Error fetching ideas for category chart:', error);
       }
       
-      // Map our database statuses to the display categories
-      // Ideas Submitted = total of all ideas
-      // Implemented = status 'implemented'
-      // Needs Review = status 'submitted' and 'in-review'
-      // Planned = status 'merged'
-      // Future Consideration = status 'parked'
-      const counts = {
-        'Ideas Submitted': ideas.length,
-        'Implemented': ideas.filter(idea => idea.status === 'implemented').length,
-        'Needs Review': ideas.filter(idea => ['submitted', 'in-review'].includes(idea.status as string)).length,
-        'Planned': ideas.filter(idea => idea.status === 'merged').length,
-        'Future Consideration': ideas.filter(idea => idea.status === 'parked').length,
+      // Count ideas by category (pain-point, opportunity, challenge)
+      const categoryCounts = {
+        'Ideas': ideas.filter(idea => idea.category === 'opportunity').length,
+        'Challenges': ideas.filter(idea => idea.category === 'challenge').length,
+        'Pain Points': ideas.filter(idea => idea.category === 'pain-point').length,
       };
       
-      // Format for chart display
+      // Format for bar chart display
       const result = [
-        { name: 'Ideas Submitted', value: counts['Ideas Submitted'], fill: '#8bc34a' }, // green
-        { name: 'Implemented', value: counts['Implemented'], fill: '#2196f3' },       // blue
-        { name: 'Needs Review', value: counts['Needs Review'], fill: '#ffc107' },      // yellow
-        { name: 'Planned', value: counts['Planned'], fill: '#03a9f4' },               // light blue
-        { name: 'Future Consideration', value: counts['Future Consideration'], fill: '#e91e63' }  // pink
+        { name: 'Ideas', value: categoryCounts['Ideas'], fill: '#4CAF50' },           // green 
+        { name: 'Challenges', value: categoryCounts['Challenges'], fill: '#2196F3' },   // blue
+        { name: 'Pain Points', value: categoryCounts['Pain Points'], fill: '#F44336' }, // red
       ];
       
       res.json(result);
     } catch (error) {
-      console.error('Error fetching ideas by status:', error);
+      console.error('Error fetching ideas by category:', error);
       // Return default data with zeros instead of error
       const defaultData = [
-        { name: 'Ideas Submitted', value: 0, fill: '#8bc34a' },
-        { name: 'Implemented', value: 0, fill: '#2196f3' },
-        { name: 'Needs Review', value: 0, fill: '#ffc107' },
-        { name: 'Planned', value: 0, fill: '#03a9f4' },
-        { name: 'Future Consideration', value: 0, fill: '#e91e63' }
+        { name: 'Ideas', value: 0, fill: '#4CAF50' },
+        { name: 'Challenges', value: 0, fill: '#2196F3' },
+        { name: 'Pain Points', value: 0, fill: '#F44336' }
       ];
       res.json(defaultData);
     }
