@@ -468,18 +468,18 @@ export class DatabaseStorage implements IStorage {
     const result = await db.execute(sql`
       WITH idea_counts AS (
         SELECT 
-          "submittedById",
+          "submitted_by_id",
           COUNT(*) AS ideas_submitted,
           COUNT(*) FILTER (WHERE status = 'implemented') AS ideas_implemented,
           SUM(votes) AS total_votes,
           COUNT(*) FILTER (WHERE category = 'opportunity') AS ideas_count,
           COUNT(*) FILTER (WHERE category = 'challenge') AS challenges_count,
           COUNT(*) FILTER (WHERE category = 'pain-point') AS pain_points_count,
-          MAX("createdAt") AS last_submission_date
+          MAX("created_at") AS last_submission_date
         FROM ${ideas}
-        WHERE "createdAt" BETWEEN ${startDate} AND ${endDate}
+        WHERE "created_at" BETWEEN ${startDate} AND ${endDate}
         ${sql.raw(categoryFilter)}
-        GROUP BY "submittedById"
+        GROUP BY "submitted_by_id"
       )
       SELECT 
         u.*,
@@ -492,7 +492,7 @@ export class DatabaseStorage implements IStorage {
         COALESCE(ic.pain_points_count, 0) AS pain_points_count,
         ic.last_submission_date
       FROM ${users} u
-      LEFT JOIN idea_counts ic ON u.id = ic."submittedById"
+      LEFT JOIN idea_counts ic ON u.id = ic."submitted_by_id"
       WHERE (ic.ideas_submitted > 0 OR ic.ideas_implemented > 0)
       ${sql.raw(departmentJoin)}
       ORDER BY ${sql.raw(filters?.sortBy === 'votes' ? 'votes_received' : 
