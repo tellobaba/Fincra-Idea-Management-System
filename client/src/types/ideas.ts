@@ -45,10 +45,19 @@ export interface LeaderboardEntry {
     displayName: string;
     department?: string;
     avatarUrl?: string;
+    email?: string;
   };
   ideasSubmitted: number;
   ideasImplemented: number;
   impactScore: number;
+  votesReceived: number;
+  lastSubmissionDate?: string;
+  categoryBreakdown: {
+    ideas: number; // opportunity
+    challenges: number;
+    painPoints: number; // pain-point
+  };
+  status?: 'Top Contributor' | 'Active Contributor' | 'New Contributor';
 }
 
 export interface Metrics {

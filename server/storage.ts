@@ -47,7 +47,7 @@ export interface IStorage {
   getComments(ideaId: number): Promise<Comment[]>;
   
   // Leaderboard
-  getLeaderboard(): Promise<{ user: User; ideasSubmitted: number; ideasImplemented: number; impactScore: number }[]>;
+  getLeaderboard(filters?: { timeRange?: string; startDate?: Date; endDate?: Date; category?: string; department?: string; sortBy?: string }): Promise<{ user: User; ideasSubmitted: number; ideasImplemented: number; impactScore: number; votesReceived: number; lastSubmissionDate?: string; categoryBreakdown: { ideas: number; challenges: number; painPoints: number }; status?: string }[]>;
   
   // Admin operations
   getIdeasForReview(): Promise<Idea[]>;
@@ -419,7 +419,51 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Leaderboard
-  async getLeaderboard(): Promise<{ user: User; ideasSubmitted: number; ideasImplemented: number; impactScore: number }[]> {
+  async getLeaderboard(filters?: { timeRange?: string, startDate?: Date, endDate?: Date, category?: string, department?: string, sortBy?: string }): Promise<{ user: User; ideasSubmitted: number; ideasImplemented: number; impactScore: number; votesReceived: number; lastSubmissionDate?: string; categoryBreakdown: { ideas: number; challenges: number; painPoints: number } }[]> {
+    // Prepare date filters
+    let startDate = new Date(0); // Default to epoch start
+    let endDate = new Date(); // Default to current date
+    
+    if (filters?.timeRange) {
+      const now = new Date();
+      switch (filters.timeRange) {
+        case 'this-week':
+          startDate = new Date(now.setDate(now.getDate() - now.getDay()));
+          break;
+        case 'last-week':
+          const lastWeekEnd = new Date(now.setDate(now.getDate() - now.getDay()));
+          startDate = new Date(lastWeekEnd.setDate(lastWeekEnd.getDate() - 7));
+          endDate = new Date(lastWeekEnd.setDate(lastWeekEnd.getDate() + 6));
+          break;
+        case 'this-month':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        case 'last-month':
+          startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+          break;
+        case 'this-year':
+          startDate = new Date(now.getFullYear(), 0, 1);
+          break;
+        case 'custom':
+          if (filters.startDate) startDate = new Date(filters.startDate);
+          if (filters.endDate) endDate = new Date(filters.endDate);
+          break;
+      }
+    }
+    
+    // Construct the category filter
+    let categoryFilter = "";
+    if (filters?.category) {
+      categoryFilter = `AND category = '${filters.category}'`;
+    }
+    
+    // Construct the department filter
+    let departmentJoin = "";
+    if (filters?.department) {
+      departmentJoin = `AND u.department = '${filters.department}'`;
+    }
+    
     // We need to use SQL for more complex queries like this
     const result = await db.execute(sql`
       WITH idea_counts AS (
@@ -427,34 +471,74 @@ export class DatabaseStorage implements IStorage {
           "submittedById",
           COUNT(*) AS ideas_submitted,
           COUNT(*) FILTER (WHERE status = 'implemented') AS ideas_implemented,
-          SUM(votes) AS total_votes
+          SUM(votes) AS total_votes,
+          COUNT(*) FILTER (WHERE category = 'opportunity') AS ideas_count,
+          COUNT(*) FILTER (WHERE category = 'challenge') AS challenges_count,
+          COUNT(*) FILTER (WHERE category = 'pain-point') AS pain_points_count,
+          MAX("createdAt") AS last_submission_date
         FROM ${ideas}
+        WHERE "createdAt" BETWEEN ${startDate} AND ${endDate}
+        ${sql.raw(categoryFilter)}
         GROUP BY "submittedById"
       )
       SELECT 
         u.*,
         COALESCE(ic.ideas_submitted, 0) AS ideas_submitted,
         COALESCE(ic.ideas_implemented, 0) AS ideas_implemented,
-        COALESCE((ic.ideas_submitted * 2) + (ic.ideas_implemented * 5) + ic.total_votes, 0) AS impact_score
+        COALESCE(ic.total_votes, 0) AS votes_received,
+        COALESCE((ic.ideas_submitted * 2) + (ic.ideas_implemented * 5) + ic.total_votes, 0) AS impact_score,
+        COALESCE(ic.ideas_count, 0) AS ideas_count,
+        COALESCE(ic.challenges_count, 0) AS challenges_count,
+        COALESCE(ic.pain_points_count, 0) AS pain_points_count,
+        ic.last_submission_date
       FROM ${users} u
       LEFT JOIN idea_counts ic ON u.id = ic."submittedById"
-      ORDER BY impact_score DESC
+      WHERE (ic.ideas_submitted > 0 OR ic.ideas_implemented > 0)
+      ${sql.raw(departmentJoin)}
+      ORDER BY ${sql.raw(filters?.sortBy === 'votes' ? 'votes_received' : 
+                     filters?.sortBy === 'approved' ? 'ideas_implemented' : 
+                     filters?.sortBy === 'newest' ? 'last_submission_date' : 
+                     'ideas_submitted')} DESC
     `);
     
-    return result.rows.map((row: any) => ({
-      user: {
-        id: row.id,
-        username: row.username,
-        displayName: row.displayName,
-        department: row.department,
-        role: row.role,
-        avatarUrl: row.avatarUrl,
-        password: row.password, // Not used in frontend, just for type compatibility
-      },
-      ideasSubmitted: parseInt(row.ideas_submitted) || 0,
-      ideasImplemented: parseInt(row.ideas_implemented) || 0,
-      impactScore: parseInt(row.impact_score) || 0,
-    }));
+    return result.rows.map((row: any) => {
+      // Calculate contributor status
+      let status: 'Top Contributor' | 'Active Contributor' | 'New Contributor' | undefined;
+      const impactScore = parseInt(row.impact_score) || 0;
+      const ideasSubmitted = parseInt(row.ideas_submitted) || 0;
+      
+      if (impactScore > 50) {
+        status = 'Top Contributor';
+      } else if (ideasSubmitted > 2) {
+        status = 'Active Contributor';
+      } else if (ideasSubmitted > 0) {
+        status = 'New Contributor';
+      }
+      
+      return {
+        user: {
+          id: row.id,
+          username: row.username,
+          displayName: row.displayName,
+          department: row.department,
+          role: row.role,
+          avatarUrl: row.avatarUrl,
+          email: row.username, // Email is stored in username field
+          password: row.password, // Not used in frontend, just for type compatibility
+        },
+        ideasSubmitted,
+        ideasImplemented: parseInt(row.ideas_implemented) || 0,
+        impactScore,
+        votesReceived: parseInt(row.votes_received) || 0,
+        lastSubmissionDate: row.last_submission_date ? new Date(row.last_submission_date).toISOString() : undefined,
+        categoryBreakdown: {
+          ideas: parseInt(row.ideas_count) || 0,
+          challenges: parseInt(row.challenges_count) || 0,
+          painPoints: parseInt(row.pain_points_count) || 0,
+        },
+        status
+      };
+    });
   }
   
   // Admin operations

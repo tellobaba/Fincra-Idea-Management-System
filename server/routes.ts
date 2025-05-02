@@ -1062,89 +1062,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get leaderboard data (top contributors)
-  app.get("/api/leaderboard", async (_req, res) => {
+  app.get("/api/leaderboard", async (req, res) => {
     try {
-      // Wrap in try/catch blocks to handle individual query errors
-      let allIdeas: Idea[] = [];
-      let allUsers: User[] = [];
+      const { 
+        timeRange, 
+        startDate, 
+        endDate, 
+        category, 
+        department, 
+        sortBy 
+      } = req.query;
       
-      try {
-        allIdeas = await dbStorage.getIdeas();
-      } catch (ideasError) {
-        console.error('Error fetching ideas for leaderboard:', ideasError);
-        // Continue with empty array rather than failing completely
+      // Parse dates if provided
+      let parsedStartDate;
+      let parsedEndDate;
+      
+      if (startDate && typeof startDate === 'string') {
+        parsedStartDate = new Date(startDate);
       }
       
-      try {
-        allUsers = await dbStorage.getUsers();
-      } catch (usersError) {
-        console.error('Error fetching users for leaderboard:', usersError);
-        // Continue with empty array rather than failing completely
+      if (endDate && typeof endDate === 'string') {
+        parsedEndDate = new Date(endDate);
       }
       
-      // If both failed, return empty array instead of error
-      if (allIdeas.length === 0 && allUsers.length === 0) {
-        return res.json([]);
-      }
-      
-      // Count submissions by category (pain-point, opportunity, challenge) per user
-      const submissionsByUser: Record<number, { 
-        total: number,
-        ideas: number,     // opportunity
-        challenges: number,
-        painPoints: number
-      }> = {};
-      
-      // Initialize counters for each user
-      allUsers.forEach(user => {
-        submissionsByUser[user.id] = {
-          total: 0,
-          ideas: 0,
-          challenges: 0,
-          painPoints: 0
-        };
+      // Get leaderboard data with filters
+      const leaderboardData = await dbStorage.getLeaderboard({
+        timeRange: typeof timeRange === 'string' ? timeRange : undefined,
+        startDate: parsedStartDate,
+        endDate: parsedEndDate,
+        category: typeof category === 'string' ? category : undefined,
+        department: typeof department === 'string' ? department : undefined,
+        sortBy: typeof sortBy === 'string' ? sortBy : undefined
       });
       
-      // Count submissions for each user by category
-      allIdeas.forEach(idea => {
-        if (idea.submittedById && submissionsByUser[idea.submittedById]) {
-          const userId = idea.submittedById;
-          
-          // Increment total count
-          submissionsByUser[userId].total++;
-          
-          // Increment category-specific count
-          if (idea.category === 'opportunity') {
-            submissionsByUser[userId].ideas++;
-          } else if (idea.category === 'challenge') {
-            submissionsByUser[userId].challenges++;
-          } else if (idea.category === 'pain-point') {
-            submissionsByUser[userId].painPoints++;
-          }
-        }
-      });
-      
-      // Generate leaderboard entries with actual submission counts
-      const leaderboard = allUsers
-        .filter(user => submissionsByUser[user.id]?.total > 0) // Only include users with submissions
-        .map(user => ({
-          user: {
-            id: user.id,
-            displayName: user.displayName || `User ${user.id}`,
-            department: user.department || 'General',
-            email: user.username, // Add email (username is email in this app)
-            avatarUrl: user.avatarUrl || null
-          },
-          totalSubmissions: submissionsByUser[user.id].total,
-          ideas: submissionsByUser[user.id].ideas,
-          challenges: submissionsByUser[user.id].challenges,
-          painPoints: submissionsByUser[user.id].painPoints
-        }));
-      
-      // Sort by total submissions descending
-      leaderboard.sort((a, b) => b.totalSubmissions - a.totalSubmissions);
-      
-      res.json(leaderboard);
+      res.json(leaderboardData);
     } catch (error) {
       console.error('Error fetching leaderboard data:', error);
       // Return empty array instead of error to prevent UI disruption
