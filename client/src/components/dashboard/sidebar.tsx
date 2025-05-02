@@ -17,6 +17,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
+import { Idea } from "@shared/schema";
+
+interface Metrics {
+  ideasSubmitted: number;
+  inReview: number;
+  implemented: number;
+  costSaved: number;
+  revenueGenerated: number;
+}
 
 interface SidebarProps {
   className?: string;
@@ -28,12 +37,12 @@ export function Sidebar({ className }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   
   // Fetch metrics for sidebar badges
-  const { data: metrics } = useQuery({
+  const { data: metrics = { ideasSubmitted: 0, inReview: 0, implemented: 0, costSaved: 0, revenueGenerated: 0 } } = useQuery<Metrics>({
     queryKey: ["/api/metrics"],
   });
   
   // Get idea counts by category
-  const { data: ideas = [] } = useQuery<any[]>({
+  const { data: ideas = [] } = useQuery<Idea[]>({
     queryKey: ["/api/ideas"],
   });
   
@@ -41,13 +50,9 @@ export function Sidebar({ className }: SidebarProps) {
   const challenges = ideas.filter(idea => idea.category === 'challenge').length || 0;
   const painPoints = ideas.filter(idea => idea.category === 'pain-point').length || 0;
   
-  // Calculate my votes (ideas where current user voted)
-  // Assuming votes is stored as an array in the database
-  const myVotes = ideas.filter(idea => {
-    // Handle votes being undefined or not an array
-    if (!idea.votes || !Array.isArray(idea.votes)) return false;
-    return idea.votes.includes(user?.id);
-  }).length || 0;
+  // For My Votes - in our schema votes is a number not an array, so we'd need a different query
+  // This is a placeholder until we implement the actual votes tracking
+  const myVotes: number = 0;
   
   const isAdmin = user?.role && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role);
   
@@ -85,7 +90,7 @@ export function Sidebar({ className }: SidebarProps) {
       href: "/my-votes",
       icon: Vote,
       active: location === "/my-votes",
-      badge: myVotes ? myVotes.toString() : undefined,
+      badge: myVotes > 0 ? String(myVotes) : undefined,
     },
     {
       name: "Pinned Ideas",
