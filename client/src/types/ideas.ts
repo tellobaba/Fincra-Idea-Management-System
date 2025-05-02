@@ -15,6 +15,9 @@ export interface IdeaWithUser extends Idea {
     department?: string;
     avatarUrl?: string;
   } | null;
+  impact?: string;
+  adminNotes?: string;
+  attachmentUrl?: string;
 }
 
 export interface CommentWithUser extends Comment {
@@ -67,11 +70,11 @@ export interface SubmitCommentForm {
 
 // Status labels and colors for UI
 export const STATUS_CONFIG: Record<Status, { label: string; color: string }> = {
-  'submitted': { label: 'Submitted', color: 'bg-blue-100 text-blue-800' },
-  'in-review': { label: 'In Review', color: 'bg-amber-100 text-amber-800' },
-  'in-refinement': { label: 'In Refinement', color: 'bg-purple-100 text-purple-800' },
-  'implemented': { label: 'Implemented', color: 'bg-green-100 text-green-800' },
-  'closed': { label: 'Closed', color: 'bg-gray-100 text-gray-800' },
+  'submitted': { label: 'Submitted', color: 'blue' },
+  'in-review': { label: 'In Review', color: 'amber' },
+  'merged': { label: 'Merged', color: 'purple' },
+  'parked': { label: 'Parked', color: 'gray' },
+  'implemented': { label: 'Implemented', color: 'green' },
 };
 
 // Category labels and colors for UI
