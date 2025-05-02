@@ -366,7 +366,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
+  // Get voted ideas by current user
+  app.get("/api/ideas/my-votes", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to view your votes" });
+      }
+      
+      const userId = req.user!.id;
+      
+      // Get ideas that the current user has voted for
+      const votedIdeas = await dbStorage.getUserVotedIdeas(userId);
+      
+      // Get user info for each idea
+      const ideasWithUsers = await Promise.all(
+        votedIdeas.map(async (idea: Idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching voted ideas:', error);
+      res.status(500).json({ message: "Failed to fetch voted ideas" });
+    }
+  });
 
   // Get single idea
   app.get("/api/ideas/:id", async (req, res) => {
@@ -1116,40 +1149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add endpoints to get ideas by specific category type
   // Category-specific routes moved before the generic /:id route
   
-  // Get voted ideas by current user
-  app.get("/api/ideas/my-votes", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "You must be logged in to view your votes" });
-      }
-      
-      const userId = req.user!.id;
-      
-      // Get ideas that the current user has voted for
-      const votedIdeas = await dbStorage.getUserVotedIdeas(userId);
-      
-      // Get user info for each idea
-      const ideasWithUsers = await Promise.all(
-        votedIdeas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null,
-          };
-        })
-      );
-      
-      res.json(ideasWithUsers);
-    } catch (error) {
-      console.error('Error fetching voted ideas:', error);
-      res.status(500).json({ message: "Failed to fetch voted ideas" });
-    }
-  });
+  // My votes endpoint moved to another location to fix route ordering
   
   // Backward compatibility endpoint - redirects to by-category
   app.get("/api/ideas/by-status", async (_req, res) => {
