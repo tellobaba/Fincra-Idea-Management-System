@@ -71,7 +71,8 @@ export function AdminLoginForm() {
       }
       
       // Check if the user has admin role
-      if (!userData || userData.role !== "admin") {
+      const adminRoles = ['admin', 'reviewer', 'transformer', 'implementer'];
+      if (!userData || !adminRoles.includes(userData.role)) {
         throw new Error("You do not have admin privileges");
       }
 

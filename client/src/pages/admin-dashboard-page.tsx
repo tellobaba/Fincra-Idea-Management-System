@@ -20,7 +20,7 @@ export default function AdminDashboardPage() {
   
   // Redirect to login if not authenticated or not an admin
   useEffect(() => {
-    if (!isAuthLoading && (!user || user.role !== 'admin')) {
+    if (!isAuthLoading && (!user || !['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role))) {
       navigate("/admin/login");
     }
   }, [user, isAuthLoading, navigate]);

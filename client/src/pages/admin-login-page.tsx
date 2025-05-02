@@ -10,7 +10,7 @@ export default function AdminLoginPage() {
 
   // If the user is already logged in and is an admin, redirect to admin dashboard
   useEffect(() => {
-    if (user && user.role === "admin") {
+    if (user && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role)) {
       navigate("/admin/dashboard");
     }
   }, [user, navigate]);
