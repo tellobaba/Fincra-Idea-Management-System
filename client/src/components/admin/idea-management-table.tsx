@@ -65,7 +65,7 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
     if (!editIdea || !newStatus) return;
 
     try {
-      const response = await fetch(`/api/admin/ideas/${editIdea.id}`, {
+      const response = await fetch(`/api/ideas/${editIdea.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +90,6 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
       setAdminNote("");
 
       // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/ideas"] });
       queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
       queryClient.invalidateQueries({ queryKey: ["/api/ideas/top"] });
       queryClient.invalidateQueries({ queryKey: ["/api/metrics"] });

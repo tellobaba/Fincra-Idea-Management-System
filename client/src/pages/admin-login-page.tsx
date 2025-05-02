@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
           <CardHeader className="space-y-1">
             <div className="flex justify-center mb-4">
               <div className="h-16 w-16 rounded-full bg-purple-100 flex items-center justify-center">
-                <img src="/Logomark.png" alt="Fincra Logo" className="h-10 w-10" />
+                <img src="/assets/Logomark.png" alt="Fincra Logo" className="h-10 w-10" />
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-center">Admin Portal</CardTitle>
