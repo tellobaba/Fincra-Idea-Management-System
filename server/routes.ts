@@ -157,6 +157,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Important: Define specific category routes before generic routes
+  // Define the category-specific idea routes to ensure they don't get matched by /:id
+  app.get("/api/ideas/opportunity", async (_req, res) => {
+    try {
+      // Use the getIdeas method with category filter
+      const opportunityIdeas = await dbStorage.getIdeas({ category: 'opportunity' });
+      
+      // Get user info for each idea
+      const ideasWithUsers = await Promise.all(
+        opportunityIdeas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching opportunity ideas:', error);
+      res.status(500).json({ message: "Failed to fetch ideas" });
+    }
+  });
+  
+  app.get("/api/ideas/challenge", async (_req, res) => {
+    try {
+      // Use the getIdeas method with category filter
+      const challengeIdeas = await dbStorage.getIdeas({ category: 'challenge' });
+      
+      // Get user info for each idea
+      const ideasWithUsers = await Promise.all(
+        challengeIdeas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching challenge ideas:', error);
+      res.status(500).json({ message: "Failed to fetch challenges" });
+    }
+  });
+  
+  app.get("/api/ideas/pain-point", async (_req, res) => {
+    try {
+      // Use the getIdeas method with category filter
+      const painPointIdeas = await dbStorage.getIdeas({ category: 'pain-point' });
+      
+      // Get user info for each idea
+      const ideasWithUsers = await Promise.all(
+        painPointIdeas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching pain point ideas:', error);
+      res.status(500).json({ message: "Failed to fetch pain points" });
+    }
+  });
+  
+  // Get ideas for review (admin)
+  app.get("/api/ideas/review", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // Check if user has admin role
+      if (!['admin', 'reviewer', 'transformer', 'implementer'].includes(req.user.role)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const ideas = await dbStorage.getIdeasForReview();
+      
+      // Attach user info to each idea
+      const ideasWithUsers = await Promise.all(
+        ideas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch ideas for review" });
+    }
+  });
+
   // Ideas routes
   // Get all ideas (with optional filters)
   app.get("/api/ideas", async (req, res) => {
@@ -243,44 +366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Removed duplicate route
 
-  // Get ideas for review (admin)
-  app.get("/api/ideas/review", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      
-      // Check if user has admin role
-      if (!['admin', 'reviewer', 'transformer', 'implementer'].includes(req.user.role)) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
-      
-      const ideas = await dbStorage.getIdeasForReview();
-      
-      // Attach user info to each idea
-      const ideasWithUsers = await Promise.all(
-        ideas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null,
-          };
-        })
-      );
-      
-      res.json(ideasWithUsers);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch ideas for review" });
-    }
-  });
 
   // Get single idea
   app.get("/api/ideas/:id", async (req, res) => {
@@ -1006,89 +1092,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Define specialized routes before generic ones
   
   // Add endpoints to get ideas by specific category type
-  app.get("/api/ideas/opportunity", async (_req, res) => {
-    try {
-      // Use the getIdeas method with category filter
-      const opportunityIdeas = await dbStorage.getIdeas({ category: 'opportunity' });
-      
-      // Get user info for each idea
-      const ideasWithUsers = await Promise.all(
-        opportunityIdeas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null,
-          };
-        })
-      );
-      
-      res.json(ideasWithUsers);
-    } catch (error) {
-      console.error('Error fetching opportunity ideas:', error);
-      res.status(500).json({ message: "Failed to fetch ideas" });
-    }
-  });
-  
-  app.get("/api/ideas/challenge", async (_req, res) => {
-    try {
-      // Use the getIdeas method with category filter
-      const challengeIdeas = await dbStorage.getIdeas({ category: 'challenge' });
-      
-      // Get user info for each idea
-      const ideasWithUsers = await Promise.all(
-        challengeIdeas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null,
-          };
-        })
-      );
-      
-      res.json(ideasWithUsers);
-    } catch (error) {
-      console.error('Error fetching challenge ideas:', error);
-      res.status(500).json({ message: "Failed to fetch challenges" });
-    }
-  });
-  
-  app.get("/api/ideas/pain-point", async (_req, res) => {
-    try {
-      // Use the getIdeas method with category filter
-      const painPointIdeas = await dbStorage.getIdeas({ category: 'pain-point' });
-      
-      // Get user info for each idea
-      const ideasWithUsers = await Promise.all(
-        painPointIdeas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null,
-          };
-        })
-      );
-      
-      res.json(ideasWithUsers);
-    } catch (error) {
-      console.error('Error fetching pain point ideas:', error);
-      res.status(500).json({ message: "Failed to fetch pain points" });
-    }
-  });
+  // Category-specific routes moved before the generic /:id route
   
   // Get voted ideas by current user
   app.get("/api/ideas/my-votes", async (req, res) => {
