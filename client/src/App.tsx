@@ -20,13 +20,13 @@ import SubmitIdeaPage from "@/pages/submit-idea-page";
 function Router() {
   return (
     <Switch>
+      <Route path="/admin/login" component={AdminLoginPage} />
+      <AdminRoute path="/admin/dashboard" component={AdminDashboardPage} />
+      <AdminRoute path="/admin" component={AdminPage} />
       <ProtectedRoute path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
       <ProtectedRoute path="/submissions" component={SubmissionsPage} />
-      <AdminRoute path="/admin" component={AdminPage} />
-      <Route path="/admin/login" component={AdminLoginPage} />
-      <AdminRoute path="/admin/dashboard" component={AdminDashboardPage} />
       <ProtectedRoute path="/ideas/:id" component={IdeaDetailPage} />
       <ProtectedRoute path="/submit" component={SubmitIdeaPage} />
       <ProtectedRoute path="/submit/:type" component={SubmitIdeaPage} />

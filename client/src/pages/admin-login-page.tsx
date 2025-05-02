@@ -11,9 +11,10 @@ export default function AdminLoginPage() {
   // If the user is already logged in and is an admin, redirect to admin dashboard
   useEffect(() => {
     if (user && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role)) {
-      navigate("/admin/dashboard");
+      // Use direct location change to ensure the redirect happens
+      window.location.href = "/admin/dashboard";
     }
-  }, [user, navigate]);
+  }, [user]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">

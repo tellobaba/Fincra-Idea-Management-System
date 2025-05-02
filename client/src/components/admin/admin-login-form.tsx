@@ -73,15 +73,21 @@ export function AdminLoginForm() {
       // Check if the user has admin role
       const adminRoles = ['admin', 'reviewer', 'transformer', 'implementer'];
       if (!userData || !adminRoles.includes(userData.role)) {
+        // Force logout if the user doesn't have admin privileges
+        await fetch("/api/logout", { method: "POST" });
         throw new Error("You do not have admin privileges");
       }
 
-      // On successful login
+      // On successful login with admin privileges
       toast({
         title: "Admin login successful",
         description: "Welcome to the admin dashboard",
       });
-      navigate("/admin/dashboard");
+      
+      // Explicitly navigate to the admin dashboard
+      setTimeout(() => {
+        window.location.href = "/admin/dashboard";
+      }, 500);
     } catch (error) {
       toast({
         title: "Admin login failed",
