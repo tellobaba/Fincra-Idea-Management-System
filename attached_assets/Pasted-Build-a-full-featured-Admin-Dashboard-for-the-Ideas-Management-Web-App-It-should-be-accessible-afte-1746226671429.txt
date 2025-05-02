@@ -1,0 +1,91 @@
+Build a full-featured Admin Dashboard for the Ideas Management Web App. It should be accessible after admin login and built using the existing tech stack (React + Tailwind CSS frontend, Node.js backend, PostgreSQL database).
+
+---
+
+🔒 Authentication:
+- Only accessible to authenticated admin users (login already built).
+
+---
+
+📊 Admin Dashboard Overview Page:
+- Show total number of:
+  - Ideas
+  - Challenges
+  - Pain Points
+- Display charts:
+  - Weekly/monthly submission volume (line chart)
+  - Category breakdown (bar/pie chart)
+  - Top contributors and departments
+  - Most voted ideas
+
+---
+
+🗂 Submissions Management Table:
+- Display all submitted Ideas, Challenges, and Pain Points in a table.
+- Columns:
+  - Title
+  - Type
+  - Submitted by
+  - Date submitted
+  - Status
+  - Vote count
+  - Actions
+
+- Add filters:
+  - By category (Idea, Challenge, Pain Point)
+  - By status (New, In Review, Completed, etc.)
+  - By date
+  - By department
+
+- Enable actions on each row:
+  - View full submission details
+  - Approve / Reject / Archive
+  - Comment
+  - Update status
+  - Assign roles to users (see below)
+
+---
+
+👥 Role Assignment for Each Submission:
+- From the submission detail view, admin can assign 3 roles to different users:
+  - Reviewer: Evaluates and prioritizes submissions
+  - Transformer: Helps refine or develop the idea
+  - Implementer: Executes the approved idea
+
+- Roles must be saved in the database per submission and visible in the detail view.
+
+---
+
+🧭 Status Tracker (Admin Controlled):
+- Admin can update status of each submission.
+- Status options: New, In Review, In Progress, Completed, Rejected, Archived
+- Status should sync with frontend and reflect correctly in all dashboards
+
+---
+
+💬 Commenting System:
+- Admin can comment on any submission
+- Comments can be threaded or listed in chronological order
+- Only visible to admin and assigned role-holders
+
+---
+
+📈 Voting Insight Panel:
+- Show most voted ideas with real-time data
+- Filter by:
+  - Week / Month / Year
+  - Category
+  - Department
+- See vote count and who voted
+
+---
+
+📌 Frontend:
+- Use existing React and Tailwind setup
+- Add routing to `/admin` and nested routes like `/admin/submissions`, `/admin/leaderboard`, etc.
+
+📌 Backend:
+- Use Express routes to fetch/update submissions, votes, roles, statuses, and comments
+- Ensure all data is securely stored and synced with PostgreSQL
+
+Do not use any mocked or static data. Everything must be connected to the live database.
