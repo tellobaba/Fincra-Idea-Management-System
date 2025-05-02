@@ -16,120 +16,118 @@ interface ChartData {
 export function ExistingUserView() {
   const [activeTab, setActiveTab] = useState("ideas");
   
-  // Simulate metrics data (this would come from an API)
+  // Fetch real data from API endpoints
   const { data: topIdeas = [] } = useQuery<IdeaWithUser[]>({
     queryKey: ["/api/ideas/top"],
   });
   
   const { data: idealVolume = [] } = useQuery<any>({
     queryKey: ["/api/ideas/volume"],
-    queryFn: () => {
-      // Simulated data
-      return [
-        { name: "5D", value: 10 },
-        { name: "2W", value: 35 },
-        { name: "1M", value: 80 },
-        { name: "6M", value: 120 },
-        { name: "1Y", value: 210 }
-      ];
-    }
   });
   
-  // Simulated data for status breakdown
-  const statusData: ChartData[] = [
-    { name: "Ideas Submitted", value: 234, fill: "#4CAF50" },
-    { name: "Implemented", value: 122, fill: "#2196F3" },
-    { name: "Needs Review", value: 84, fill: "#FF9800" },
-    { name: "Planned", value: 45, fill: "#00BCD4" },
-    { name: "Future Consideration", value: 23, fill: "#F06292" }
-  ];
+  const { data: statusBreakdown = [] } = useQuery<any>({
+    queryKey: ["/api/ideas/by-status"],
+  });
   
-  // Simulated data for activity
-  const activityData = [
-    {
-      id: 1,
-      title: "Cost optimization for cloud infrastructure",
-      description: "Search for inspiration to provide a rich content experience on mobile devices.",
-      status: "Need Review",
-      date: "3h ago"
-    },
-    {
-      id: 2,
-      title: "Cost optimization for cloud infrastructure",
-      description: "Search for inspiration to provide a rich content experience on mobile devices.",
-      status: "Need Review",
-      date: "3h ago"
-    },
-    {
-      id: 3,
-      title: "Cost optimization for cloud infrastructure",
-      description: "Search for inspiration to provide a rich content experience on mobile devices.",
-      status: "Submitted",
-      date: "Apr 23"
-    }
-  ];
+  // Map status data with appropriate colors
+  const statusColors = {
+    "submitted": "#FF9800", // orange
+    "in-review": "#00BCD4", // teal
+    "merged": "#4CAF50", // green
+    "parked": "#F06292", // pink
+    "implemented": "#2196F3", // blue
+  };
   
-  // Simulated data for contributors
-  const contributorsData = [
-    {
-      id: 1,
-      name: "Kayode Shotanke",
-      department: "I.T",
-      value: 45
-    },
-    {
-      id: 2,
-      name: "Tobi Tajiri",
-      department: "I.T",
-      value: 25
-    },
-    {
-      id: 3,
-      name: "Wole Ayodele",
-      department: "I.E",
-      value: 21
-    },
-    {
-      id: 4,
-      name: "Yewande",
-      department: "I.G",
-      value: 20
-    },
-    {
-      id: 5,
-      name: "Emma Wright",
-      department: "W.D",
-      value: 18
-    }
-  ];
+  // Format status data for chart
+  const statusData: ChartData[] = statusBreakdown.map((item: any) => ({
+    name: item.name,
+    value: item.value,
+    fill: statusColors[item.name as keyof typeof statusColors] || "#9E9E9E"
+  }));
   
-  // Simulated data for top voted ideas
-  const topVotedData = [
-    {
-      id: 1,
-      title: "Cost optimization for cloud infrastructure",
-      description: "Search for inspiration to provide a rich content experience on mobile devices.",
-      votes: 45,
-      status: "Planned",
-      date: "Apr 23"
-    },
-    {
-      id: 2,
-      title: "Cost optimization for cloud infrastructure",
-      description: "Search for inspiration to provide a rich content experience on mobile devices.",
-      votes: 40,
-      status: "Need Review",
-      date: "May 12"
-    },
-    {
-      id: 3,
-      title: "Cost optimization for cloud infrastructure",
-      description: "Search for inspiration to provide a rich content experience on mobile devices.",
-      votes: 39,
-      status: "Submitted",
-      date: "Apr 22"
+  // Helper function to get status badge styling
+  const getStatusBadgeClasses = (status: string) => {
+    switch(status) {
+      case 'in-review':
+        return 'bg-orange-100 text-orange-700';
+      case 'submitted':
+        return 'bg-green-100 text-green-700';
+      case 'merged':
+        return 'bg-blue-100 text-blue-700';
+      case 'parked':
+        return 'bg-red-100 text-red-700';
+      case 'implemented':
+        return 'bg-purple-100 text-purple-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
-  ];
+  };
+  
+  // Fetch recent ideas data for activity section
+  const { data: activityIdeas = [] } = useQuery<IdeaWithUser[]>({
+    queryKey: ["/api/ideas"],
+  });
+  
+  // Use the most recent ideas for the activity feed
+  const activityData = activityIdeas
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3)
+    .map(idea => ({
+      id: idea.id,
+      title: idea.title,
+      description: idea.description.substring(0, 80) + (idea.description.length > 80 ? '...' : ''),
+      status: idea.status,
+      date: formatRelativeTime(new Date(idea.createdAt))
+    }));
+  
+  // Helper function to format dates in relative time
+  function formatRelativeTime(date: Date): string {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'Just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes}m ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours}h ago`;
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days}d ago`;
+    } else {
+      // Format as MM/DD if older than a week
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+  }
+  
+  // Fetch leaderboard data for contributors section
+  const { data: leaderboardData = [] } = useQuery<any>({
+    queryKey: ["/api/leaderboard"]
+  });
+  
+  // Map leaderboard data to contributors format
+  const contributorsData = leaderboardData
+    .slice(0, 5)
+    .map((entry: any) => ({
+      id: entry.user.id,
+      name: entry.user.displayName,
+      department: entry.user.department || "N/A",
+      value: entry.ideasSubmitted
+    }));
+  
+  // Use topIdeas for the Top Voted section
+  const topVotedData = topIdeas
+    .slice(0, 3)
+    .map(idea => ({
+      id: idea.id,
+      title: idea.title,
+      description: idea.description.substring(0, 80) + (idea.description.length > 80 ? '...' : ''),
+      votes: idea.votes,
+      status: idea.status,
+      date: formatRelativeTime(new Date(idea.createdAt))
+    }));
 
   return (
     <div className="p-6">
@@ -243,13 +241,7 @@ export function ExistingUserView() {
                   <h3 className="font-medium text-sm">{item.title}</h3>
                   <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                   <div className="flex justify-between items-center mt-2">
-                    <span className={`text-xs rounded-md py-1 px-2 ${
-                      item.status === "Need Review" 
-                        ? "bg-orange-100 text-orange-700" 
-                        : item.status === "Submitted"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-blue-100 text-blue-700"
-                    }`}>
+                    <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                       {item.status}
                     </span>
                     <span className="text-xs text-gray-400">{item.date}</span>
