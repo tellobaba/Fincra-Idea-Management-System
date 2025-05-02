@@ -187,4 +187,33 @@ export function setupAuth(app: Express) {
     
     res.json(userResponse);
   });
+  
+  // Special route for resetting the admin password - TEMPORARY, REMOVE IN PRODUCTION
+  app.get("/api/admin/reset-password", async (req, res) => {
+    try {
+      const adminUser = await dbStorage.getUserByUsername("admin@fincra.com");
+      if (!adminUser) {
+        return res.status(404).json({ message: "Admin user not found" });
+      }
+      
+      // Reset to a known password
+      const newPassword = "adminpass";
+      const hashedPassword = await hashPassword(newPassword);
+      
+      const updatedUser = await dbStorage.updateUser(adminUser.id, {
+        password: hashedPassword
+      });
+      
+      if (updatedUser) {
+        return res.status(200).json({ 
+          message: `Admin password reset successfully to '${newPassword}'` 
+        });
+      } else {
+        return res.status(500).json({ message: "Failed to update admin password" });
+      }
+    } catch (err) {
+      console.error("Admin password reset error:", err);
+      return res.status(500).json({ message: "Server error during admin password reset" });
+    }
+  });
 }
