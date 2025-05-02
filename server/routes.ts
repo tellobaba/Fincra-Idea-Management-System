@@ -1091,11 +1091,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add endpoints to get ideas by specific category type
   app.get("/api/ideas/opportunity", async (_req, res) => {
     try {
-      // Get all ideas
-      const ideas = await dbStorage.getIdeas();
-      
-      // Filter to only get opportunities (ideas)
-      const opportunityIdeas = ideas.filter(idea => idea.category === 'opportunity');
+      // Use the getIdeas method with category filter
+      const opportunityIdeas = await dbStorage.getIdeas({ category: 'opportunity' });
       
       // Get user info for each idea
       const ideasWithUsers = await Promise.all(
@@ -1122,11 +1119,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/ideas/challenge", async (_req, res) => {
     try {
-      // Get all ideas
-      const ideas = await dbStorage.getIdeas();
-      
-      // Filter to only get challenges
-      const challengeIdeas = ideas.filter(idea => idea.category === 'challenge');
+      // Use the getIdeas method with category filter
+      const challengeIdeas = await dbStorage.getIdeas({ category: 'challenge' });
       
       // Get user info for each idea
       const ideasWithUsers = await Promise.all(
