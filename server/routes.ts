@@ -997,17 +997,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Define specialized routes before generic ones
   // Get ideas by category for bar chart
-  app.get("/api/ideas/by-status", async (req, res) => {
+  app.get("/api/ideas/by-category", async (req, res) => {
     try {
-      // This endpoint is actually checking idea categories, not status
-      // The name was kept for backward compatibility
+      // This endpoint tallies ideas by their category
       let ideas: Idea[] = [];
       
       try {
-        const filters = {};
-        // No need to filter by ID - removing the param check that was causing the error
-        
-        ideas = await dbStorage.getIdeas(filters);
+        ideas = await dbStorage.getIdeas();
+      } catch (error) {
+        console.error('Error fetching ideas for category chart:', error);
+      }
+      
+      // Count ideas by category (pain-point, opportunity, challenge)
+      const categoryCounts = {
+        'Ideas': ideas.filter(idea => idea.category === 'opportunity').length,
+        'Challenges': ideas.filter(idea => idea.category === 'challenge').length,
+        'Pain Points': ideas.filter(idea => idea.category === 'pain-point').length,
+      };
+      
+      // Format for bar chart display
+      const result = [
+        { name: 'Ideas', value: categoryCounts['Ideas'], fill: '#4CAF50' },           // green 
+        { name: 'Challenges', value: categoryCounts['Challenges'], fill: '#2196F3' },   // blue
+        { name: 'Pain Points', value: categoryCounts['Pain Points'], fill: '#F44336' }, // red
+      ];
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching ideas by category:', error);
+      // Return default data with zeros instead of error
+      const defaultData = [
+        { name: 'Ideas', value: 0, fill: '#4CAF50' },
+        { name: 'Challenges', value: 0, fill: '#2196F3' },
+        { name: 'Pain Points', value: 0, fill: '#F44336' }
+      ];
+      res.json(defaultData);
+    }
+  });
+  
+  // Backward compatibility endpoint - redirects to by-category
+  app.get("/api/ideas/by-status", async (req, res) => {
+    try {
+      // This endpoint tallies ideas by their category
+      let ideas: Idea[] = [];
+      
+      try {
+        ideas = await dbStorage.getIdeas();
       } catch (error) {
         console.error('Error fetching ideas for category chart:', error);
       }

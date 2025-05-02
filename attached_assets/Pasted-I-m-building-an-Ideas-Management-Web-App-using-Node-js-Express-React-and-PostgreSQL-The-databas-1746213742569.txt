@@ -1,0 +1,69 @@
+I’m building an Ideas Management Web App using Node.js (Express), React, and PostgreSQL. The database is connected and the frontend is mostly functional. I need to extend the app with full feature support for idea, challenge, and pain point submission and visualization.
+
+Here’s what I need you to build:
+
+---
+
+1. **Navigation and Routing**:
+   - Make the “Ideas,” “Challenges,” and “Pain Points” buttons in the left sidebar functional.
+   - Each should link to a dedicated page: `/ideas`, `/challenges`, `/pain-points`.
+
+---
+
+2. **Individual Pages (Ideas, Challenges, Pain Points)**:
+   Each of the three pages should:
+   - Display a list of all submissions in that category.
+   - Include analytics charts showing:
+     - Total submissions
+     - Submission trends over time (weekly, line chart)
+     - Who submitted them
+   - Make each submission clickable to open a full detail view.
+
+---
+
+3. **Submission Enhancements**:
+   For all new idea, challenge, or pain point submissions:
+   - Add a form with the following fields:
+     1. **Detailed Description**
+     2. **Impact and Relevance**
+     3. **Categorization** (Dropdown with these options):
+        - Organisation Health
+        - Technology & Systems
+        - Commercial & Strategy
+        - Process
+        - Cost Leadership
+        - Other
+     4. **Inspiration or Context Behind the Submission**
+     5. **Awareness of Similar Solutions**
+
+   Save all these fields properly in PostgreSQL and allow them to be viewed in the detail page.
+
+---
+
+4. **Voting System**:
+   - Enable all ideas to be voted on by users (upvote only, no downvotes).
+   - Track the number of votes each user makes.
+   - Update the “My Votes” number in the left sidebar to reflect how many ideas a user has voted on.
+   - Make the “My Votes” button clickable — redirect to a page (`/my-votes`) that shows all ideas the user has voted for.
+   - Ensure “Top Voted” section on the Overview page always lists ideas sorted by vote count in real-time.
+
+---
+
+5. **Analytics Enhancements**:
+   - Convert the “Ideas Volume” chart on the Overview page into a **LINE chart**.
+   - X-axis should represent **weeks** (past 5 weeks minimum).
+   - Y-axis should show total new submissions each week (combined: ideas + challenges + pain points).
+   - Chart should go up when more submissions are made, down when fewer are made — calculated dynamically.
+
+---
+
+6. **Technical Stack**:
+   - Frontend: React + Tailwind CSS
+   - Backend: Node.js (Express)
+   - Database: PostgreSQL
+
+Important Notes:
+- Do not use any fake or placeholder numbers — all stats and data must be fetched from the PostgreSQL database.
+- Everything must update in real time based on actual user activity.
+- No admin features for now.
+
