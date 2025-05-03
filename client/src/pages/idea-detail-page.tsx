@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -29,6 +29,16 @@ export default function IdeaDetailPage() {
     queryKey: [`/api/ideas/${ideaId}`],
     enabled: !isNaN(ideaId),
   });
+  
+  // Debug log for ideas (commented to avoid TypeScript errors)
+  // useEffect(() => {
+  //   if (idea) {
+  //     console.log('Idea detail response:', idea);
+  //     if (idea.mediaUrls) {
+  //       console.log('Media URLs:', idea.mediaUrls);
+  //     }
+  //   }
+  // }, [idea]);
   
   // Mutation for adding a comment
   const addCommentMutation = useMutation({
@@ -253,7 +263,7 @@ export default function IdeaDetailPage() {
                 </div>
                 
                 {/* Display attachments if available */}
-                {idea.mediaUrls && idea.mediaUrls.length > 0 && (
+                {idea.mediaUrls && Array.isArray(idea.mediaUrls) && idea.mediaUrls.length > 0 && (
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-3">Attachments</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
