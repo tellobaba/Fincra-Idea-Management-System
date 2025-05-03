@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Upload } from "lucide-react";
+import { Upload, Mic } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,8 @@ interface ChallengeSubmitFormProps {
     criteria: string;
     timeframe: string;
     reward: string;
-    files?: FileList;
+    media?: FileList;
+    voiceNote?: File;
   }) => void;
   onCancel?: () => void;
   initialData?: {
@@ -55,6 +56,10 @@ export function ChallengeSubmitForm({
 }: ChallengeSubmitFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [files, setFiles] = useState<FileList | null>(null);
+  const [voiceNote, setVoiceNote] = useState<File | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   
   // Use FormValues for the form
   const form = useForm<FormValues>({
@@ -75,6 +80,7 @@ export function ChallengeSubmitForm({
       const transformedValues = {
         ...values,
         media: files || undefined,
+        voiceNote: voiceNote || undefined,
       };
       await onSubmit(transformedValues);
     } finally {
@@ -85,6 +91,55 @@ export function ChallengeSubmitForm({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFiles(e.target.files);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      // Check for microphone support first
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Your browser does not support audio recording');
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Use webm for better browser compatibility
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
+      
+      // Clear any previous chunks
+      setAudioChunks([]);
+      
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          setAudioChunks((chunks) => [...chunks, e.data]);
+        }
+      };
+      
+      recorder.onstop = () => {
+        // Create blob from all chunks
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioFile = new File([audioBlob], 'voice-note.webm', { type: 'audio/webm' });
+        setVoiceNote(audioFile);
+        // Clear chunks after creating file
+        setAudioChunks([]);
+      };
+      
+      // Request data at 1-second intervals
+      recorder.start(1000);
+      setIsRecording(true);
+      console.log('Recording started successfully');
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      alert('Could not access microphone. Please check permissions and make sure you\'re using a secure connection (HTTPS).');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      // Stop all audio tracks
+      mediaRecorder.stream.getTracks().forEach(track => track.stop());
     }
   };
 
@@ -231,6 +286,61 @@ export function ChallengeSubmitForm({
                 </ul>
               </div>
             )}
+          </div>
+        </div>
+
+        <div>
+          <FormLabel>Voice Note</FormLabel>
+          <div className="border rounded-md p-4 mt-2">
+            <div className="flex flex-col items-center">
+              <Mic className="h-8 w-8 text-muted-foreground mb-3" />
+              <p className="text-muted-foreground text-sm mb-2">Record a voice note to explain the challenge</p>
+              
+              {!isRecording && !voiceNote && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={startRecording}
+                  className="mt-2"
+                >
+                  Start Recording
+                </Button>
+              )}
+              
+              {isRecording && (
+                <div className="flex flex-col items-center">
+                  <div className="w-full h-2 bg-red-200 rounded-full overflow-hidden mb-2">
+                    <div className="h-full bg-red-500 animate-pulse"></div>
+                  </div>
+                  <p className="text-sm text-red-500 mb-2">Recording...</p>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={stopRecording}
+                  >
+                    Stop Recording
+                  </Button>
+                </div>
+              )}
+              
+              {voiceNote && !isRecording && (
+                <div className="w-full mt-2">
+                  <audio controls className="w-full">
+                    <source src={URL.createObjectURL(voiceNote)} type="audio/webm" />
+                    Your browser does not support the audio element.
+                  </audio>
+                  <div className="flex justify-center mt-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setVoiceNote(null)}
+                    >
+                      Delete & Record Again
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         
