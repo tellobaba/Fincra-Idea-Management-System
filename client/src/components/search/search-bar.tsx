@@ -49,6 +49,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
         const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
         if (response.ok) {
           const data = await response.json();
+          console.log('Search suggestions:', data);
           setSuggestions(data);
         }
       } catch (error) {
@@ -98,6 +99,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
     }
   };
   
+  // Debug values to help troubleshoot
+  console.log('showSuggestions:', showSuggestions);
+  console.log('query.length:', query.length);
+  console.log('suggestions.length:', suggestions.length);
+  
   return (
     <div className={`relative ${className}`} ref={searchRef}>
       <form onSubmit={handleSearch} className="relative">
@@ -129,9 +135,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
         </div>
       </form>
       
-      {/* Suggestions dropdown */}
-      {showSuggestions && query.length >= 2 && (
-        <div className="absolute z-50 mt-1 w-full rounded-md bg-white shadow-lg dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      {/* Suggestions dropdown - forcing visibility for debugging */}
+      {query.length >= 2 && (
+        <div className="absolute top-full left-0 z-[100] mt-1 w-full rounded-md bg-white shadow-lg dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           {isLoading ? (
             <div className="p-4 flex justify-center">
               <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
