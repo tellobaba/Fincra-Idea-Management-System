@@ -179,23 +179,53 @@ export default function AnalyticsPage() {
                 <CardTitle className="text-lg font-medium">Ideas Volume</CardTitle>
               </CardHeader>
               <CardContent>
-                {/* Custom DIV-based Bar chart for Ideas Volume */}
-                <div className="h-[200px] w-full flex flex-col justify-center pb-4 pt-2">
+                {/* Custom DIV-based Bar chart for Ideas Volume (by time period) */}
+                <div className="h-[200px] w-full flex flex-col justify-center pb-2 pt-2">
                   <div className="flex justify-between px-2 mb-2">
                     <div className="text-xs font-medium text-gray-500">Time Period</div>
-                    <div className="text-xs font-medium text-gray-500">Count</div>
+                    <div className="text-xs font-medium text-gray-500">Submissions</div>
                   </div>
                   
-                  <div className="space-y-4 flex-grow">
-                    {idealVolume.map((item, index) => {
+                  <div className="space-y-3 flex-grow">
+                    {idealVolume.map((item: {name: string; value: number}, index: number) => {
                       // Calculate percentage of max for bar width
-                      const maxValue = Math.max(...idealVolume.map(d => d.value));
+                      const maxValue = Math.max(...idealVolume.map((d: {value: number}) => d.value));
                       const percentage = maxValue ? (item.value / maxValue) * 100 : 0;
+                      
+                      // Map the time period code to a more readable format
+                      let timePeriod = item.name;
+                      let description = '';
+                      
+                      switch(item.name) {
+                        case '5D':
+                          timePeriod = '5D';
+                          description = '5 Days';
+                          break;
+                        case '2W':
+                          timePeriod = '2W';
+                          description = '2 Weeks';
+                          break;
+                        case '1M':
+                          timePeriod = '1M';
+                          description = '1 Month';
+                          break;
+                        case '6M':
+                          timePeriod = '6M';
+                          description = '6 Months';
+                          break;
+                        case '1Y':
+                          timePeriod = '1Y';
+                          description = '1 Year';
+                          break;
+                      }
                       
                       return (
                         <div key={index} className="flex items-center space-x-3">
-                          <div className="w-10 flex-shrink-0 text-sm font-medium text-gray-700">{item.name}</div>
-                          <div className="flex-grow h-8 bg-gray-100 rounded overflow-hidden relative">
+                          <div className="w-16 flex-shrink-0">
+                            <div className="text-sm font-medium text-gray-700">{timePeriod}</div>
+                            <div className="text-xs text-gray-500">{description}</div>
+                          </div>
+                          <div className="flex-grow h-6 bg-gray-100 rounded overflow-hidden relative">
                             <div 
                               className="h-full" 
                               style={{
@@ -212,7 +242,7 @@ export default function AnalyticsPage() {
                     })}
                   </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-2 text-right">Monday, 22</div>
+                <div className="text-xs text-gray-500 mt-2 text-right">Updated: {new Date().toLocaleDateString()}</div>
               </CardContent>
             </Card>
           </div>
