@@ -1,0 +1,63 @@
+We are overhauling the `/ideas`, `/challenges`, and `/pain-point` pages in the Ideas Management System. Apply the following updates:
+
+---
+
+📌 GENERAL CHANGES:
+- Each page (`/ideas`, `/challenges`, `/pain-point`) should show **only the logged-in user’s** own submissions by default.
+- Move the **analytics and full organization-wide views** to the corresponding sections under the "Welcome Back" (overview) page:
+  - "Ideas" button → moves current `/ideas` page (analytics, chart, all ideas company-wide).
+  - "Challenges" button → same behavior, showing analytics and all challenges company-wide.
+  - "Pain Points" button → same behavior, showing analytics and all pain points company-wide.
+
+---
+
+💡 IDEAS PAGE (/ideas):
+- Show only the logged-in user's ideas.
+- Update submission form:
+  - **Remove**: `Category` field.
+  - **Rename**: `Organization Category` → `Workstreams`.
+  - **Enable**: File upload functionality (ensure files are stored and associated with the idea).
+  - **Add**: Voice note recording option (allow upload or record directly via microphone).
+- Update all Call-to-Action buttons (e.g., “Submit New Idea”) across the platform to reflect this new form structure.
+
+---
+
+🧩 CHALLENGES PAGE (/challenges):
+- Show only the logged-in user's submitted challenges.
+- Move full challenges analytics to the "Welcome Back" page under the "Challenges" button.
+- Update the challenge submission form with the following fields:
+  - **Title**: (e.g., I want to build an Ideas Management System)
+  - **Description**: A detailed description of the challenge.
+  - **Criteria**: What the solver should meet (e.g., Built using Vibe coding. Any platform accepted.)
+  - **Timeframe**: (e.g., 14 days)
+  - **Reward**: (e.g., $500 and dinner with the CEO)
+- Update all Call-to-Action buttons for creating a new challenge to point to this updated format.
+- Delete all existing dummy or example challenges from the database.
+
+---
+
+🔥 PAIN POINT PAGE (/pain-point):
+- Show only the logged-in user's submitted pain points.
+- Move full pain point analytics to the "Welcome Back" page under the "Pain Points" button.
+- Update the pain point submission form with the following fields:
+  - **Title**: (e.g., Difficulty Scheduling Meeting Rooms)
+  - **Department Related to Problem**: Dropdown with options:
+    - Organisation Health
+    - Technology & Systems
+    - Commercial & Strategy
+    - Process
+    - Cost Leadership
+    - Other
+  - **Description**: (e.g., The current system for booking meeting rooms is not effective and leads to double booking.)
+  - **Urgency**: Dropdown with options: High, Medium, Low
+  - **Root Cause**: (e.g., Lack of centralized room booking system)
+  - **Upload File**: Enable file attachment
+  - **Record a Voice Note**: Allow user to record or upload a voice note
+- Update all Call-to-Action buttons for submitting new pain points to reflect this structure.
+- Delete all existing dummy or example pain points from the database.
+
+---
+
+🚫 FINAL INSTRUCTION:
+- Do not use any placeholder or mock data.
+- All features and components must be connected to the live PostgreSQL database and existing user authentication system.
