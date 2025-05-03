@@ -43,7 +43,9 @@ export default function AnalyticsPage() {
 
   // Fetch leaderboard data for contributors section
   const { data: leaderboardData = [], isLoading: leaderboardLoading } = useQuery<any>({
-    queryKey: ["/api/leaderboard"]
+    queryKey: ["/api/leaderboard"],
+    staleTime: 60000, // Cache for 1 minute
+    refetchInterval: 120000, // Refresh every 2 minutes
   });
   
   // Map leaderboard data to contributors format with error handling
@@ -55,10 +57,14 @@ export default function AnalyticsPage() {
           name: entry.user?.displayName || 'Anonymous User',
           email: entry.user?.email || '',
           department: entry.user?.department || "N/A",
-          value: entry.totalSubmissions || 0,
-          ideas: entry.ideas || 0,
-          challenges: entry.challenges || 0,
-          painPoints: entry.painPoints || 0
+          value: entry.ideasSubmitted || 0,
+          ideas: entry.categoryBreakdown?.ideas || 0,
+          challenges: entry.categoryBreakdown?.challenges || 0,
+          painPoints: entry.categoryBreakdown?.painPoints || 0,
+          avatarUrl: entry.user?.avatarUrl || '',
+          impactScore: entry.impactScore || 0,
+          votesReceived: entry.votesReceived || 0,
+          status: entry.status || ''
         }))
     : [];
 
