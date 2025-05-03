@@ -692,7 +692,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if the current user is following this idea
       let isFollowed = false;
       if (req.isAuthenticated()) {
-        isFollowed = await dbStorage.isItemFollowed(req.user.id, id, idea.category);
+        try {
+          isFollowed = await dbStorage.isItemFollowed(req.user.id, id, idea.category);
+          console.log(`Follow check for user ${req.user.id}, idea ${id}, category ${idea.category}: ${isFollowed}`);
+        } catch (followError) {
+          console.error('Error checking follow status:', followError);
+          // Don't fail the whole request if follow check fails
+          isFollowed = false;
+        }
       }
 
       res.json({
@@ -713,7 +720,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isFollowed: isFollowed,
       });
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch idea" });
+      console.error('Error fetching idea details:', error);
+      res.status(500).json({ message: "Failed to fetch idea", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
