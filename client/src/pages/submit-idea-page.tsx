@@ -30,7 +30,7 @@ export default function SubmitIdeaPage() {
       const data = new FormData();
       data.append('title', formData.title);
       data.append('description', formData.description);
-      data.append('workstream', formData.workstream);
+      data.append('department', formData.workstream); // Map workstream to department
       data.append('impact', formData.impact || '');
       data.append('inspiration', formData.inspiration || '');
       data.append('similarSolutions', formData.similarSolutions || '');
