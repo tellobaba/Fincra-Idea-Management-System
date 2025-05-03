@@ -28,9 +28,13 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
       ? '/api/ideas/challenge'
       : '/api/ideas/pain-point';
 
+  // State for view mode (my ideas / all ideas)
+  const [viewMode, setViewMode] = useState<'my' | 'all'>('my');
+  
   // Fetch the ideas specific to this category
   const { data: ideas = [], isLoading: ideasLoading } = useQuery<any[]>({
-    queryKey: [apiEndpoint],
+    queryKey: [apiEndpoint, viewMode],
+    queryFn: () => fetch(`${apiEndpoint}?all=${viewMode === 'all' ? 'true' : 'false'}`).then(res => res.json()),
   });
 
   // Get the proper title based on category
@@ -148,7 +152,7 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
       });
       
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint, viewMode] });
       queryClient.invalidateQueries({ queryKey: [`/api/ideas/${id}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/ideas/top"] });
       queryClient.invalidateQueries({ queryKey: ["/api/ideas/my-votes"] });
@@ -282,7 +286,23 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
           {/* Ideas listing */}
           <div className="bg-white rounded-md shadow-sm">
             <div className="p-4 flex items-center justify-between border-b">
-              <h2 className="text-lg font-medium">All {pageTitle}</h2>
+              <div className="flex items-center space-x-4">
+                <h2 className="text-lg font-medium">{viewMode === 'my' ? 'My' : 'All'} {pageTitle}</h2>
+                <div className="flex bg-gray-100 rounded-md p-1">
+                  <button 
+                    className={`px-3 py-1 text-sm rounded-md transition ${viewMode === 'my' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                    onClick={() => setViewMode('my')}
+                  >
+                    My {pageTitle}
+                  </button>
+                  <button 
+                    className={`px-3 py-1 text-sm rounded-md transition ${viewMode === 'all' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                    onClick={() => setViewMode('all')}
+                  >
+                    All {pageTitle}
+                  </button>
+                </div>
+              </div>
               <div className="flex space-x-2">
                 <Button variant="outline" size="sm">
                   <Filter className="h-4 w-4 mr-2" />

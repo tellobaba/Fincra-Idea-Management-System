@@ -159,10 +159,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Important: Define specific category routes before generic routes
   // Define the category-specific idea routes to ensure they don't get matched by /:id
-  app.get("/api/ideas/opportunity", async (_req, res) => {
+  app.get("/api/ideas/opportunity", async (req, res) => {
     try {
       // Use the getIdeas method with category filter
-      const opportunityIdeas = await dbStorage.getIdeas({ category: 'opportunity' });
+      const filters: { category: string; submittedById?: number } = { category: 'opportunity' };
+      
+      // If user is authenticated and 'all' query param is not true, filter by user's submitted ideas
+      if (req.isAuthenticated() && req.query.all !== 'true') {
+        filters.submittedById = req.user.id;
+      }
+      
+      const opportunityIdeas = await dbStorage.getIdeas(filters);
       
       // Get user info for each idea
       const ideasWithUsers = await Promise.all(
@@ -187,10 +194,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/ideas/challenge", async (_req, res) => {
+  app.get("/api/ideas/challenge", async (req, res) => {
     try {
       // Use the getIdeas method with category filter
-      const challengeIdeas = await dbStorage.getIdeas({ category: 'challenge' });
+      const filters: { category: string; submittedById?: number } = { category: 'challenge' };
+      
+      // If user is authenticated and 'all' query param is not true, filter by user's submitted ideas
+      if (req.isAuthenticated() && req.query.all !== 'true') {
+        filters.submittedById = req.user.id;
+      }
+      
+      const challengeIdeas = await dbStorage.getIdeas(filters);
       
       // Get user info for each idea
       const ideasWithUsers = await Promise.all(
@@ -215,10 +229,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/ideas/pain-point", async (_req, res) => {
+  app.get("/api/ideas/pain-point", async (req, res) => {
     try {
       // Use the getIdeas method with category filter
-      const painPointIdeas = await dbStorage.getIdeas({ category: 'pain-point' });
+      const filters: { category: string; submittedById?: number } = { category: 'pain-point' };
+      
+      // If user is authenticated and 'all' query param is not true, filter by user's submitted ideas
+      if (req.isAuthenticated() && req.query.all !== 'true') {
+        filters.submittedById = req.user.id;
+      }
+      
+      const painPointIdeas = await dbStorage.getIdeas(filters);
       
       // Get user info for each idea
       const ideasWithUsers = await Promise.all(
