@@ -72,6 +72,14 @@ export interface IStorage {
   isItemFollowed(userId: number, itemId: number, itemType: string): Promise<boolean>;
   getUserFollowedItems(userId: number): Promise<Idea[]>;
   
+  // Search operations
+  searchItems(query: string): Promise<{ 
+    ideas: (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[], 
+    challenges: (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[], 
+    painPoints: (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[]
+  }>;
+  getSearchSuggestions(query: string): Promise<{ id: number; title: string; category: string }[]>;
+  
   // Session store
   sessionStore: session.SessionStore;
 }
