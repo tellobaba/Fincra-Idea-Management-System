@@ -35,10 +35,11 @@ interface SidebarProps {
   className?: string;
 }
 
+// Define a simple type for navigation items
 type NavItemWithIcon = {
   name: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }> | (() => React.ReactNode);
+  icon: any; // Using any type to simplify icon handling
   active: boolean;
 };
 
@@ -145,28 +146,36 @@ export function Sidebar({ className }: SidebarProps) {
   };
 
   // Renders a navigation item with icon
-  const renderNavItem = (item: NavItemWithIcon) => (
-    <li key={item.name}>
-      <Link 
-        href={item.href}
-        onClick={closeSidebar}
-        className={cn(
-          "flex items-center px-2 py-2 rounded-md transition-colors relative",
-          item.active 
-            ? "bg-indigo-50 text-indigo-700 font-medium before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:rounded-r-full before:bg-indigo-700" 
-            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-        )}
-      >
-        <div className="w-5 h-5 mr-3 flex items-center justify-center">
-          {typeof item.icon === 'function' 
-            ? item.icon() 
-            : React.createElement(item.icon, { className: "w-5 h-5" })
-          }
-        </div>
-        <span>{item.name}</span>
-      </Link>
-    </li>
-  );
+  const renderNavItem = (item: NavItemWithIcon) => {
+    // Manually handle the icon rendering based on type
+    let iconElement;
+    if (typeof item.icon === 'function') {
+      iconElement = item.icon();
+    } else {
+      const IconComponent = item.icon;
+      iconElement = <IconComponent className="w-5 h-5" />;
+    }
+    
+    return (
+      <li key={item.name}>
+        <Link 
+          href={item.href}
+          onClick={closeSidebar}
+          className={cn(
+            "flex items-center px-2 py-2 rounded-md transition-colors relative",
+            item.active 
+              ? "bg-indigo-50 text-indigo-700 font-medium before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:rounded-r-full before:bg-indigo-700" 
+              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+          )}
+        >
+          <div className="w-5 h-5 mr-3 flex items-center justify-center">
+            {iconElement}
+          </div>
+          <span>{item.name}</span>
+        </Link>
+      </li>
+    );
+  };
 
   return (
     <>

@@ -46,30 +46,27 @@ export function CtaSection({ displayName }: CtaSectionProps) {
     tags: string[];
   }) => {
     try {
-      // Create FormData for server submission
-      const data = new FormData();
-      data.append('title', formData.title);
-      data.append('description', formData.description);
-      data.append('category', formData.category);
-      data.append('department', formData.organizationCategory || 'Other');
+      // Create a properly structured JSON object
+      const requestData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        department: formData.organizationCategory || 'Other',
+        impact: formData.impact || '',
+        inspiration: formData.inspiration || '',
+        similarSolutions: formData.similarSolutions || '',
+        tags: formData.tags || []
+      };
       
-      if (formData.impact) data.append('impact', formData.impact);
-      if (formData.inspiration) data.append('inspiration', formData.inspiration);
-      if (formData.similarSolutions) data.append('similarSolutions', formData.similarSolutions);
+      console.log('Submitting idea with data:', requestData);
       
-      // Handle tags (convert array to JSON string)
-      if (formData.tags && formData.tags.length > 0) {
-        data.append('tags', JSON.stringify(formData.tags));
-      } else {
-        data.append('tags', JSON.stringify([]));
-      }
-      
-      console.log('Submitting idea with form data');
-      
-      // Manual fetch instead of using apiRequest to handle FormData
+      // Use fetch with JSON data
       const response = await fetch('/api/ideas', {
         method: 'POST',
-        body: data,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData),
         credentials: 'include'
       });
       
