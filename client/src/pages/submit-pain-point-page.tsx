@@ -33,15 +33,21 @@ export default function SubmitPainPointPage() {
       data.append('impact', formData.rootCause || ''); // Map rootCause to impact
       data.append('category', 'pain-point'); // Set category explicitly
 
+      // Add empty tags array as required by schema
+      data.append('tags', JSON.stringify([]));
+      
       // Add files if present - use 'media' field as expected by server
       if (formData.files) {
+        console.log('Adding files to request:', formData.files.length);
         for (let i = 0; i < formData.files.length; i++) {
+          console.log(`Adding file ${i+1}:`, formData.files[i].name, formData.files[i].type);
           data.append('media', formData.files[i]);
         }
       }
 
       // Add voice note if present - also as 'media'
       if (formData.voiceNote) {
+        console.log('Adding voice note to request:', formData.voiceNote.name, formData.voiceNote.type);
         data.append('media', formData.voiceNote);
       }
 

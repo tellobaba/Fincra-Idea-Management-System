@@ -36,20 +36,27 @@ export default function SubmitIdeaPage() {
       data.append('similarSolutions', formData.similarSolutions || '');
       data.append('category', 'opportunity'); // Set category explicitly
       
-      // Add tags
+      // Add tags with proper format
       if (formData.tags && formData.tags.length > 0) {
+        // Make sure tags are sent as a formatted string
         data.append('tags', JSON.stringify(formData.tags));
+      } else {
+        // Ensure tags is at least an empty array
+        data.append('tags', JSON.stringify([]));
       }
 
       // Add files if present - use 'media' field as expected by server
       if (formData.files) {
+        console.log('Adding files to request:', formData.files.length);
         for (let i = 0; i < formData.files.length; i++) {
+          console.log(`Adding file ${i+1}:`, formData.files[i].name, formData.files[i].type);
           data.append('media', formData.files[i]);
         }
       }
 
       // Add voice note if present - also as 'media'
       if (formData.voiceNote) {
+        console.log('Adding voice note to request:', formData.voiceNote.name, formData.voiceNote.type);
         data.append('media', formData.voiceNote);
       }
 
