@@ -3,16 +3,20 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  LightbulbIcon,
-  Trophy,
-  ListChecks,
-  AlertCircle,
   Menu,
   X,
-  Vote,
-  Bookmark,
   BarChart
 } from "lucide-react";
+import { CustomIcon } from "@/components/ui/custom-icon";
+
+// Import custom icons
+import ideasIcon from "@/assets/Ideas.png";
+import challengesIcon from "@/assets/Challenges.png";
+import leaderboardIcon from "@/assets/Leaderboard.png";
+import myVotesIcon from "@/assets/MyVotes.png";
+import overviewIcon from "@/assets/Overview.png";
+import painPointsIcon from "@/assets/Painpoints.png";
+import pinnedIdeasIcon from "@/assets/PinnedIdeas.png";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,11 +57,16 @@ export function Sidebar({ className }: SidebarProps) {
   
   const isAdmin = user?.role && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role);
   
+  // Custom icon rendering function
+  const CustomIconComponent = ({ src, alt }: { src: string, alt: string }) => (
+    <CustomIcon src={src} alt={alt} />
+  );
+
   const mainNavigationItems = [
     {
       name: "Overview",
       href: "/",
-      icon: LayoutDashboard,
+      icon: () => <CustomIcon src={overviewIcon} alt="Overview" />,
       active: location === "/",
     },
     {
@@ -69,31 +78,31 @@ export function Sidebar({ className }: SidebarProps) {
     {
       name: "Ideas",
       href: "/ideas",
-      icon: LightbulbIcon,
+      icon: () => <CustomIcon src={ideasIcon} alt="Ideas" />,
       active: location === "/ideas" || location.startsWith("/ideas/"),
     },
     {
       name: "Challenges",
       href: "/challenges",
-      icon: AlertCircle,
+      icon: () => <CustomIcon src={challengesIcon} alt="Challenges" />,
       active: location === "/challenges",
     },
     {
       name: "Pain Points",
       href: "/pain-points",
-      icon: AlertCircle,
+      icon: () => <CustomIcon src={painPointsIcon} alt="Pain Points" />,
       active: location === "/pain-points",
     },
     {
       name: "My Votes",
       href: "/my-votes",
-      icon: Vote,
+      icon: () => <CustomIcon src={myVotesIcon} alt="My Votes" />,
       active: location === "/my-votes",
     },
     {
       name: "Pinned Ideas",
       href: "/pinned",
-      icon: Bookmark,
+      icon: () => <CustomIcon src={pinnedIdeasIcon} alt="Pinned Ideas" />,
       active: location === "/pinned",
     },
   ];
@@ -102,7 +111,7 @@ export function Sidebar({ className }: SidebarProps) {
     {
       name: "Leaderboard",
       href: "/leaderboard",
-      icon: Trophy,
+      icon: () => <CustomIcon src={leaderboardIcon} alt="Leaderboard" />,
       active: location === "/leaderboard",
     },
   ];
@@ -199,7 +208,9 @@ export function Sidebar({ className }: SidebarProps) {
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     )}
                   >
-                    <item.icon className="w-5 h-5 mr-3" />
+                    <div className="w-5 h-5 mr-3">
+                      {typeof item.icon === 'function' ? item.icon() : <item.icon />}
+                    </div>
                     <span>{item.name}</span>
                   </Link>
                 </li>
@@ -222,7 +233,9 @@ export function Sidebar({ className }: SidebarProps) {
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     )}
                   >
-                    <item.icon className="w-5 h-5 mr-3" />
+                    <div className="w-5 h-5 mr-3">
+                      {typeof item.icon === 'function' ? item.icon() : <item.icon />}
+                    </div>
                     <span>{item.name}</span>
                   </Link>
                 </li>
