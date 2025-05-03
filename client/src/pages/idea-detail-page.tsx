@@ -274,7 +274,7 @@ export default function IdeaDetailPage() {
                         
                         return (
                           <div key={index} className="border rounded-md overflow-hidden">
-                            {media.type === 'image' ? (
+                            {(media.type === 'image' || media.url.endsWith('.jpg') || media.url.endsWith('.jpeg') || media.url.endsWith('.png') || media.url.endsWith('.gif')) ? (
                               <div className="h-auto">
                                 <img 
                                   src={fullUrl} 
