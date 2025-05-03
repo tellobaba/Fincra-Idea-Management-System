@@ -19,6 +19,8 @@ export interface IdeaWithUser extends Idea {
     department?: string;
     avatarUrl?: string;
   } | null;
+  // Explicitly define mediaUrls to match schema type
+  mediaUrls: Array<{type: string; url: string}> | null;
   // Note: These fields are already in the schema, here for clarity
   // impact: string | null;
   // adminNotes: string | null;
@@ -35,9 +37,9 @@ export interface CommentWithUser extends Comment {
   } | null;
 }
 
-export interface IdeaDetailResponse extends IdeaWithUser {
+export interface IdeaDetailResponse extends Omit<IdeaWithUser, 'mediaUrls'> {
   comments: CommentWithUser[];
-  mediaUrls?: Array<{type: string; url: string}>;
+  mediaUrls?: Array<{type: string; url: string}> | null;
 }
 
 export interface LeaderboardEntry {

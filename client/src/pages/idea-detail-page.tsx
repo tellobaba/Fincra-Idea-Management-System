@@ -30,15 +30,11 @@ export default function IdeaDetailPage() {
     enabled: !isNaN(ideaId),
   });
   
-  // Debug log for ideas (commented to avoid TypeScript errors)
-  // useEffect(() => {
-  //   if (idea) {
-  //     console.log('Idea detail response:', idea);
-  //     if (idea.mediaUrls) {
-  //       console.log('Media URLs:', idea.mediaUrls);
-  //     }
-  //   }
-  // }, [idea]);
+  // Add debugging statement when rendering individual media items
+  const logMediaInfo = (media: any, index: number, fullUrl: string) => {
+    console.log(`Rendering media ${index}:`, { ...media, fullUrl });
+    return null;
+  };
   
   // Mutation for adding a comment
   const addCommentMutation = useMutation({
@@ -263,6 +259,12 @@ export default function IdeaDetailPage() {
                 </div>
                 
                 {/* Display attachments if available */}
+                {console.log('Idea MediaUrls debug:', {
+                  mediaUrls: idea.mediaUrls,
+                  isArray: Array.isArray(idea.mediaUrls),
+                  length: idea.mediaUrls ? idea.mediaUrls.length : 0,
+                  type: typeof idea.mediaUrls
+                })}
                 {idea.mediaUrls && Array.isArray(idea.mediaUrls) && idea.mediaUrls.length > 0 && (
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-3">Attachments</h3>
@@ -273,7 +275,8 @@ export default function IdeaDetailPage() {
                           ? media.url 
                           : `${window.location.origin}${media.url}`;
                           
-                        console.log(`Rendering media ${index}:`, { ...media, fullUrl });
+                        // Call our debug function while ensuring the component still renders properly
+                        logMediaInfo(media, index, fullUrl);
                         
                         return (
                           <div key={index} className="border rounded-md overflow-hidden">
