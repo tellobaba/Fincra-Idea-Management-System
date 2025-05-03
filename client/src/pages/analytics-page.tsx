@@ -56,28 +56,19 @@ export default function AnalyticsPage() {
           // For debugging
           console.log('Entry user data:', entry.user);
           
-          // Extract username from email (as display name might not be set)
-          let name = entry.user?.displayName;
-          if (!name && entry.user?.username) {
-            // If username is an email, extract the part before @
-            const username = entry.user.username;
-            if (username.includes('@')) {
-              name = username.split('@')[0];
-            } else {
-              name = username;
-            }
-          }
+          // The server response has different casing for display_name vs displayName
+          let name = entry.user?.display_name;
+          let avatarUrl = entry.user?.avatar_url;
           
           return {
             id: entry.user?.id || 0,
             name: name || 'Anonymous User',
-            email: entry.user?.email || entry.user?.username || '',
             department: entry.user?.department || "N/A",
             value: entry.ideasSubmitted || 0,
             ideas: entry.categoryBreakdown?.ideas || 0,
             challenges: entry.categoryBreakdown?.challenges || 0,
             painPoints: entry.categoryBreakdown?.painPoints || 0,
-            avatarUrl: entry.user?.avatarUrl || '',
+            avatarUrl: avatarUrl || '',
             impactScore: entry.impactScore || 0,
             votesReceived: entry.votesReceived || 0,
             status: entry.status || ''
