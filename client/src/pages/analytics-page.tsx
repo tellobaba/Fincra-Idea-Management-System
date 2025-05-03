@@ -108,9 +108,8 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Ideas by Category chart */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader>
                 <CardTitle className="text-lg font-medium">Submissions by Category</CardTitle>
-                <button className="text-sm text-blue-600 hover:underline">See Report</button>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
@@ -134,18 +133,18 @@ export default function AnalyticsPage() {
                       tick={{ fontSize: 12 }}
                     />
                     <Tooltip />
-                    {/* Create a separate bar for each status with its color */}
                     {statusData.map((entry, index) => (
                       <Bar 
                         key={`status-bar-${index}`}
                         dataKey="value" 
                         name={entry.name}
-                        data={[entry]}
-                        barSize={20}
                         fill={entry.fill}
+                        barSize={20}
+                        data={[entry]}
                         fillOpacity={0.9}
                       />
                     ))}
+
                   </BarChart>
                 </ResponsiveContainer>
                 
@@ -163,9 +162,8 @@ export default function AnalyticsPage() {
             
             {/* Ideas Volume chart */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader>
                 <CardTitle className="text-lg font-medium">Ideas Volume</CardTitle>
-                <button className="text-sm text-blue-600 hover:underline">See Breakdown</button>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
@@ -190,7 +188,7 @@ export default function AnalyticsPage() {
                       dataKey="value" 
                       fill="#8884d8" 
                       radius={[4, 4, 0, 0]}
-                      barSize={30}
+                      barSize={20}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -201,9 +199,8 @@ export default function AnalyticsPage() {
 
           {/* Top Contributors */}
           <Card className="mb-6">
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader>
               <CardTitle className="text-lg font-medium">Top Contributors</CardTitle>
-              <button className="text-sm text-blue-600 hover:underline">See All</button>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
