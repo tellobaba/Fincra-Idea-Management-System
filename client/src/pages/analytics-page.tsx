@@ -52,20 +52,37 @@ export default function AnalyticsPage() {
   const contributorsData = leaderboardData && leaderboardData.length > 0
     ? leaderboardData
         .slice(0, 5)
-        .map((entry: any) => ({
-          id: entry.user?.id || 0,
-          name: entry.user?.displayName || 'Anonymous User',
-          email: entry.user?.email || '',
-          department: entry.user?.department || "N/A",
-          value: entry.ideasSubmitted || 0,
-          ideas: entry.categoryBreakdown?.ideas || 0,
-          challenges: entry.categoryBreakdown?.challenges || 0,
-          painPoints: entry.categoryBreakdown?.painPoints || 0,
-          avatarUrl: entry.user?.avatarUrl || '',
-          impactScore: entry.impactScore || 0,
-          votesReceived: entry.votesReceived || 0,
-          status: entry.status || ''
-        }))
+        .map((entry: any) => {
+          // For debugging
+          console.log('Entry user data:', entry.user);
+          
+          // Extract username from email (as display name might not be set)
+          let name = entry.user?.displayName;
+          if (!name && entry.user?.username) {
+            // If username is an email, extract the part before @
+            const username = entry.user.username;
+            if (username.includes('@')) {
+              name = username.split('@')[0];
+            } else {
+              name = username;
+            }
+          }
+          
+          return {
+            id: entry.user?.id || 0,
+            name: name || 'Anonymous User',
+            email: entry.user?.email || entry.user?.username || '',
+            department: entry.user?.department || "N/A",
+            value: entry.ideasSubmitted || 0,
+            ideas: entry.categoryBreakdown?.ideas || 0,
+            challenges: entry.categoryBreakdown?.challenges || 0,
+            painPoints: entry.categoryBreakdown?.painPoints || 0,
+            avatarUrl: entry.user?.avatarUrl || '',
+            impactScore: entry.impactScore || 0,
+            votesReceived: entry.votesReceived || 0,
+            status: entry.status || ''
+          };
+        })
     : [];
 
   // Combine all loading states for overall loading indicator
