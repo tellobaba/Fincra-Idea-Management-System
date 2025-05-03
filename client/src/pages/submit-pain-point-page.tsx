@@ -33,16 +33,16 @@ export default function SubmitPainPointPage() {
       data.append('rootCause', formData.rootCause);
       data.append('category', 'pain-point'); // Set category explicitly
 
-      // Add files if present
+      // Add files if present - use 'media' field as expected by server
       if (formData.files) {
         for (let i = 0; i < formData.files.length; i++) {
-          data.append('files', formData.files[i]);
+          data.append('media', formData.files[i]);
         }
       }
 
-      // Add voice note if present
+      // Add voice note if present - also as 'media'
       if (formData.voiceNote) {
-        data.append('voiceNote', formData.voiceNote);
+        data.append('media', formData.voiceNote);
       }
 
       const response = await fetch('/api/ideas', {

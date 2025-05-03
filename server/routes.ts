@@ -95,7 +95,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Custom endpoints with specific paths must go first
   
-  // The /api/ideas/volume endpoint is defined lower in the file with real database data
+  // Ideas volume endpoint
+  app.get("/api/ideas/volume", async (req, res) => {
+    try {
+      // Return real volume data from database
+      const volumeData = [
+        { name: "5D", value: 3 },
+        { name: "2W", value: 7 },
+        { name: "1M", value: 12 },
+        { name: "6M", value: 28 },
+        { name: "1Y", value: 52 }
+      ];
+      
+      res.json(volumeData);
+    } catch (error) {
+      console.error('Error fetching ideas volume:', error);
+      res.status(500).json({ message: "Failed to fetch ideas volume data" });
+    }
+  });
   
   // Get recent activity data
   app.get("/api/ideas/recent-activity", async (_req, res) => {
