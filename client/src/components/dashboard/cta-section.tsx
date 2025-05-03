@@ -39,10 +39,27 @@ export function CtaSection({ displayName }: CtaSectionProps) {
     title: string;
     description: string;
     category: Category;
+    organizationCategory?: string;
+    impact?: string;
+    inspiration?: string;
+    similarSolutions?: string;
     tags: string[];
   }) => {
     try {
-      await apiRequest("POST", "/api/ideas", formData);
+      // Create a new object with the correct field mapping
+      const apiData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        department: formData.organizationCategory || 'Other', // Map organizationCategory to department
+        impact: formData.impact,
+        inspiration: formData.inspiration,
+        similarSolutions: formData.similarSolutions,
+        tags: formData.tags
+      };
+      
+      console.log('Submitting idea:', apiData);
+      await apiRequest("POST", "/api/ideas", apiData);
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
