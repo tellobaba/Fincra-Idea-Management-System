@@ -1,0 +1,55 @@
+We are redesigning the /ideas, /challenges, and /pain-point pages to work as personal submission pages for each user. Follow these exact instructions:
+
+---
+
+/IDEAS PAGE 
+
+- The page should only display the **logged-in user's** own ideas.
+- Remove the "Category" field from the submission form.
+- Change "Organization Category" to **"Workstreams"**.
+- Make the **file upload** input fully functional.
+- Add a **voice note** input (either a file upload or voice recorder).
+- All call-to-action buttons for submitting an idea across the app should use this new form.
+- The existing /ideas page (which shows charts and all ideas in the system) should be moved to the **"Ideas" button under the Welcome Back section** (main dashboard). That version can still show all ideas and analytics.
+
+---
+
+/CHALLENGES PAGE 
+
+- The page should only display the **logged-in user's** own submitted challenges.
+- All current example or test challenges should be **deleted** from the database.
+- Replace the form fields with the following inputs:
+  - Title
+  - Description
+  - Criteria (e.g., "Must be built using Vibe coding")
+  - Timeframe (e.g., "14 days")
+  - Reward (e.g., "$500 and dinner with the CEO")
+- All call-to-action buttons that trigger new challenge submissions should point to this new form.
+- Move the existing company-wide challenges dashboard (with charts and lists of all challenges) to the **"Challenges" button under the Welcome Back section**.
+
+---
+
+/PAIN-POINT PAGE 
+
+- The page should only show **pain points submitted by the logged-in user**.
+- All dummy or test pain points should be **deleted** from the database.
+- Replace the current form with the following fields:
+  - Title
+  - Department Related to Problem (dropdown with: Organisation Health, Technology & Systems, Commercial & Strategy, Process, Cost Leadership, Other)
+  - Description
+  - Urgency (dropdown with: High, Medium, Low)
+  - Root Cause
+  - Upload File
+  - Record Voice Note
+- Ensure the file upload and voice input are functional.
+- All call-to-action buttons for submitting a pain point should use this new form.
+- Move the full company-wide pain point charts and analytics to the **"Pain Points" button under the Welcome Back section**.
+
+---
+
+ FINAL INSTRUCTIONS 
+
+- Ensure all form submissions are saved correctly in the PostgreSQL database.
+- Link the correct user to each submission using the existing authentication system.
+- Do **not** display other users' ideas, challenges, or pain points on these individual pages.
+- Only show company-wide analytics under the “Welcome Back” section.

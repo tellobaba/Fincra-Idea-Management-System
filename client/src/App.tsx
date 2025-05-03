@@ -16,6 +16,8 @@ import AdminLoginPage from "@/pages/admin-login-page";
 import AdminDashboardPage from "@/pages/admin-dashboard-page";
 import IdeaDetailPage from "@/pages/idea-detail-page";
 import SubmitIdeaPage from "@/pages/submit-idea-page";
+import SubmitChallengePage from "@/pages/submit-challenge-page";
+import SubmitPainPointPage from "@/pages/submit-pain-point-page";
 import IdeasPage from "@/pages/ideas-page";
 import ChallengesPage from "@/pages/challenges-page";
 import PainPointsPage from "@/pages/pain-points-page";
