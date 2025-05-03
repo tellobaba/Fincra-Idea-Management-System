@@ -576,74 +576,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new idea with file upload
-  app.post("/api/ideas", upload.fields([
-    { name: 'files', maxCount: 5 },
-    { name: 'voiceNote', maxCount: 1 }
-  ]), async (req, res) => {
+  app.post("/api/ideas", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      // Process uploaded files if any
-      const mediaUrls = [];
-      if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
-        // Handle the regular files upload
-        const filesArray = req.files['files'];
-        if (filesArray && Array.isArray(filesArray)) {
-          for (const file of filesArray) {
-            const fileUrl = `/uploads/${file.filename}`;
-            
-            // Better handling of file types, especially for images
-            let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
-            
-            // Make sure we're properly identifying image files
-            if (file.mimetype.includes('image') || 
-                file.originalname.endsWith('.jpg') || 
-                file.originalname.endsWith('.jpeg') || 
-                file.originalname.endsWith('.png') || 
-                file.originalname.endsWith('.gif') || 
-                file.originalname.endsWith('.webp')) {
-              fileType = 'image';
-            }
-            
-            console.log('Processing image/document file:', { 
-              name: file.originalname,
-              mimetype: file.mimetype,
-              type: fileType,
-              url: fileUrl,
-              size: file.size
-            });
-            
-            mediaUrls.push({
-              type: fileType,
-              url: fileUrl
-            });
-          }
-        }
-        
-        // Handle voice note specifically
-        const voiceNoteArray = req.files['voiceNote'];
-        if (voiceNoteArray && Array.isArray(voiceNoteArray) && voiceNoteArray.length > 0) {
-          const voiceNote = voiceNoteArray[0];
-          const fileUrl = `/uploads/${voiceNote.filename}`;
-          
-          console.log('Processing voice note:', { 
-            name: voiceNote.originalname,
-            mimetype: voiceNote.mimetype,
-            url: fileUrl,
-            size: voiceNote.size
-          });
-          
-          mediaUrls.push({
-            type: 'audio',
-            url: fileUrl
-          });
-        }
-      }
-      
-      // Log for debugging
-      console.log('Creating idea with media:', mediaUrls.length, 'Media URLs:', mediaUrls);
+      // Temporary disabled file upload handling
+      const mediaUrls: { type: string; url: string }[] = [];
+      console.log('Creating idea without media');
       
       // Validate request body
       // Parse request body properly, considering both form data and JSON
@@ -704,10 +645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update idea with file upload
-  app.patch("/api/ideas/:id", upload.fields([
-    { name: 'files', maxCount: 5 },
-    { name: 'voiceNote', maxCount: 1 }
-  ]), async (req, res) => {
+  app.patch("/api/ideas/:id", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -731,62 +669,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      // Process uploaded files if any
-      const mediaUrls = [];
-      if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
-        // Handle regular files upload
-        const filesArray = req.files['files'];
-        if (filesArray && Array.isArray(filesArray)) {
-          for (const file of filesArray) {
-            const fileUrl = `/uploads/${file.filename}`;
-            
-            // Better handling of file types, especially for images
-            let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
-            
-            // Make sure we're properly identifying image files
-            if (file.mimetype.includes('image') || 
-                file.originalname.endsWith('.jpg') || 
-                file.originalname.endsWith('.jpeg') || 
-                file.originalname.endsWith('.png') || 
-                file.originalname.endsWith('.gif') || 
-                file.originalname.endsWith('.webp')) {
-              fileType = 'image';
-            }
-            
-            console.log('Processing image/document file for update:', { 
-              name: file.originalname,
-              mimetype: file.mimetype,
-              type: fileType,
-              url: fileUrl,
-              size: file.size
-            });
-            
-            mediaUrls.push({
-              type: fileType,
-              url: fileUrl
-            });
-          }
-        }
-        
-        // Handle voice note specifically
-        const voiceNoteArray = req.files['voiceNote'];
-        if (voiceNoteArray && Array.isArray(voiceNoteArray) && voiceNoteArray.length > 0) {
-          const voiceNote = voiceNoteArray[0];
-          const fileUrl = `/uploads/${voiceNote.filename}`;
-          
-          console.log('Processing voice note for update:', { 
-            name: voiceNote.originalname,
-            mimetype: voiceNote.mimetype,
-            url: fileUrl,
-            size: voiceNote.size
-          });
-          
-          mediaUrls.push({
-            type: 'audio',
-            url: fileUrl
-          });
-        }
-      }
+      // Temporarily disabled file upload handling
+      const mediaUrls: { type: string; url: string }[] = [];
       
       // Remove fields that shouldn't be updated directly
       const updates = { ...req.body };
