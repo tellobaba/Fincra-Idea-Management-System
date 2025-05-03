@@ -46,20 +46,37 @@ export function CtaSection({ displayName }: CtaSectionProps) {
     tags: string[];
   }) => {
     try {
-      // Create a new object with the correct field mapping
-      const apiData = {
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
-        department: formData.organizationCategory || 'Other', // Map organizationCategory to department
-        impact: formData.impact,
-        inspiration: formData.inspiration,
-        similarSolutions: formData.similarSolutions,
-        tags: formData.tags
-      };
+      // Create FormData for server submission
+      const data = new FormData();
+      data.append('title', formData.title);
+      data.append('description', formData.description);
+      data.append('category', formData.category);
+      data.append('department', formData.organizationCategory || 'Other');
       
-      console.log('Submitting idea:', apiData);
-      await apiRequest("POST", "/api/ideas", apiData);
+      if (formData.impact) data.append('impact', formData.impact);
+      if (formData.inspiration) data.append('inspiration', formData.inspiration);
+      if (formData.similarSolutions) data.append('similarSolutions', formData.similarSolutions);
+      
+      // Handle tags (convert array to JSON string)
+      if (formData.tags && formData.tags.length > 0) {
+        data.append('tags', JSON.stringify(formData.tags));
+      } else {
+        data.append('tags', JSON.stringify([]));
+      }
+      
+      console.log('Submitting idea with form data');
+      
+      // Manual fetch instead of using apiRequest to handle FormData
+      const response = await fetch('/api/ideas', {
+        method: 'POST',
+        body: data,
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit idea');
+      }
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
@@ -123,7 +140,7 @@ export function CtaSection({ displayName }: CtaSectionProps) {
               </Button>
               
               <Button 
-                variant="warning" 
+                variant="outline" 
                 className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-white" 
                 onClick={() => handleOpenModal("challenge")}
               >
