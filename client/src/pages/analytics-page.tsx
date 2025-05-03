@@ -180,30 +180,37 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 {/* Custom DIV-based Bar chart for Ideas Volume */}
-                <div className="h-[200px] w-full flex flex-col space-y-4 justify-center">
-                  {idealVolume.map((item, index) => {
-                    // Calculate percentage of max for bar width
-                    const maxValue = Math.max(...idealVolume.map(d => d.value));
-                    const percentage = maxValue ? (item.value / maxValue) * 100 : 0;
-                    
-                    return (
-                      <div key={index} className="flex flex-col space-y-1">
-                        <div className="flex justify-between items-center">
-                          <div className="text-sm font-medium text-gray-700">{item.name}</div>
-                          <div className="text-sm font-semibold">{item.value}</div>
+                <div className="h-[200px] w-full flex flex-col justify-center pb-4 pt-2">
+                  <div className="flex justify-between px-2 mb-2">
+                    <div className="text-xs font-medium text-gray-500">Time Period</div>
+                    <div className="text-xs font-medium text-gray-500">Count</div>
+                  </div>
+                  
+                  <div className="space-y-4 flex-grow">
+                    {idealVolume.map((item, index) => {
+                      // Calculate percentage of max for bar width
+                      const maxValue = Math.max(...idealVolume.map(d => d.value));
+                      const percentage = maxValue ? (item.value / maxValue) * 100 : 0;
+                      
+                      return (
+                        <div key={index} className="flex items-center space-x-3">
+                          <div className="w-10 flex-shrink-0 text-sm font-medium text-gray-700">{item.name}</div>
+                          <div className="flex-grow h-8 bg-gray-100 rounded overflow-hidden relative">
+                            <div 
+                              className="h-full" 
+                              style={{
+                                width: `${percentage}%`,
+                                backgroundColor: "#6B46C1"
+                              }}
+                            />
+                          </div>
+                          <div className="w-8 flex-shrink-0 text-right text-sm font-semibold">
+                            {item.value}
+                          </div>
                         </div>
-                        <div className="h-6 bg-gray-100 rounded-full overflow-hidden relative">
-                          <div 
-                            className="h-full rounded-full" 
-                            style={{
-                              width: `${percentage}%`,
-                              backgroundColor: "#6B46C1"
-                            }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="text-xs text-gray-500 mt-2 text-right">Monday, 22</div>
               </CardContent>
