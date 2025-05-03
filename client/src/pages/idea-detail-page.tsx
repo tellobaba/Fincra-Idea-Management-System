@@ -256,42 +256,57 @@ export default function IdeaDetailPage() {
                 {idea.mediaUrls && idea.mediaUrls.length > 0 && (
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-3">Attachments</h3>
+                    <pre className="text-xs text-muted-foreground mb-2 p-2 bg-muted rounded">
+                      {JSON.stringify(idea.mediaUrls, null, 2)}
+                    </pre>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {idea.mediaUrls.map((media: {type: string; url: string}, index) => (
-                        <div key={index} className="border rounded-md overflow-hidden">
-                          {media.type === 'image' ? (
-                            <img 
-                              src={media.url} 
-                              alt={`Attachment ${index + 1}`}
-                              className="w-full h-48 object-cover"
-                            />
-                          ) : media.type === 'video' ? (
-                            <video 
-                              src={media.url} 
-                              controls 
-                              className="w-full h-48 object-cover"
-                            />
-                          ) : media.type === 'audio' ? (
-                            <div className="p-4 bg-muted flex items-center justify-center h-48">
-                              <audio src={media.url} controls className="w-full" />
-                            </div>
-                          ) : (
-                            <div className="p-4 bg-muted flex items-center justify-center h-48">
-                              <a 
-                                href={media.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-primary hover:text-primary-dark flex flex-col items-center"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <span>View Document</span>
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                      {idea.mediaUrls.map((media: {type: string; url: string}, index) => {
+                        console.log(`Rendering media ${index}:`, media);
+                        return (
+                          <div key={index} className="border rounded-md overflow-hidden">
+                            {media.type === 'image' ? (
+                              <div>
+                                <div className="p-2 bg-muted-foreground/10 text-xs text-center">
+                                  Image: {media.url}
+                                </div>
+                                <img 
+                                  src={media.url} 
+                                  alt={`Attachment ${index + 1}`}
+                                  className="w-full h-48 object-cover"
+                                  onError={(e) => {
+                                    console.error(`Error loading image: ${media.url}`, e);
+                                    e.currentTarget.src = 'https://placehold.co/600x400?text=Image+Error';
+                                  }}
+                                />
+                              </div>
+                            ) : media.type === 'video' ? (
+                              <video 
+                                src={media.url} 
+                                controls 
+                                className="w-full h-48 object-cover"
+                              />
+                            ) : media.type === 'audio' ? (
+                              <div className="p-4 bg-muted flex items-center justify-center h-48">
+                                <audio src={media.url} controls className="w-full" />
+                              </div>
+                            ) : (
+                              <div className="p-4 bg-muted flex items-center justify-center h-48">
+                                <a 
+                                  href={media.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:text-primary-dark flex flex-col items-center"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                  <span>View Document</span>
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
