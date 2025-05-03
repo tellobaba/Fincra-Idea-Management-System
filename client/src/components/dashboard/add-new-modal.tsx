@@ -15,7 +15,7 @@ export function AddNewModal({ open, onOpenChange }: AddNewModalProps) {
   const [location, navigate] = useLocation();
 
   const handleSubmitIdea = () => {
-    navigate("/submit/opportunity");
+    navigate("/submit/idea");
     onOpenChange(false);
   };
 

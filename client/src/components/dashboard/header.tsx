@@ -78,29 +78,15 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
             />
           </div>
           
-          {/* Add New button - for existing users view or specifically requested */}
-          {showAddNewButton && (
-            <Button 
-              variant="default" 
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              onClick={handleAddNew}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add new
-            </Button>
-          )}
-          
-          {/* Add New Idea button - for new users view */}
-          {!showAddNewButton && !welcomeMessage && (
-            <Button 
-              variant="default" 
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              onClick={handleAddNew}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add New Idea
-            </Button>
-          )}
+          {/* Add New button - always show as per user request */}
+          <Button 
+            variant="default" 
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            onClick={handleAddNew}
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add new
+          </Button>
           
           {/* Notifications */}
           <Button

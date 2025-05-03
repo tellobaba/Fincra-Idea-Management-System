@@ -46,13 +46,10 @@ export function Sidebar({ className }: SidebarProps) {
     queryKey: ["/api/ideas"],
   });
   
-  // Count ideas by category
-  const ideasCount = ideas.filter(idea => idea.category === 'opportunity').length || 0;
-  const challenges = ideas.filter(idea => idea.category === 'challenge').length || 0;
-  const painPoints = ideas.filter(idea => idea.category === 'pain-point').length || 0;
-  
-  // For My Votes - using ideas with votes > 0 as a proxy
-  const myVotes = ideas.filter(idea => idea.votes && idea.votes > 0).length || 0;
+  // My Votes data
+  const { data: votedIdeas = [] } = useQuery<Idea[]>({
+    queryKey: ["/api/ideas/my-votes"],
+  });
   
   const isAdmin = user?.role && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role);
   
@@ -62,42 +59,36 @@ export function Sidebar({ className }: SidebarProps) {
       href: "/",
       icon: LayoutDashboard,
       active: location === "/",
-      badge: undefined,
     },
     {
       name: "Ideas",
       href: "/ideas",
       icon: LightbulbIcon,
       active: location === "/ideas" || location.startsWith("/ideas/"),
-      badge: ideasCount ? ideasCount.toString() : undefined,
     },
     {
       name: "Challenges",
       href: "/challenges",
       icon: AlertCircle,
       active: location === "/challenges",
-      badge: challenges ? challenges.toString() : undefined,
     },
     {
       name: "Pain Points",
       href: "/pain-points",
       icon: AlertCircle,
       active: location === "/pain-points",
-      badge: painPoints ? painPoints.toString() : undefined,
     },
     {
       name: "My Votes",
       href: "/my-votes",
       icon: Vote,
       active: location === "/my-votes",
-      badge: myVotes > 0 ? String(myVotes) : undefined,
     },
     {
       name: "Pinned Ideas",
       href: "/pinned",
       icon: Bookmark,
       active: location === "/pinned",
-      badge: undefined,
     },
   ];
 
@@ -107,14 +98,6 @@ export function Sidebar({ className }: SidebarProps) {
       href: "/leaderboard",
       icon: Trophy,
       active: location === "/leaderboard",
-      badge: undefined,
-    },
-    {
-      name: "Polls",
-      href: "/polls",
-      icon: BarChart,
-      active: location === "/polls",
-      badge: undefined,
     },
   ];
   
@@ -124,7 +107,6 @@ export function Sidebar({ className }: SidebarProps) {
       href: "/admin",
       icon: LayoutDashboard,
       active: location === "/admin" || location.startsWith("/admin/"),
-      badge: undefined,
     });
     
     mainNavigationItems.push({
@@ -132,7 +114,6 @@ export function Sidebar({ className }: SidebarProps) {
       href: "/admin/dashboard",
       icon: BarChart,
       active: location === "/admin/dashboard",
-      badge: undefined,
     });
   }
   
@@ -214,11 +195,6 @@ export function Sidebar({ className }: SidebarProps) {
                   >
                     <item.icon className="w-5 h-5 mr-3" />
                     <span>{item.name}</span>
-                    {item.badge && (
-                      <span className="ml-auto bg-gray-100 text-gray-600 text-xs font-medium px-2 py-1 rounded-md">
-                        {item.badge}
-                      </span>
-                    )}
                   </Link>
                 </li>
               ))}
@@ -249,30 +225,7 @@ export function Sidebar({ className }: SidebarProps) {
           </div>
         </nav>
         
-        {/* Add New button */}
-        <div className="px-4 mb-4 border-t border-gray-100 pt-4">
-          <div className="flex flex-col space-y-2">
-            <h2 className="text-xs font-semibold text-gray-400 mb-2">ADD NEW</h2>
-            <Link href="/submit/idea" onClick={closeSidebar}>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <LightbulbIcon className="mr-2 h-4 w-4" />
-                Idea
-              </Button>
-            </Link>
-            <Link href="/submit/challenge" onClick={closeSidebar}>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <Trophy className="mr-2 h-4 w-4" />
-                Challenge
-              </Button>
-            </Link>
-            <Link href="/submit/pain-point" onClick={closeSidebar}>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <AlertCircle className="mr-2 h-4 w-4" />
-                Pain Point
-              </Button>
-            </Link>
-          </div>
-        </div>
+        {/* No Add New section per user request */}
         
         {/* User info */}
         {user && (
