@@ -119,7 +119,7 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="submitted">Submitted</SelectItem>
                 <SelectItem value="in-review">In Review</SelectItem>
                 <SelectItem value="merged">Merged</SelectItem>
@@ -137,7 +137,7 @@ export function IdeaManagementTable({ ideas, isLoading, onRefresh }: IdeaManagem
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="pain-point">Pain Point</SelectItem>
                 <SelectItem value="opportunity">Opportunity</SelectItem>
                 <SelectItem value="challenge">Challenge</SelectItem>

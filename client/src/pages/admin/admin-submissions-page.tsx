@@ -764,7 +764,7 @@ export default function AdminSubmissionsPage() {
                   <SelectValue placeholder="Select an implementer" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {users?.map(user => (
                     <SelectItem key={`implementer-${user.id}`} value={String(user.id)}>
                       {user.displayName || user.username}
