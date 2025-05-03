@@ -56,6 +56,15 @@ export const userVotes = pgTable("user_votes", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Table to track user follows/pins on items
+export const follows = pgTable("follows", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  itemId: integer("item_id").notNull(),
+  itemType: text("item_type").notNull(), // 'opportunity', 'challenge', 'pain-point'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -96,6 +105,12 @@ export const insertUserVoteSchema = createInsertSchema(userVotes).pick({
   ideaId: true,
 });
 
+export const insertFollowSchema = createInsertSchema(follows).pick({
+  userId: true,
+  itemId: true,
+  itemType: true,
+});
+
 // Type exports
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -108,6 +123,9 @@ export type Comment = typeof comments.$inferSelect;
 
 export type InsertUserVote = z.infer<typeof insertUserVoteSchema>;
 export type UserVote = typeof userVotes.$inferSelect;
+
+export type InsertFollow = z.infer<typeof insertFollowSchema>;
+export type Follow = typeof follows.$inferSelect;
 
 // Category type
 export const categorySchema = z.enum(['pain-point', 'opportunity', 'challenge']);

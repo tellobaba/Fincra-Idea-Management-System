@@ -1,4 +1,4 @@
-import { users, ideas, comments, userVotes, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment, type InsertUserVote, type UserVote } from "@shared/schema";
+import { users, ideas, comments, userVotes, follows, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment, type InsertUserVote, type UserVote, type InsertFollow, type Follow } from "@shared/schema";
 import session from "express-session";
 import { db } from "./db";
 import { eq, asc, desc, and, sql } from "drizzle-orm";
@@ -65,6 +65,12 @@ export interface IStorage {
     costSaved: number; 
     revenueGenerated: number 
   }>;
+  
+  // Follow operations
+  followItem(userId: number, itemId: number, itemType: string): Promise<Follow>;
+  unfollowItem(userId: number, itemId: number, itemType: string): Promise<boolean>;
+  isItemFollowed(userId: number, itemId: number, itemType: string): Promise<boolean>;
+  getUserFollowedItems(userId: number): Promise<Idea[]>;
   
   // Session store
   sessionStore: session.SessionStore;
