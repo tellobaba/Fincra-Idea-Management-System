@@ -1203,6 +1203,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Search routes
+  app.get("/api/search", async (req, res) => {
+    const query = req.query.q as string;
+    if (!query) {
+      return res.status(400).json({ error: 'Query parameter "q" is required' });
+    }
+
+    try {
+      // Search across all ideas, challenges, and pain points
+      const searchResults = await dbStorage.searchItems(query);
+      res.json(searchResults);
+    } catch (error) {
+      console.error('Search error:', error);
+      res.status(500).json({ error: 'Failed to perform search' });
+    }
+  });
+
+  // Autocomplete suggestions API endpoint
+  app.get("/api/search/suggestions", async (req, res) => {
+    const query = req.query.q as string;
+    if (!query || query.length < 2) {
+      return res.json([]);
+    }
+
+    try {
+      const suggestions = await dbStorage.getSearchSuggestions(query);
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Suggestion error:', error);
+      res.status(500).json({ error: 'Failed to get suggestions' });
+    }
+  });
+  
   // Let's create a new, distinct endpoint for the categories chart
   // Since the /api/ideas/by-category endpoint seems to have issues
   app.get("/api/chart/categories", async (_req, res) => {
