@@ -73,8 +73,6 @@ export default function HomePage() {
             <Header 
               onSearch={handleSearch}
               welcomeMessage="Welcome back,"
-              showTabs={true}
-              showAddNewButton={true}
             />
             <main className="flex-1 overflow-y-auto">
               <ExistingUserView />

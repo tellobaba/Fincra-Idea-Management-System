@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
-import { Search, Bell, ChevronDown, PlusCircle } from "lucide-react";
+import { Search, Bell, ChevronDown, PlusCircle, LightbulbIcon, AlertCircle, Trophy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
 import { AddNewModal } from "./add-new-modal";
+import { useQuery } from "@tanstack/react-query";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -26,9 +27,19 @@ interface HeaderProps {
 export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewButton = false }: HeaderProps) {
   const { user, logoutMutation } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("ideas");
   const [newIdeaModalOpen, setNewIdeaModalOpen] = useState(false);
+  const [location, navigate] = useLocation();
+
+  // Fetch statistics for the welcome section buttons
+  const { data: statusBreakdown = [] } = useQuery<any>({
+    queryKey: ["/api/chart/categories"],
+  });
+
+  // Get counts by category for the welcome buttons
+  const ideasCount = statusBreakdown.find((item: any) => item.name === "Ideas")?.value || 0;
+  const challengesCount = statusBreakdown.find((item: any) => item.name === "Challenges")?.value || 0;
+  const painPointsCount = statusBreakdown.find((item: any) => item.name === "Pain Points")?.value || 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,8 +54,18 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    // In a real application, this would update content or change routes
-    // For now we'll just set active tab state
+    // Navigate to the appropriate page based on the tab
+    switch(tab) {
+      case "ideas":
+        navigate("/ideas");
+        break;
+      case "challenges":
+        navigate("/challenges");
+        break;
+      case "pain-points":
+        navigate("/pain-points");
+        break;
+    }
   };
   
   const handleAddNew = () => {
@@ -137,33 +158,36 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
         </div>
       </div>
       
-      {/* Tabs - For existing users view */}
-      {showTabs && (
+      {/* Analytics buttons */}
+      {welcomeMessage && (
         <div className="flex mt-2 mb-4">
           <nav className="-mb-px flex space-x-8">
             <button
-              className={`border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`flex items-center border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === "ideas" ? "border-indigo-500 text-indigo-600" : ""
               }`}
               onClick={() => handleTabChange("ideas")}
             >
-              Ideas
+              <LightbulbIcon className="w-4 h-4 mr-2" />
+              Ideas {ideasCount > 0 && `(${ideasCount})`}
             </button>
             <button
-              className={`border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "challenge" ? "border-indigo-500 text-indigo-600" : ""
+              className={`flex items-center border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "challenges" ? "border-indigo-500 text-indigo-600" : ""
               }`}
-              onClick={() => handleTabChange("challenge")}
+              onClick={() => handleTabChange("challenges")}
             >
-              Challenge
+              <Trophy className="w-4 h-4 mr-2" />
+              Challenge {challengesCount > 0 && `(${challengesCount})`}
             </button>
             <button
-              className={`border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`flex items-center border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === "pain-points" ? "border-indigo-500 text-indigo-600" : ""
               }`}
               onClick={() => handleTabChange("pain-points")}
             >
-              Pain points
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Pain points {painPointsCount > 0 && `(${painPointsCount})`}
             </button>
           </nav>
         </div>
