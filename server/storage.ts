@@ -525,10 +525,10 @@ export class DatabaseStorage implements IStorage {
         user: {
           id: row.id,
           username: row.username,
-          displayName: row.displayName,
+          displayName: row.display_name,
           department: row.department,
           role: row.role,
-          avatarUrl: row.avatarUrl,
+          avatarUrl: row.avatar_url,
           email: row.username, // Email is stored in username field
           password: row.password, // Not used in frontend, just for type compatibility
         },

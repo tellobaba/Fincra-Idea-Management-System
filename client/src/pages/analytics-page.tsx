@@ -56,9 +56,9 @@ export default function AnalyticsPage() {
           // For debugging
           console.log('Entry user data:', entry.user);
           
-          // The server response has different casing for display_name vs displayName
-          let name = entry.user?.display_name;
-          let avatarUrl = entry.user?.avatar_url;
+          // The server response now uses displayName and avatarUrl from the backend
+          let name = entry.user?.displayName;
+          let avatarUrl = entry.user?.avatarUrl;
           
           return {
             id: entry.user?.id || 0,
