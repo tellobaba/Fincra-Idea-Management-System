@@ -16,7 +16,7 @@ import { Loader2 } from "lucide-react";
 
 export default function IdeaDetailPage() {
   const params = useParams();
-  const ideaId = parseInt(params.id);
+  const ideaId = params.id ? parseInt(params.id) : 0;
   const { user } = useAuth();
   const { toast } = useToast();
   const [isVoting, setIsVoting] = useState(false);

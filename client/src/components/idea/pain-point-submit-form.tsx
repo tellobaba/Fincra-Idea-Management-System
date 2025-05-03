@@ -103,26 +103,41 @@ export function PainPointSubmitForm({
 
   const startRecording = async () => {
     try {
+      // Check for microphone support first
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Your browser does not support audio recording');
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Use webm for better browser compatibility
       const recorder = new MediaRecorder(stream);
       setMediaRecorder(recorder);
       
+      // Clear any previous chunks
+      setAudioChunks([]);
+      
       recorder.ondataavailable = (e) => {
-        setAudioChunks((chunks) => [...chunks, e.data]);
+        if (e.data.size > 0) {
+          setAudioChunks((chunks) => [...chunks, e.data]);
+        }
       };
       
       recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-        const audioFile = new File([audioBlob], 'voice-note.wav', { type: 'audio/wav' });
+        // Create blob from all chunks
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioFile = new File([audioBlob], 'voice-note.webm', { type: 'audio/webm' });
         setVoiceNote(audioFile);
+        // Clear chunks after creating file
         setAudioChunks([]);
       };
       
-      recorder.start();
+      // Request data at 1-second intervals
+      recorder.start(1000);
       setIsRecording(true);
+      console.log('Recording started successfully');
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      alert('Could not access microphone. Please check permissions.');
+      alert('Could not access microphone. Please check permissions and make sure you\'re using a secure connection (HTTPS).');
     }
   };
 
@@ -333,7 +348,7 @@ export function PainPointSubmitForm({
               {voiceNote && !isRecording && (
                 <div className="w-full mt-2">
                   <audio controls className="w-full">
-                    <source src={URL.createObjectURL(voiceNote)} type="audio/wav" />
+                    <source src={URL.createObjectURL(voiceNote)} type="audio/webm" />
                     Your browser does not support the audio element.
                   </audio>
                   <div className="flex justify-center mt-2">
