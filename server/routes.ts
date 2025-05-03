@@ -1,4 +1,4 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import { createServer, type Server } from "http";
 import path from "path";
 import fs from 'fs';
@@ -78,9 +78,18 @@ const serveUploads = (app: Express) => {
   
   // Serve files from the uploads directory
   app.use('/uploads', (req, res, next) => {
-    const filePath = path.join(uploadDir, req.path);
-    res.sendFile(filePath, err => {
-      if (err) next();
+    // Log serving request for debugging
+    console.log('Serving file from uploads:', req.path);
+    
+    // Use express.static instead of manually handling file sending
+    // This properly handles the req.path by joining it with the uploadDir
+    const staticMiddleware = express.static(uploadDir);
+    staticMiddleware(req, res, (err) => {
+      if (err) {
+        console.error('Error serving file:', req.path, err);
+        return next(err);
+      }
+      next();
     });
   });
 };

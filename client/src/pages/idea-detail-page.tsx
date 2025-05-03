@@ -33,7 +33,6 @@ export default function IdeaDetailPage() {
   // Add debugging statement when rendering individual media items
   const logMediaInfo = (media: any, index: number, fullUrl: string) => {
     console.log(`Rendering media ${index}:`, { ...media, fullUrl });
-    return null;
   };
   
   // Mutation for adding a comment
@@ -259,12 +258,7 @@ export default function IdeaDetailPage() {
                 </div>
                 
                 {/* Display attachments if available */}
-                {console.log('Idea MediaUrls debug:', {
-                  mediaUrls: idea.mediaUrls,
-                  isArray: Array.isArray(idea.mediaUrls),
-                  length: idea.mediaUrls ? idea.mediaUrls.length : 0,
-                  type: typeof idea.mediaUrls
-                })}
+                {/* Debug log for mediaUrls */}
                 {idea.mediaUrls && Array.isArray(idea.mediaUrls) && idea.mediaUrls.length > 0 && (
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-3">Attachments</h3>
