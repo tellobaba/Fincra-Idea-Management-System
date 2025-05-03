@@ -47,21 +47,15 @@ const upload = multer({
     fileSize: 15 * 1024 * 1024, // 15MB max file size
   },
   fileFilter: (req, file, cb) => {
-    // Allow all file types for simplicity in testing
+    console.log('Processing upload file:', { 
+      originalname: file.originalname, 
+      mimetype: file.mimetype, 
+      fieldname: file.fieldname,
+      size: file.size
+    });
+    
+    // Accept all file types for now to allow images, audio, and documents
     return cb(null, true);
-    
-    // Original file filter code (commented out for now)
-    /*
-    // Accept images, videos, pdfs, and common office document types
-    const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|mpeg|pdf|doc|docx|xls|xlsx|ppt|pptx/;
-    const ext = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (ext && mimetype) {
-      return cb(null, true);
-    }
-    cb(new Error('Invalid file type. Only images, videos, PDFs and office documents are allowed.'));
-    */
   }
 });
 

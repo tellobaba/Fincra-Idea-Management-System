@@ -270,29 +270,55 @@ export default function IdeaDetailPage() {
                           : `${window.location.origin}${media.url}`;
                           
                         // Call our debug function while ensuring the component still renders properly
-                        logMediaInfo(media, index, fullUrl);
+                        console.log(`Rendering media ${index}:`, { ...media, fullUrl });
+                        
+                        // Determine media type from both type and URL
+                        let mediaType = media.type || 'unknown';
+                        
+                        // Special handling for images
+                        const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+                        const isImage = mediaType === 'image' || 
+                          imageExts.some(ext => media.url.toLowerCase().endsWith(ext));
+                        
+                        // Special handling for audio
+                        const audioExts = ['.mp3', '.wav', '.webm', '.ogg', '.m4a'];
+                        const isAudio = mediaType === 'audio' || 
+                          audioExts.some(ext => media.url.toLowerCase().endsWith(ext));
                         
                         return (
                           <div key={index} className="border rounded-md overflow-hidden">
-                            {(media.type === 'image' || media.url.endsWith('.jpg') || media.url.endsWith('.jpeg') || media.url.endsWith('.png') || media.url.endsWith('.gif')) ? (
-                              <div className="h-auto">
+                            {isImage ? (
+                              <div className="h-auto p-2">
                                 <img 
                                   src={fullUrl} 
                                   alt={`Attachment ${index + 1}`}
                                   className="w-full object-contain max-h-48"
+                                  onLoad={() => console.log(`Image loaded successfully:`, { url: media.url, fullUrl })}
                                   onError={(e) => {
                                     console.error(`Error loading image:`, { url: media.url, fullUrl });
+                                    // Try to fetch the image to see if it exists on the server
+                                    fetch(fullUrl, { method: 'HEAD' })
+                                      .then(response => {
+                                        console.log(`Image HEAD response:`, { 
+                                          status: response.status, 
+                                          ok: response.ok, 
+                                          statusText: response.statusText,
+                                          headers: Array.from(response.headers.entries())
+                                        });
+                                      })
+                                      .catch(error => {
+                                        console.error(`Failed to fetch image HEAD:`, error);
+                                      });
+                                    
+                                    // Fall back to placeholder
                                     e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
                                   }}
                                 />
+                                <div className="mt-2 text-xs text-center text-muted-foreground">
+                                  <a href={fullUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">View image</a>
+                                </div>
                               </div>
-                            ) : media.type === 'video' ? (
-                              <video 
-                                src={fullUrl} 
-                                controls 
-                                className="w-full h-48 object-cover"
-                              />
-                            ) : media.type === 'audio' || media.url.endsWith('.wav') || media.url.endsWith('.webm') || media.url.endsWith('.mp3') ? (
+                            ) : isAudio ? (
                               <div className="p-4 bg-muted flex items-center justify-center h-48">
                                 <div className="w-full">
                                   <p className="text-xs text-muted-foreground mb-2">Audio Recording</p>

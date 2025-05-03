@@ -96,11 +96,33 @@ export function IdeaSubmitForm({
         ...values,
         tags: values.tags ? values.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [],
         // Use the correct field name 'media' for file uploads
-        media: files || undefined,
+        files: files || undefined,
         // Add voice note to media if available
         voiceNote: voiceNote || undefined,
       };
+      
+      // Log submission details for debugging
+      console.log('Submitting idea with form values:', transformedValues);
+      
+      // Log file details if present
+      if (files) {
+        console.log(`Submitting ${files.length} file(s):`, 
+          Array.from(files).map(f => ({ name: f.name, type: f.type, size: f.size })));
+      }
+      
+      // Log voice note details if present
+      if (voiceNote) {
+        console.log('Submitting voice note:', { 
+          name: voiceNote.name, 
+          type: voiceNote.type, 
+          size: voiceNote.size 
+        });
+      }
+      
       await onSubmit(transformedValues);
+    } catch (error) {
+      console.error('Error submitting idea:', error);
+      throw error;
     } finally {
       setIsSaving(false);
     }
