@@ -249,6 +249,31 @@ export function Sidebar({ className }: SidebarProps) {
           </div>
         </nav>
         
+        {/* Add New button */}
+        <div className="px-4 mb-4 border-t border-gray-100 pt-4">
+          <div className="flex flex-col space-y-2">
+            <h2 className="text-xs font-semibold text-gray-400 mb-2">ADD NEW</h2>
+            <Link href="/submit/idea" onClick={closeSidebar}>
+              <Button variant="outline" size="sm" className="w-full justify-start">
+                <LightbulbIcon className="mr-2 h-4 w-4" />
+                Idea
+              </Button>
+            </Link>
+            <Link href="/submit/challenge" onClick={closeSidebar}>
+              <Button variant="outline" size="sm" className="w-full justify-start">
+                <Trophy className="mr-2 h-4 w-4" />
+                Challenge
+              </Button>
+            </Link>
+            <Link href="/submit/pain-point" onClick={closeSidebar}>
+              <Button variant="outline" size="sm" className="w-full justify-start">
+                <AlertCircle className="mr-2 h-4 w-4" />
+                Pain Point
+              </Button>
+            </Link>
+          </div>
+        </div>
+        
         {/* User info */}
         {user && (
           <div className="p-4 border-t border-gray-100 mt-2">

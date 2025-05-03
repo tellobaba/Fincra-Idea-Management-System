@@ -78,8 +78,9 @@ function Router() {
       <ProtectedRoute path="/challenges" component={ChallengesPage} />
       <ProtectedRoute path="/pain-points" component={PainPointsPage} />
       <ProtectedRoute path="/my-votes" component={MyVotesPage} />
-      <ProtectedRoute path="/submit" component={SubmitIdeaPage} />
-      <ProtectedRoute path="/submit/:type" component={SubmitIdeaPage} />
+      <ProtectedRoute path="/submit/idea" component={SubmitIdeaPage} />
+      <ProtectedRoute path="/submit/challenge" component={SubmitChallengePage} />
+      <ProtectedRoute path="/submit/pain-point" component={SubmitPainPointPage} />
       <Route component={NotFound} />
     </Switch>
   );
