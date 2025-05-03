@@ -37,6 +37,7 @@ export interface CommentWithUser extends Comment {
 
 export interface IdeaDetailResponse extends IdeaWithUser {
   comments: CommentWithUser[];
+  mediaUrls?: Array<{type: string; url: string}>;
 }
 
 export interface LeaderboardEntry {
