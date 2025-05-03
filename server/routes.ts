@@ -30,13 +30,35 @@ const multerStorage = multer.diskStorage({
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
+    console.log(`Setting upload destination to: ${uploadDir}`);
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    // Create a unique filename with original extension
+    // Create a unique filename with appropriate extension
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    
+    // Make sure we have a proper extension
+    let ext = path.extname(file.originalname);
+    if (!ext || ext === '.') {
+      // No extension or just a dot, derive from mimetype
+      if (file.mimetype.startsWith('image/')) {
+        const subtype = file.mimetype.split('/')[1];
+        ext = `.${subtype === 'jpeg' ? 'jpg' : subtype}`;
+      } else if (file.mimetype === 'audio/webm') {
+        ext = '.webm';
+      } else if (file.mimetype === 'audio/mpeg' || file.mimetype === 'audio/mp3') {
+        ext = '.mp3';
+      } else if (file.mimetype === 'audio/wav') {
+        ext = '.wav';
+      } else {
+        // For other mimetypes, use a generic extension
+        ext = '.bin';
+      }
+    }
+    
+    const filename = file.fieldname + '-' + uniqueSuffix + ext;
+    console.log(`Generated upload filename: ${filename} (type: ${file.mimetype})`);
+    cb(null, filename);
   }
 });
 
@@ -75,16 +97,48 @@ const serveUploads = (app: Express) => {
     // Log serving request for debugging
     console.log('Serving file from uploads:', req.path);
     
-    // Use express.static instead of manually handling file sending
-    // This properly handles the req.path by joining it with the uploadDir
-    const staticMiddleware = express.static(uploadDir);
-    staticMiddleware(req, res, (err) => {
-      if (err) {
-        console.error('Error serving file:', req.path, err);
-        return next(err);
-      }
-      next();
-    });
+    // Check if the file exists first
+    const filePath = path.join(uploadDir, req.path);
+    if (fs.existsSync(filePath)) {
+      // Get file stats to check size
+      const stats = fs.statSync(filePath);
+      console.log(`File exists at ${filePath}, size: ${stats.size} bytes`);
+      
+      // Determine content type from file extension
+      const ext = path.extname(filePath).toLowerCase();
+      let contentType = 'application/octet-stream'; // Default content type
+      
+      if (ext === '.png') contentType = 'image/png';
+      else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+      else if (ext === '.gif') contentType = 'image/gif';
+      else if (ext === '.webp') contentType = 'image/webp';
+      else if (ext === '.webm') contentType = 'audio/webm';
+      else if (ext === '.mp3') contentType = 'audio/mpeg';
+      else if (ext === '.wav') contentType = 'audio/wav';
+      
+      // Set the content type
+      res.set('Content-Type', contentType);
+      res.set('Content-Length', stats.size.toString());
+      
+      // Send the file
+      res.sendFile(filePath, (err) => {
+        if (err) {
+          console.error('Error serving file:', req.path, err);
+          return next(err);
+        }
+      });
+    } else {
+      console.error(`File not found: ${filePath}`);
+      // Use express.static as fallback
+      const staticMiddleware = express.static(uploadDir);
+      staticMiddleware(req, res, (err) => {
+        if (err) {
+          console.error('Error serving file via static middleware:', req.path, err);
+          return next(err);
+        }
+        next();
+      });
+    }
   });
 };
 
@@ -522,7 +576,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new idea with file upload
-  app.post("/api/ideas", upload.array('media', 5), async (req, res) => {
+  app.post("/api/ideas", upload.fields([
+    { name: 'files', maxCount: 5 },
+    { name: 'voiceNote', maxCount: 1 }
+  ]), async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -530,47 +587,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Process uploaded files if any
       const mediaUrls = [];
-      if (req.files && Array.isArray(req.files)) {
-        for (const file of req.files) {
-          const fileUrl = `/uploads/${file.filename}`;
-          
-          // Better handling of file types, especially for audio files and images
-          let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
-          
-          // Handle special cases for audio
-          if (file.mimetype.includes('audio') || 
-              file.originalname.endsWith('.mp3') || 
-              file.originalname.endsWith('.wav') || 
-              file.originalname.endsWith('.webm')) {
-            fileType = 'audio';
+      if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
+        // Handle the regular files upload
+        const filesArray = req.files['files'];
+        if (filesArray && Array.isArray(filesArray)) {
+          for (const file of filesArray) {
+            const fileUrl = `/uploads/${file.filename}`;
+            
+            // Better handling of file types, especially for images
+            let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
+            
+            // Make sure we're properly identifying image files
+            if (file.mimetype.includes('image') || 
+                file.originalname.endsWith('.jpg') || 
+                file.originalname.endsWith('.jpeg') || 
+                file.originalname.endsWith('.png') || 
+                file.originalname.endsWith('.gif') || 
+                file.originalname.endsWith('.webp')) {
+              fileType = 'image';
+            }
+            
+            console.log('Processing image/document file:', { 
+              name: file.originalname,
+              mimetype: file.mimetype,
+              type: fileType,
+              url: fileUrl,
+              size: file.size
+            });
+            
+            mediaUrls.push({
+              type: fileType,
+              url: fileUrl
+            });
           }
-          // Handle image files explicitly
-          else if (file.mimetype.includes('image') ||
-                  file.originalname.endsWith('.jpg') ||
-                  file.originalname.endsWith('.jpeg') ||
-                  file.originalname.endsWith('.png') ||
-                  file.originalname.endsWith('.gif') ||
-                  file.originalname.endsWith('.webp')) {
-            fileType = 'image';
-          }
+        }
+        
+        // Handle voice note specifically
+        const voiceNoteArray = req.files['voiceNote'];
+        if (voiceNoteArray && Array.isArray(voiceNoteArray) && voiceNoteArray.length > 0) {
+          const voiceNote = voiceNoteArray[0];
+          const fileUrl = `/uploads/${voiceNote.filename}`;
           
-          console.log('Processing file:', { 
-            name: file.originalname,
-            mimetype: file.mimetype,
-            type: fileType,
+          console.log('Processing voice note:', { 
+            name: voiceNote.originalname,
+            mimetype: voiceNote.mimetype,
             url: fileUrl,
-            size: file.size
+            size: voiceNote.size
           });
           
           mediaUrls.push({
-            type: fileType,
+            type: 'audio',
             url: fileUrl
           });
         }
       }
       
       // Log for debugging
-      console.log('Creating idea with files:', req.files?.length || 0, 'Media URLs:', mediaUrls);
+      console.log('Creating idea with media:', mediaUrls.length, 'Media URLs:', mediaUrls);
       
       // Validate request body
       // Parse request body properly, considering both form data and JSON
@@ -631,7 +704,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update idea with file upload
-  app.patch("/api/ideas/:id", upload.array('media', 5), async (req, res) => {
+  app.patch("/api/ideas/:id", upload.fields([
+    { name: 'files', maxCount: 5 },
+    { name: 'voiceNote', maxCount: 1 }
+  ]), async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -657,40 +733,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Process uploaded files if any
       const mediaUrls = [];
-      if (req.files && Array.isArray(req.files)) {
-        for (const file of req.files) {
-          const fileUrl = `/uploads/${file.filename}`;
-          
-          // Better handling of file types, especially for audio files and images
-          let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
-          
-          // Handle special cases for audio
-          if (file.mimetype.includes('audio') || 
-              file.originalname.endsWith('.mp3') || 
-              file.originalname.endsWith('.wav') || 
-              file.originalname.endsWith('.webm')) {
-            fileType = 'audio';
+      if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
+        // Handle regular files upload
+        const filesArray = req.files['files'];
+        if (filesArray && Array.isArray(filesArray)) {
+          for (const file of filesArray) {
+            const fileUrl = `/uploads/${file.filename}`;
+            
+            // Better handling of file types, especially for images
+            let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
+            
+            // Make sure we're properly identifying image files
+            if (file.mimetype.includes('image') || 
+                file.originalname.endsWith('.jpg') || 
+                file.originalname.endsWith('.jpeg') || 
+                file.originalname.endsWith('.png') || 
+                file.originalname.endsWith('.gif') || 
+                file.originalname.endsWith('.webp')) {
+              fileType = 'image';
+            }
+            
+            console.log('Processing image/document file for update:', { 
+              name: file.originalname,
+              mimetype: file.mimetype,
+              type: fileType,
+              url: fileUrl,
+              size: file.size
+            });
+            
+            mediaUrls.push({
+              type: fileType,
+              url: fileUrl
+            });
           }
-          // Handle image files explicitly
-          else if (file.mimetype.includes('image') ||
-                  file.originalname.endsWith('.jpg') ||
-                  file.originalname.endsWith('.jpeg') ||
-                  file.originalname.endsWith('.png') ||
-                  file.originalname.endsWith('.gif') ||
-                  file.originalname.endsWith('.webp')) {
-            fileType = 'image';
-          }
+        }
+        
+        // Handle voice note specifically
+        const voiceNoteArray = req.files['voiceNote'];
+        if (voiceNoteArray && Array.isArray(voiceNoteArray) && voiceNoteArray.length > 0) {
+          const voiceNote = voiceNoteArray[0];
+          const fileUrl = `/uploads/${voiceNote.filename}`;
           
-          console.log('Processing file for update:', { 
-            name: file.originalname,
-            mimetype: file.mimetype,
-            type: fileType,
+          console.log('Processing voice note for update:', { 
+            name: voiceNote.originalname,
+            mimetype: voiceNote.mimetype,
             url: fileUrl,
-            size: file.size
+            size: voiceNote.size
           });
           
           mediaUrls.push({
-            type: fileType,
+            type: 'audio',
             url: fileUrl
           });
         }
