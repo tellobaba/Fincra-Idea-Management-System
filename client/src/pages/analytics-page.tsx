@@ -32,9 +32,20 @@ export default function AnalyticsPage() {
     queryKey: ["/api/chart/categories"],
   });
   
-  // Format ideas by category data for chart
+  // Format ideas by category data for chart with explicit colors
   const statusData: ChartData[] = statusBreakdown.length > 0 
-    ? statusBreakdown 
+    ? statusBreakdown.map(item => {
+        // Ensure the colors match the requirement
+        let fill = item.fill;
+        if (item.name === 'Ideas') fill = '#4CAF50'; // Green
+        if (item.name === 'Challenges') fill = '#2196F3'; // Blue
+        if (item.name === 'Pain Points') fill = '#F44336'; // Red
+
+        return {
+          ...item,
+          fill
+        };
+      })
     : [
         { name: 'Ideas', value: 0, fill: '#4CAF50' },
         { name: 'Challenges', value: 0, fill: '#2196F3' },
