@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart, LineChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, LineChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { useAuth } from "@/hooks/use-auth";
@@ -34,7 +34,7 @@ export default function AnalyticsPage() {
   
   // Format ideas by category data for chart with explicit colors
   const statusData: ChartData[] = statusBreakdown.length > 0 
-    ? statusBreakdown.map(item => {
+    ? statusBreakdown.map((item: any) => {
         // Ensure the colors match the requirement
         let fill = item.fill;
         if (item.name === 'Ideas') fill = '#4CAF50'; // Green
@@ -144,29 +144,41 @@ export default function AnalyticsPage() {
                       tick={{ fontSize: 12 }}
                     />
                     <Tooltip />
-                    {statusData.map((entry, index) => (
-                      <Bar 
-                        key={`status-bar-${index}`}
-                        dataKey="value" 
-                        name={entry.name}
-                        fill={entry.fill}
-                        barSize={20}
-                        data={[entry]}
-                        fillOpacity={0.9}
-                      />
-                    ))}
-
+                    {/* Separate Bar for each category with explicit colors */}
+                    {statusData.map((entry) => {
+                      let color = '#4CAF50'; // Green (Ideas)
+                      if (entry.name === 'Challenges') color = '#2196F3'; // Blue 
+                      if (entry.name === 'Pain Points') color = '#F44336'; // Red
+                        
+                      return (
+                        <Bar 
+                          key={`bar-${entry.name}`}
+                          dataKey="value" 
+                          name={entry.name}
+                          fill={color}
+                          barSize={20}
+                          data={[entry]}
+                          fillOpacity={0.9}
+                        />
+                      );
+                    })}
                   </BarChart>
                 </ResponsiveContainer>
                 
                 {/* Legend */}
                 <div className="flex flex-wrap gap-3 justify-center mt-4">
-                  {statusData.map((item, index) => (
-                    <div key={index} className="flex items-center">
-                      <div className="w-3 h-3 rounded-full mr-2" style={{ background: item.fill }}></div>
-                      <div className="text-xs text-gray-500">{item.name}: {item.value}</div>
-                    </div>
-                  ))}
+                  {statusData.map((item, index) => {
+                    let color = '#4CAF50'; // Green (Ideas)
+                    if (item.name === 'Challenges') color = '#2196F3'; // Blue 
+                    if (item.name === 'Pain Points') color = '#F44336'; // Red
+                    
+                    return (
+                      <div key={index} className="flex items-center">
+                        <div className="w-3 h-3 rounded-full mr-2" style={{ background: color }}></div>
+                        <div className="text-xs text-gray-500">{item.name}: {item.value}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -197,7 +209,7 @@ export default function AnalyticsPage() {
                     <Tooltip />
                     <Bar 
                       dataKey="value" 
-                      fill="#8884d8" 
+                      fill="#6B46C1" 
                       radius={[4, 4, 0, 0]}
                       barSize={20}
                     />
