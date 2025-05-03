@@ -29,8 +29,8 @@ export default function SubmitPainPointPage() {
       data.append('title', formData.title);
       data.append('department', formData.department);
       data.append('description', formData.description);
-      data.append('urgency', formData.urgency);
-      data.append('rootCause', formData.rootCause);
+      data.append('priority', formData.urgency); // Map urgency to priority
+      data.append('impact', formData.rootCause || ''); // Map rootCause to impact
       data.append('category', 'pain-point'); // Set category explicitly
 
       // Add files if present - use 'media' field as expected by server

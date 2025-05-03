@@ -27,9 +27,9 @@ export default function SubmitChallengePage() {
       const data = new FormData();
       data.append('title', formData.title);
       data.append('description', formData.description);
-      data.append('criteria', formData.criteria);
-      data.append('timeframe', formData.timeframe);
-      data.append('reward', formData.reward);
+      data.append('impact', formData.criteria || ''); // Map criteria to impact field
+      data.append('adminNotes', formData.timeframe || ''); // Map timeframe to adminNotes 
+      data.append('inspiration', formData.reward || ''); // Map reward to inspiration
       data.append('category', 'challenge'); // Set category explicitly
 
       // Add files if present - use 'media' field as expected by server
