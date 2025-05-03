@@ -777,6 +777,100 @@ export class DatabaseStorage implements IStorage {
     
     return result;
   }
+
+  // Search operations
+  async searchItems(query: string): Promise<{ 
+    ideas: (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[], 
+    challenges: (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[], 
+    painPoints: (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[]
+  }> {
+    try {
+      const searchTerm = `%${query}%`;
+      
+      // Create the search condition for title, description, and other searchable fields
+      const searchCondition = or(
+        sql`${ideas.title} ILIKE ${searchTerm}`,
+        sql`${ideas.description} ILIKE ${searchTerm}`,
+        sql`${ideas.impact} ILIKE ${searchTerm}`,
+        sql`${ideas.adminNotes} ILIKE ${searchTerm}`,
+        sql`${ideas.tags} ILIKE ${searchTerm}`
+      );
+      
+      // Get all matching ideas
+      const allResults = await db
+        .select()
+        .from(ideas)
+        .where(searchCondition)
+        .orderBy(desc(ideas.createdAt));
+      
+      // Group results by category
+      const results = {
+        ideas: [] as (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[],
+        challenges: [] as (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[],
+        painPoints: [] as (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[]
+      };
+      
+      // Attach user info to each idea and categorize
+      for (const idea of allResults) {
+        let submitter = undefined;
+        
+        if (idea.submittedById) {
+          const user = await this.getUser(idea.submittedById);
+          if (user) {
+            submitter = {
+              id: user.id,
+              displayName: user.displayName || 'Anonymous',
+              department: user.department || 'General',
+              avatarUrl: user.avatarUrl
+            };
+          }
+        }
+        
+        const ideaWithSubmitter = { ...idea, submitter };
+        
+        // Categorize by idea type
+        if (idea.category === 'opportunity') {
+          results.ideas.push(ideaWithSubmitter);
+        } else if (idea.category === 'challenge') {
+          results.challenges.push(ideaWithSubmitter);
+        } else if (idea.category === 'pain-point') {
+          results.painPoints.push(ideaWithSubmitter);
+        }
+      }
+      
+      return results;
+    } catch (error) {
+      console.error('Error searching items:', error);
+      return { ideas: [], challenges: [], painPoints: [] };
+    }
+  }
+  
+  async getSearchSuggestions(query: string): Promise<{ id: number; title: string; category: string }[]> {
+    try {
+      if (!query || query.length < 2) {
+        return [];
+      }
+      
+      const searchTerm = `%${query}%`;
+      
+      // Search for ideas with matching titles for suggestions
+      const suggestions = await db
+        .select({
+          id: ideas.id,
+          title: ideas.title,
+          category: ideas.category
+        })
+        .from(ideas)
+        .where(sql`${ideas.title} ILIKE ${searchTerm}`)
+        .orderBy(asc(ideas.title))
+        .limit(10);
+      
+      return suggestions;
+    } catch (error) {
+      console.error('Error getting search suggestions:', error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
