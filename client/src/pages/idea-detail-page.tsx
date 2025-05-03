@@ -256,43 +256,43 @@ export default function IdeaDetailPage() {
                 {idea.mediaUrls && idea.mediaUrls.length > 0 && (
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-3">Attachments</h3>
-                    <pre className="text-xs text-muted-foreground mb-2 p-2 bg-muted rounded">
-                      {JSON.stringify(idea.mediaUrls, null, 2)}
-                    </pre>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {idea.mediaUrls.map((media: {type: string; url: string}, index) => {
-                        console.log(`Rendering media ${index}:`, media);
+                        // Use absolute URLs for images
+                        const fullUrl = media.url.startsWith('http') 
+                          ? media.url 
+                          : `${window.location.origin}${media.url}`;
+                          
+                        console.log(`Rendering media ${index}:`, { ...media, fullUrl });
+                        
                         return (
                           <div key={index} className="border rounded-md overflow-hidden">
                             {media.type === 'image' ? (
-                              <div>
-                                <div className="p-2 bg-muted-foreground/10 text-xs text-center">
-                                  Image: {media.url}
-                                </div>
+                              <div className="h-auto">
                                 <img 
-                                  src={media.url} 
+                                  src={fullUrl} 
                                   alt={`Attachment ${index + 1}`}
-                                  className="w-full h-48 object-cover"
+                                  className="w-full object-contain max-h-48"
                                   onError={(e) => {
-                                    console.error(`Error loading image: ${media.url}`, e);
-                                    e.currentTarget.src = 'https://placehold.co/600x400?text=Image+Error';
+                                    console.error(`Error loading image:`, { url: media.url, fullUrl });
+                                    e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
                                   }}
                                 />
                               </div>
                             ) : media.type === 'video' ? (
                               <video 
-                                src={media.url} 
+                                src={fullUrl} 
                                 controls 
                                 className="w-full h-48 object-cover"
                               />
                             ) : media.type === 'audio' ? (
                               <div className="p-4 bg-muted flex items-center justify-center h-48">
-                                <audio src={media.url} controls className="w-full" />
+                                <audio src={fullUrl} controls className="w-full" />
                               </div>
                             ) : (
                               <div className="p-4 bg-muted flex items-center justify-center h-48">
                                 <a 
-                                  href={media.url} 
+                                  href={fullUrl} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
                                   className="text-primary hover:text-primary-dark flex flex-col items-center"
