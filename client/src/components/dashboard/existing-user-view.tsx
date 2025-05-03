@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, LineChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { PieChart } from "lucide-react";
+import { PieChart, PlusCircle, Sparkles, AlertTriangle } from "lucide-react";
 import { IdeaTable } from "./idea-table";
 import { useQuery } from "@tanstack/react-query";
 import { IdeaWithUser } from "@/types/ideas";
+import { useLocation } from "wouter";
 
 interface ChartData {
   name: string;
@@ -161,8 +162,72 @@ export function ExistingUserView() {
   // Combine all loading states for overall loading indicator
   const isLoading = topIdeasLoading || volumeLoading || statusLoading || activityLoading || leaderboardLoading;
 
+  // Use navigate from wouter hook
+  const [_, navigate] = useLocation();
+
+  // Handler functions for the call-to-action buttons
+  const handleSubmitIdea = () => {
+    navigate("/submit/idea");
+  };
+
+  const handlePostChallenge = () => {
+    navigate("/submit/challenge");
+  };
+
+  const handleRecordPainPoint = () => {
+    navigate("/submit/pain-point");
+  };
+
   return (
     <div className="p-6">
+      {/* Call-to-action cards section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Got Ideas? */}
+        <div className="bg-green-50 rounded-lg p-6 border border-green-100 flex flex-col items-center text-center">
+          <h3 className="text-xl font-semibold mb-2">Got Ideas?</h3>
+          <p className="text-gray-600 mb-6">
+            Got a spark of innovation? Share your ideas to help Fincra move faster and smarter.
+          </p>
+          <button
+            onClick={handleSubmitIdea}
+            className="inline-flex items-center px-4 py-2 border border-green-200 text-sm font-medium rounded-md text-green-600 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Submit an Idea
+          </button>
+        </div>
+
+        {/* Challenge */}
+        <div className="bg-blue-50 rounded-lg p-6 border border-blue-100 flex flex-col items-center text-center">
+          <h3 className="text-xl font-semibold mb-2">Challenge</h3>
+          <p className="text-gray-600 mb-6">
+            Have a big question or a tough problem we should solve together?
+          </p>
+          <button
+            onClick={handlePostChallenge}
+            className="inline-flex items-center px-4 py-2 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Sparkles className="mr-2 h-4 w-4" />
+            Post a Challenge
+          </button>
+        </div>
+
+        {/* Pain points? */}
+        <div className="bg-red-50 rounded-lg p-6 border border-red-100 flex flex-col items-center text-center">
+          <h3 className="text-xl font-semibold mb-2">Pain points?</h3>
+          <p className="text-gray-600 mb-6">
+            Spot something that's slowing us down? Share what's blocking progress.
+          </p>
+          <button
+            onClick={handleRecordPainPoint}
+            className="inline-flex items-center px-4 py-2 border border-red-200 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            <AlertTriangle className="mr-2 h-4 w-4" />
+            Record Pain point
+          </button>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Overview</h1>
         {isLoading && (
