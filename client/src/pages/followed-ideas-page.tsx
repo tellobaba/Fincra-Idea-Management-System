@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 import { Idea } from '@shared/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ type FollowedIdeaWithUser = Idea & {
 };
 
 export default function FollowedIdeasPage() {
-  const navigate = useNavigate();
+  const [_, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,9 +42,9 @@ export default function FollowedIdeasPage() {
   useEffect(() => {
     if (!user && !authLoading) {
       // Redirect to auth page if not authenticated
-      navigate('/auth');
+      setLocation('/auth');
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, setLocation]);
 
   useEffect(() => {
     if (followedIdeas) {
@@ -230,7 +230,7 @@ export default function FollowedIdeasPage() {
         <div className="text-center py-12 border rounded-lg">
           <h3 className="text-lg font-medium mb-2">No items found</h3>
           <p className="text-muted-foreground mb-6">You haven't followed any items yet or none match your current filters.</p>
-          <Button variant="outline" onClick={() => navigate('/')}>
+          <Button variant="outline" onClick={() => setLocation('/')}>
             <Plus className="h-4 w-4 mr-2" /> Browse Items
           </Button>
         </div>
@@ -255,7 +255,7 @@ export default function FollowedIdeasPage() {
                 </div>
                 
                 <h3 className="text-xl font-semibold mb-2 cursor-pointer hover:text-primary"
-                    onClick={() => navigate(`/ideas/${idea.id}`)}>
+                    onClick={() => setLocation(`/ideas/${idea.id}`)}>
                   {idea.title}
                 </h3>
                 
@@ -292,7 +292,7 @@ export default function FollowedIdeasPage() {
                 
                 <div className="flex justify-between items-center mt-4">
                   <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/ideas/${idea.id}`)}>
+                    <Button variant="ghost" size="sm" onClick={() => setLocation(`/ideas/${idea.id}`)}>
                       View Details
                     </Button>
                   </div>

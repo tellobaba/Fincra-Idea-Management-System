@@ -40,6 +40,7 @@ export interface CommentWithUser extends Comment {
 export interface IdeaDetailResponse extends Omit<IdeaWithUser, 'mediaUrls'> {
   comments: CommentWithUser[];
   mediaUrls?: Array<{type: string; url: string}> | null;
+  isFollowed?: boolean;
 }
 
 export interface LeaderboardEntry {

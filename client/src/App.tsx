@@ -80,6 +80,7 @@ function Router() {
       <ProtectedRoute path="/challenges" component={ChallengesPage} />
       <ProtectedRoute path="/pain-points" component={PainPointsPage} />
       <ProtectedRoute path="/my-votes" component={MyVotesPage} />
+      <ProtectedRoute path="/followed-ideas" component={FollowedIdeasPage} />
       <ProtectedRoute path="/analytics" component={AnalyticsPage} />
       <ProtectedRoute path="/submit/idea" component={SubmitIdeaPage} />
       <ProtectedRoute path="/submit/challenge" component={SubmitChallengePage} />
