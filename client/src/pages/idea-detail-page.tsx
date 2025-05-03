@@ -285,9 +285,12 @@ export default function IdeaDetailPage() {
                                 controls 
                                 className="w-full h-48 object-cover"
                               />
-                            ) : media.type === 'audio' ? (
+                            ) : media.type === 'audio' || media.url.endsWith('.wav') || media.url.endsWith('.webm') || media.url.endsWith('.mp3') ? (
                               <div className="p-4 bg-muted flex items-center justify-center h-48">
-                                <audio src={fullUrl} controls className="w-full" />
+                                <div className="w-full">
+                                  <p className="text-xs text-muted-foreground mb-2">Audio Recording</p>
+                                  <audio src={fullUrl} controls className="w-full" />
+                                </div>
                               </div>
                             ) : (
                               <div className="p-4 bg-muted flex items-center justify-center h-48">

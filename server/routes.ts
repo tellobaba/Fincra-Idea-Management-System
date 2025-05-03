@@ -530,7 +530,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.files && Array.isArray(req.files)) {
         for (const file of req.files) {
           const fileUrl = `/uploads/${file.filename}`;
-          const fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
+          
+          // Better handling of file types, especially for audio files
+          let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
+          
+          // Handle special cases for audio
+          if (file.mimetype.includes('audio') || 
+              file.originalname.endsWith('.mp3') || 
+              file.originalname.endsWith('.wav') || 
+              file.originalname.endsWith('.webm')) {
+            fileType = 'audio';
+          }
+          
+          console.log('Processing file:', { 
+            name: file.originalname,
+            mimetype: file.mimetype,
+            type: fileType,
+            url: fileUrl,
+            size: file.size
+          });
+          
           mediaUrls.push({
             type: fileType,
             url: fileUrl
@@ -538,11 +557,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Log for debugging
+      console.log('Creating idea with files:', req.files?.length || 0, 'Media URLs:', mediaUrls);
+      
       // Validate request body
       const validationResult = insertIdeaSchema.safeParse({
         ...req.body,
         submittedById: req.user.id,
-        mediaUrls: mediaUrls.length ? mediaUrls : undefined
+        mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined
       });
       
       if (!validationResult.success) {
@@ -599,7 +621,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.files && Array.isArray(req.files)) {
         for (const file of req.files) {
           const fileUrl = `/uploads/${file.filename}`;
-          const fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
+          
+          // Better handling of file types, especially for audio files
+          let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
+          
+          // Handle special cases for audio
+          if (file.mimetype.includes('audio') || 
+              file.originalname.endsWith('.mp3') || 
+              file.originalname.endsWith('.wav') || 
+              file.originalname.endsWith('.webm')) {
+            fileType = 'audio';
+          }
+          
+          console.log('Processing file for update:', { 
+            name: file.originalname,
+            mimetype: file.mimetype,
+            type: fileType,
+            url: fileUrl,
+            size: file.size
+          });
+          
           mediaUrls.push({
             type: fileType,
             url: fileUrl
