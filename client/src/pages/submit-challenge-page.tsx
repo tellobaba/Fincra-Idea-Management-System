@@ -38,14 +38,17 @@ export default function SubmitChallengePage() {
       // Department is required by the schema
       data.append('department', user?.department || 'Engineering');
       
-      // Add files if present - use 'media' field as expected by server
+      // Files are temporarily disabled
+      // We'll leave the old code commented out for future reference
+      /*
       if (formData.files) {
         console.log('Adding files to request:', formData.files.length);
         for (let i = 0; i < formData.files.length; i++) {
           console.log(`Adding file ${i+1}:`, formData.files[i].name, formData.files[i].type);
-          data.append('media', formData.files[i]);
+          data.append('files', formData.files[i]);
         }
       }
+      */
 
       const response = await fetch('/api/ideas', {
         method: 'POST',

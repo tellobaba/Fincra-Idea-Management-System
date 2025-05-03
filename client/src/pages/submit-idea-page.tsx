@@ -45,20 +45,24 @@ export default function SubmitIdeaPage() {
         data.append('tags', JSON.stringify([]));
       }
 
-      // Add files if present - use 'media' field as expected by server
+      // Files and voice notes are temporarily disabled
+      // We'll leave the old code commented out for future reference
+      /*
+      // Add files if present
       if (formData.files) {
         console.log('Adding files to request:', formData.files.length);
         for (let i = 0; i < formData.files.length; i++) {
           console.log(`Adding file ${i+1}:`, formData.files[i].name, formData.files[i].type);
-          data.append('media', formData.files[i]);
+          data.append('files', formData.files[i]);
         }
       }
 
-      // Add voice note if present - also as 'media'
+      // Add voice note if present
       if (formData.voiceNote) {
         console.log('Adding voice note to request:', formData.voiceNote.name, formData.voiceNote.type);
-        data.append('media', formData.voiceNote);
+        data.append('voiceNote', formData.voiceNote);
       }
+      */
 
       const response = await fetch('/api/ideas', {
         method: 'POST',
