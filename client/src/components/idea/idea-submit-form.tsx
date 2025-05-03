@@ -95,7 +95,9 @@ export function IdeaSubmitForm({
       const transformedValues = {
         ...values,
         tags: values.tags ? values.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [],
-        files: files || undefined,
+        // Use the correct field name 'media' for file uploads
+        media: files || undefined,
+        // Add voice note to media if available
         voiceNote: voiceNote || undefined,
       };
       await onSubmit(transformedValues);

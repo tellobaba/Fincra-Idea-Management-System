@@ -71,10 +71,10 @@ export function ChallengeSubmitForm({
   const onFormSubmit = async (values: FormValues) => {
     setIsSaving(true);
     try {
-      // Transform values and add files
+      // Transform values and add files with correct field name 'media'
       const transformedValues = {
         ...values,
-        files: files || undefined,
+        media: files || undefined,
       };
       await onSubmit(transformedValues);
     } finally {

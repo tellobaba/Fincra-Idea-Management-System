@@ -83,10 +83,10 @@ export function PainPointSubmitForm({
   const onFormSubmit = async (values: FormValues) => {
     setIsSaving(true);
     try {
-      // Transform values and add files/voice note
+      // Transform values and add files/voice note with correct field name 'media'
       const transformedValues = {
         ...values,
-        files: files || undefined,
+        media: files || undefined,
         voiceNote: voiceNote || undefined,
       };
       await onSubmit(transformedValues);
