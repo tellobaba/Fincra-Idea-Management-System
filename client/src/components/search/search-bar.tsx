@@ -19,7 +19,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const searchRef = useRef<HTMLDivElement>(null);
   
   // Close suggestions when clicking outside
@@ -68,7 +68,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      setLocation(`/search?q=${encodeURIComponent(query)}`);
       setShowSuggestions(false);
     }
   };
@@ -80,7 +80,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
     else if (category === 'challenge') categoryPath = 'challenges';
     else if (category === 'pain-point') categoryPath = 'pain-points';
     
-    navigate(`/${categoryPath}/${id}`);
+    setLocation(`/${categoryPath}/${id}`);
     setShowSuggestions(false);
     setQuery('');
   };

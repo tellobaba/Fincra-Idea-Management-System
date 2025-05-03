@@ -29,7 +29,7 @@ type GroupedResults = {
 };
 
 export default function SearchResultsPage() {
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GroupedResults>({ ideas: [], challenges: [], painPoints: [] });
   const [isLoading, setIsLoading] = useState(true);
@@ -43,9 +43,9 @@ export default function SearchResultsPage() {
       setQuery(q);
       performSearch(q);
     } else {
-      navigate('/');
+      setLocation('/');
     }
-  }, [navigate]);
+  }, [setLocation]);
   
   const performSearch = async (searchQuery: string) => {
     setIsLoading(true);
@@ -65,7 +65,7 @@ export default function SearchResultsPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      setLocation(`/search?q=${encodeURIComponent(query)}`);
       performSearch(query);
     }
   };
@@ -99,7 +99,7 @@ export default function SearchResultsPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/')}
+          onClick={() => setLocation('/')}
           className="mr-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -167,7 +167,7 @@ export default function SearchResultsPage() {
                         <div>
                           <CardTitle 
                             className="text-lg hover:text-violet-600 cursor-pointer"
-                            onClick={() => navigate(`/${categoryType}/${result.id}`)}
+                            onClick={() => setLocation(`/${categoryType}/${result.id}`)}
                           >
                             {result.title}
                           </CardTitle>
