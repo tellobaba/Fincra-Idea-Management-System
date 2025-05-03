@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, Tag, Plus, Loader2 } from 'lucide-react';
+import { Search, Filter, Tag, Plus, Loader2, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -170,9 +170,19 @@ export default function FollowedIdeasPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between mb-8">
-              <div>
-                <h1 className="text-3xl font-bold">Followed Items</h1>
-                <p className="text-muted-foreground mt-1">Items you've pinned for later reference</p>
+              <div className="flex items-center">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setLocation('/')}
+                  className="mr-3"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div>
+                  <h1 className="text-3xl font-bold">Followed Items</h1>
+                  <p className="text-muted-foreground mt-1">Items you've pinned for later reference</p>
+                </div>
               </div>
             </div>
 
