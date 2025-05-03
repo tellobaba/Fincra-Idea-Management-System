@@ -2,13 +2,17 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
 
+type ProtectedRouteProps = {
+  path: string;
+  component?: (...args: any[]) => React.JSX.Element;
+  children?: React.ReactNode;
+};
+
 export function ProtectedRoute({
   path,
   component: Component,
-}: {
-  path: string;
-  component: (...args: any[]) => React.JSX.Element;
-}) {
+  children,
+}: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -29,16 +33,25 @@ export function ProtectedRoute({
     );
   }
 
-  return <Route path={path} component={Component} />;
+  // If children are provided, render them; otherwise, use the component
+  if (children) {
+    return <Route path={path}>{children}</Route>;
+  }
+  
+  return Component ? <Route path={path} component={Component} /> : null;
 }
+
+type AdminRouteProps = {
+  path: string;
+  component?: (...args: any[]) => React.JSX.Element;
+  children?: React.ReactNode;
+};
 
 export function AdminRoute({
   path,
   component: Component,
-}: {
-  path: string;
-  component: (...args: any[]) => React.JSX.Element;
-}) {
+  children,
+}: AdminRouteProps) {
   const { user, isLoading } = useAuth();
   const adminRoles = ['admin', 'reviewer', 'transformer', 'implementer'];
 
@@ -68,5 +81,10 @@ export function AdminRoute({
     );
   }
 
-  return <Route path={path} component={Component} />;
+  // If children are provided, render them; otherwise, use the component
+  if (children) {
+    return <Route path={path}>{children}</Route>;
+  }
+  
+  return Component ? <Route path={path} component={Component} /> : null;
 }
