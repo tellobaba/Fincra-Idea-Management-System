@@ -22,6 +22,7 @@ import IdeasPage from "@/pages/ideas-page";
 import ChallengesPage from "@/pages/challenges-page";
 import PainPointsPage from "@/pages/pain-points-page";
 import MyVotesPage from "@/pages/my-votes-page";
+import FollowedIdeasPage from "@/pages/followed-ideas-page";
 import AnalyticsPage from "@/pages/analytics-page";
 
 // Lazy loaded admin routes to improve initial loading performance

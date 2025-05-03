@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { IdeaStatusTracker } from "@/components/idea/idea-status-tracker";
 import { CommentSection } from "@/components/idea/comment-section";
+import FollowButton from "@/components/idea/follow-button";
 import { IdeaDetailResponse, CommentWithUser, CATEGORY_CONFIG, STATUS_CONFIG } from "@/types/ideas";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -365,7 +366,7 @@ export default function IdeaDetailPage() {
                   </div>
                 )}
                 
-                <div className="mt-4 flex items-center">
+                <div className="mt-4 flex items-center gap-3">
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -376,6 +377,14 @@ export default function IdeaDetailPage() {
                     <ThumbsUp className="h-4 w-4" />
                     <span>{isVoting ? "Voting..." : `Upvote (${idea.votes})`}</span>
                   </Button>
+                  
+                  {/* Add Follow button */}
+                  <FollowButton 
+                    ideaId={idea.id} 
+                    isFollowed={idea.isFollowed || false} 
+                    variant="outline"
+                    size="sm"
+                  />
                 </div>
               </div>
               
