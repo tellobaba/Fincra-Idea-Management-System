@@ -24,45 +24,44 @@ export default function SubmitPainPointPage() {
       files?: FileList;
       voiceNote?: File;
     }) => {
-      // Create FormData for file uploads
-      const data = new FormData();
-      data.append('title', formData.title);
-      data.append('department', formData.department);
-      data.append('description', formData.description);
-      data.append('priority', formData.urgency); // Map urgency to priority
-      data.append('impact', formData.rootCause || ''); // Map rootCause to impact
-      data.append('category', 'pain-point'); // Set category explicitly
+      // Create a properly structured JSON object that matches expected schema fields
+      const requestData = {
+        title: formData.title,
+        description: formData.description,
+        category: 'pain-point', // Set category explicitly
+        department: formData.department,
+        status: 'submitted', // default status
+        priority: formData.urgency, // Map urgency to priority
+        impact: formData.rootCause || '', // Map rootCause to impact
+        inspiration: '',
+        similarSolutions: '',
+        tags: [],
+        attachments: [] // empty array as we're not handling attachments currently
+      };
 
-      // Add empty tags array as required by schema
-      data.append('tags', JSON.stringify([]));
+      console.log('Submitting pain point with data:', requestData);
       
-      // Files and voice notes are temporarily disabled
-      // We'll leave the old code commented out for future reference
-      /*
-      // Add files if present
-      if (formData.files) {
-        console.log('Adding files to request:', formData.files.length);
-        for (let i = 0; i < formData.files.length; i++) {
-          console.log(`Adding file ${i+1}:`, formData.files[i].name, formData.files[i].type);
-          data.append('files', formData.files[i]);
-        }
-      }
-
-      // Add voice note if present
-      if (formData.voiceNote) {
-        console.log('Adding voice note to request:', formData.voiceNote.name, formData.voiceNote.type);
-        data.append('voiceNote', formData.voiceNote);
-      }
-      */
-
+      // Use fetch with JSON data
       const response = await fetch('/api/ideas', {
         method: 'POST',
-        body: data,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData),
+        credentials: 'include'
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit pain point');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to submit pain point';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+          console.error('Submission errors:', errorData.errors);
+        } catch (e) {
+          console.error('Error parsing error response:', errorText);
+        }
+        throw new Error(errorMessage);
       }
 
       return response.json();

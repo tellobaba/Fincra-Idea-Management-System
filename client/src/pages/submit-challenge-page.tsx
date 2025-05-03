@@ -23,41 +23,45 @@ export default function SubmitChallengePage() {
       reward: string;
       files?: FileList;
     }) => {
-      // Create FormData for file uploads
-      const data = new FormData();
-      data.append('title', formData.title);
-      data.append('description', formData.description);
-      data.append('impact', formData.criteria || ''); // Map criteria to impact field
-      data.append('adminNotes', formData.timeframe || ''); // Map timeframe to adminNotes 
-      data.append('inspiration', formData.reward || ''); // Map reward to inspiration
-      data.append('category', 'challenge'); // Set category explicitly
+      // Create a properly structured JSON object that matches expected schema fields
+      const requestData = {
+        title: formData.title,
+        description: formData.description,
+        impact: formData.criteria || '', // Map criteria to impact field
+        adminNotes: formData.timeframe || '', // Map timeframe to adminNotes
+        inspiration: formData.reward || '', // Map reward to inspiration
+        category: 'challenge', // Set category explicitly
+        department: user?.department || 'Engineering',
+        status: 'submitted', // default status
+        priority: 'medium', // default priority
+        similarSolutions: '',
+        tags: [],
+        attachments: [] // empty array as we're not handling attachments currently
+      };
 
-      // Add empty tags array as required by schema
-      data.append('tags', JSON.stringify([]));
+      console.log('Submitting challenge with data:', requestData);
       
-      // Department is required by the schema
-      data.append('department', user?.department || 'Engineering');
-      
-      // Files are temporarily disabled
-      // We'll leave the old code commented out for future reference
-      /*
-      if (formData.files) {
-        console.log('Adding files to request:', formData.files.length);
-        for (let i = 0; i < formData.files.length; i++) {
-          console.log(`Adding file ${i+1}:`, formData.files[i].name, formData.files[i].type);
-          data.append('files', formData.files[i]);
-        }
-      }
-      */
-
+      // Use fetch with JSON data
       const response = await fetch('/api/ideas', {
         method: 'POST',
-        body: data,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData),
+        credentials: 'include'
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit challenge');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to submit challenge';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+          console.error('Submission errors:', errorData.errors);
+        } catch (e) {
+          console.error('Error parsing error response:', errorText);
+        }
+        throw new Error(errorMessage);
       }
 
       return response.json();

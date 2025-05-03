@@ -26,52 +26,44 @@ export default function SubmitIdeaPage() {
       files?: FileList;
       voiceNote?: File;
     }) => {
-      // Create FormData for file uploads
-      const data = new FormData();
-      data.append('title', formData.title);
-      data.append('description', formData.description);
-      data.append('department', formData.workstream); // Map workstream to department
-      data.append('impact', formData.impact || '');
-      data.append('inspiration', formData.inspiration || '');
-      data.append('similarSolutions', formData.similarSolutions || '');
-      data.append('category', 'opportunity'); // Set category explicitly
+      // Create a properly structured JSON object that matches expected schema fields
+      const requestData = {
+        title: formData.title,
+        description: formData.description,
+        category: 'opportunity', // Set category explicitly
+        department: formData.workstream, // Map workstream to department
+        status: 'submitted', // default status
+        priority: 'medium', // default priority
+        impact: formData.impact || '',
+        inspiration: formData.inspiration || '',
+        similarSolutions: formData.similarSolutions || '',
+        tags: formData.tags || [],
+        attachments: [] // empty array as we're not handling attachments currently
+      };
       
-      // Add tags with proper format
-      if (formData.tags && formData.tags.length > 0) {
-        // Make sure tags are sent as a formatted string
-        data.append('tags', JSON.stringify(formData.tags));
-      } else {
-        // Ensure tags is at least an empty array
-        data.append('tags', JSON.stringify([]));
-      }
-
-      // Files and voice notes are temporarily disabled
-      // We'll leave the old code commented out for future reference
-      /*
-      // Add files if present
-      if (formData.files) {
-        console.log('Adding files to request:', formData.files.length);
-        for (let i = 0; i < formData.files.length; i++) {
-          console.log(`Adding file ${i+1}:`, formData.files[i].name, formData.files[i].type);
-          data.append('files', formData.files[i]);
-        }
-      }
-
-      // Add voice note if present
-      if (formData.voiceNote) {
-        console.log('Adding voice note to request:', formData.voiceNote.name, formData.voiceNote.type);
-        data.append('voiceNote', formData.voiceNote);
-      }
-      */
-
+      console.log('Submitting idea with data:', requestData);
+      
+      // Use fetch with JSON data
       const response = await fetch('/api/ideas', {
         method: 'POST',
-        body: data,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData),
+        credentials: 'include'
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit idea');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to submit idea';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+          console.error('Submission errors:', errorData.errors);
+        } catch (e) {
+          console.error('Error parsing error response:', errorText);
+        }
+        throw new Error(errorMessage);
       }
 
       return response.json();
