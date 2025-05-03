@@ -22,6 +22,7 @@ import IdeasPage from "@/pages/ideas-page";
 import ChallengesPage from "@/pages/challenges-page";
 import PainPointsPage from "@/pages/pain-points-page";
 import MyVotesPage from "@/pages/my-votes-page";
+import AnalyticsPage from "@/pages/analytics-page";
 
 // Lazy loaded admin routes to improve initial loading performance
 import { lazy, Suspense } from "react";
@@ -78,6 +79,7 @@ function Router() {
       <ProtectedRoute path="/challenges" component={ChallengesPage} />
       <ProtectedRoute path="/pain-points" component={PainPointsPage} />
       <ProtectedRoute path="/my-votes" component={MyVotesPage} />
+      <ProtectedRoute path="/analytics" component={AnalyticsPage} />
       <ProtectedRoute path="/submit/idea" component={SubmitIdeaPage} />
       <ProtectedRoute path="/submit/challenge" component={SubmitChallengePage} />
       <ProtectedRoute path="/submit/pain-point" component={SubmitPainPointPage} />

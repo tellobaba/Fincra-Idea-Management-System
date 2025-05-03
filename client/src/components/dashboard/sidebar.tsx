@@ -61,6 +61,12 @@ export function Sidebar({ className }: SidebarProps) {
       active: location === "/",
     },
     {
+      name: "Analytics",
+      href: "/analytics",
+      icon: BarChart,
+      active: location === "/analytics",
+    },
+    {
       name: "Ideas",
       href: "/ideas",
       icon: LightbulbIcon,

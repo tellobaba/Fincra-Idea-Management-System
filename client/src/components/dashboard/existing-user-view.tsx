@@ -253,100 +253,6 @@ export function ExistingUserView() {
         )}        
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Ideas by Category chart */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-medium">Submissions by Category</CardTitle>
-            <button className="text-sm text-blue-600 hover:underline">See Report</button>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart
-                data={statusData}
-                layout="vertical"
-                barCategoryGap={12}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  width={100}
-                  tick={{ fontSize: 12 }}
-                />
-                <Tooltip />
-                {/* Create a separate bar for each status with its color */}
-                {statusData.map((entry, index) => (
-                  <Bar 
-                    key={`status-bar-${index}`}
-                    dataKey="value" 
-                    name={entry.name}
-                    data={[entry]}
-                    barSize={20}
-                    fill={entry.fill}
-                    fillOpacity={0.9}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-            
-            {/* Legend */}
-            <div className="flex flex-wrap gap-3 justify-center mt-4">
-              {statusData.map((item, index) => (
-                <div key={index} className="flex items-center">
-                  <div className="w-3 h-3 rounded-full mr-2" style={{ background: item.fill }}></div>
-                  <div className="text-xs text-gray-500">{item.name}: {item.value}</div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Ideas Volume chart */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-medium">Ideas Volume</CardTitle>
-            <button className="text-sm text-blue-600 hover:underline">See Breakdown</button>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart
-                data={idealVolume}
-                margin={{
-                  top: 5,
-                  right: 10,
-                  left: 10,
-                  bottom: 0,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis 
-                  axisLine={false}
-                  tickLine={false}
-                  tickMargin={10}
-                />
-                <Tooltip />
-                <Bar 
-                  dataKey="value" 
-                  fill="#8884d8" 
-                  radius={[4, 4, 0, 0]}
-                  barSize={30}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-            <div className="text-xs text-gray-500 mt-2 text-right">Monday, 22</div>
-          </CardContent>
-        </Card>
-      </div>
-      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {/* Activity section */}
         <Card className="md:col-span-1">
@@ -378,45 +284,8 @@ export function ExistingUserView() {
           </CardContent>
         </Card>
         
-        {/* Top Contributors */}
-        <Card className="md:col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-medium">Top Contributors</CardTitle>
-            <button className="text-sm text-blue-600 hover:underline">See All</button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {contributorsData.length > 0 ? (
-                contributorsData.map((contributor: any, index: number) => (
-                  <div key={index} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-gray-200 mr-3"></div>
-                        <div>
-                          <div className="text-sm font-medium">{contributor.name}</div>
-                          <div className="text-xs text-gray-500">{contributor.email || contributor.department}</div>
-                        </div>
-                      </div>
-                      <div className="text-gray-700 font-medium">{contributor.value}</div>
-                    </div>
-                    <div className="flex justify-between mt-1 text-xs text-gray-500">
-                      <span>Ideas: {contributor.ideas}</span>
-                      <span>Challenges: {contributor.challenges}</span>
-                      <span>Pain Points: {contributor.painPoints}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-gray-500 text-sm">No contributor data available</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
         {/* Top Voted */}
-        <Card className="md:col-span-1">
+        <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-medium">Top Voted</CardTitle>
             <button className="text-sm text-blue-600 hover:underline">See All</button>
