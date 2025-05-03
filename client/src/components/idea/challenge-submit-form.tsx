@@ -103,7 +103,9 @@ export function ChallengeSubmitForm({
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       // Use webm for better browser compatibility
-      const recorder = new MediaRecorder(stream);
+      const recorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
       setMediaRecorder(recorder);
       
       // Clear any previous chunks
@@ -111,21 +113,32 @@ export function ChallengeSubmitForm({
       
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
+          console.log('Received audio chunk of size:', e.data.size);
           setAudioChunks((chunks) => [...chunks, e.data]);
         }
       };
       
       recorder.onstop = () => {
-        // Create blob from all chunks
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        const audioFile = new File([audioBlob], 'voice-note.webm', { type: 'audio/webm' });
-        setVoiceNote(audioFile);
-        // Clear chunks after creating file
-        setAudioChunks([]);
+        // Important: we need to reference the current audioChunks here, not the state variable
+        // which might not have the latest value in this closure
+        console.log('Recorder stopped, collecting chunks...');
+        setAudioChunks(prevChunks => {
+          console.log(`Processing ${prevChunks.length} chunks to create audio file`);
+          if (prevChunks.length === 0) {
+            console.error('No audio chunks available to create file');
+            return prevChunks;
+          }
+          
+          const audioBlob = new Blob(prevChunks, { type: 'audio/webm' });
+          console.log('Created audio blob of size:', audioBlob.size);
+          const audioFile = new File([audioBlob], 'voice-note.webm', { type: 'audio/webm' });
+          setVoiceNote(audioFile);
+          return [];
+        });
       };
       
-      // Request data at 1-second intervals
-      recorder.start(1000);
+      // Request data more frequently (500ms) and make sure to get data at the end
+      recorder.start(500);
       setIsRecording(true);
       console.log('Recording started successfully');
     } catch (error) {
@@ -136,10 +149,18 @@ export function ChallengeSubmitForm({
 
   const stopRecording = () => {
     if (mediaRecorder && isRecording) {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      // Stop all audio tracks
-      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      console.log('Stopping recording...');
+      // Request a final data chunk before stopping (for Chrome/Firefox to get the last bit of audio)
+      mediaRecorder.requestData();
+      
+      // Small delay to ensure the last data is processed before stopping
+      setTimeout(() => {
+        mediaRecorder.stop();
+        setIsRecording(false);
+        // Stop all audio tracks
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        console.log('Recording stopped and tracks released');
+      }, 200);
     }
   };
 
