@@ -739,6 +739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate request body
       // Parse request body properly, considering both form data and JSON
       const formData = req.body;
+      console.log('Received idea submission:', JSON.stringify(formData, null, 2));
       
       // Handle tags if they're sent as a string
       let tags = formData.tags;
@@ -749,20 +750,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // If not valid JSON, split by comma
           tags = formData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
         }
+      } else if (!Array.isArray(formData.tags)) {
+        tags = [];
       }
       
-      // Build idea data for validation
+      // Build idea data with all required fields for validation
       const ideaData = {
         title: formData.title,
         description: formData.description,
         category: formData.category,
-        department: formData.department,
-        impact: formData.impact,
-        inspiration: formData.inspiration,
-        similarSolutions: formData.similarSolutions,
-        tags: tags,
+        department: formData.department || 'Other',
+        status: formData.status || 'submitted',
+        priority: formData.priority || 'medium',
+        impact: formData.impact || '',
+        inspiration: formData.inspiration || '',
+        similarSolutions: formData.similarSolutions || '',
+        organizationCategory: formData.organizationCategory || '',
+        tags: tags || [],
+        attachments: formData.attachments || [],
         submittedById: req.user.id,
-        mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined
+        mediaUrls: mediaUrls.length > 0 ? mediaUrls : []
       };
       
       console.log('Validating idea data:', ideaData);

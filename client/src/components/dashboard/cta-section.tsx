@@ -46,16 +46,19 @@ export function CtaSection({ displayName }: CtaSectionProps) {
     tags: string[];
   }) => {
     try {
-      // Create a properly structured JSON object
+      // Create a properly structured JSON object that matches expected schema fields
       const requestData = {
         title: formData.title,
         description: formData.description,
         category: formData.category,
         department: formData.organizationCategory || 'Other',
+        status: 'submitted', // default status
+        priority: 'medium', // default priority
         impact: formData.impact || '',
         inspiration: formData.inspiration || '',
         similarSolutions: formData.similarSolutions || '',
-        tags: formData.tags || []
+        tags: formData.tags || [],
+        attachments: [] // empty array as we're not handling attachments currently
       };
       
       console.log('Submitting idea with data:', requestData);
@@ -71,8 +74,16 @@ export function CtaSection({ displayName }: CtaSectionProps) {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit idea');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to submit idea';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+          console.error('Submission errors:', errorData.errors);
+        } catch (e) {
+          console.error('Error parsing error response:', errorText);
+        }
+        throw new Error(errorMessage);
       }
       
       // Invalidate queries to refresh data
