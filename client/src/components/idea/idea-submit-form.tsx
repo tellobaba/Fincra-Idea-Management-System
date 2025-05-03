@@ -391,7 +391,13 @@ export function IdeaSubmitForm({
               className="hidden" 
               id="file-upload" 
               multiple 
-              onChange={handleFileChange}
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  console.log('Files selected:', Array.from(e.target.files).map(f => ({ name: f.name, type: f.type })));
+                  setFiles(e.target.files);
+                }
+              }}
             />
             <label htmlFor="file-upload">
               <Button 

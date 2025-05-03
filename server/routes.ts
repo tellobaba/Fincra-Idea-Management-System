@@ -579,13 +579,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Creating idea with files:', req.files?.length || 0, 'Media URLs:', mediaUrls);
       
       // Validate request body
-      const validationResult = insertIdeaSchema.safeParse({
-        ...req.body,
+      // Parse request body properly, considering both form data and JSON
+      const formData = req.body;
+      
+      // Handle tags if they're sent as a string
+      let tags = formData.tags;
+      if (typeof formData.tags === 'string') {
+        try {
+          tags = JSON.parse(formData.tags);
+        } catch (e) {
+          // If not valid JSON, split by comma
+          tags = formData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+        }
+      }
+      
+      // Build idea data for validation
+      const ideaData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        department: formData.department,
+        impact: formData.impact,
+        inspiration: formData.inspiration,
+        similarSolutions: formData.similarSolutions,
+        tags: tags,
         submittedById: req.user.id,
         mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined
-      });
+      };
+      
+      console.log('Validating idea data:', ideaData);
+      
+      const validationResult = insertIdeaSchema.safeParse(ideaData);
       
       if (!validationResult.success) {
+        console.error('Validation errors:', validationResult.error.errors);
         return res.status(400).json({ message: "Invalid idea data", errors: validationResult.error.errors });
       }
       
