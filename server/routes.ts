@@ -540,7 +540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const file of req.files) {
           const fileUrl = `/uploads/${file.filename}`;
           
-          // Better handling of file types, especially for audio files
+          // Better handling of file types, especially for audio files and images
           let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
           
           // Handle special cases for audio
@@ -549,6 +549,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               file.originalname.endsWith('.wav') || 
               file.originalname.endsWith('.webm')) {
             fileType = 'audio';
+          }
+          // Handle image files explicitly
+          else if (file.mimetype.includes('image') ||
+                  file.originalname.endsWith('.jpg') ||
+                  file.originalname.endsWith('.jpeg') ||
+                  file.originalname.endsWith('.png') ||
+                  file.originalname.endsWith('.gif') ||
+                  file.originalname.endsWith('.webp')) {
+            fileType = 'image';
           }
           
           console.log('Processing file:', { 
@@ -631,7 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const file of req.files) {
           const fileUrl = `/uploads/${file.filename}`;
           
-          // Better handling of file types, especially for audio files
+          // Better handling of file types, especially for audio files and images
           let fileType = file.mimetype.split('/')[0]; // 'image', 'video', 'application'
           
           // Handle special cases for audio
@@ -640,6 +649,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               file.originalname.endsWith('.wav') || 
               file.originalname.endsWith('.webm')) {
             fileType = 'audio';
+          }
+          // Handle image files explicitly
+          else if (file.mimetype.includes('image') ||
+                  file.originalname.endsWith('.jpg') ||
+                  file.originalname.endsWith('.jpeg') ||
+                  file.originalname.endsWith('.png') ||
+                  file.originalname.endsWith('.gif') ||
+                  file.originalname.endsWith('.webp')) {
+            fileType = 'image';
           }
           
           console.log('Processing file for update:', { 
