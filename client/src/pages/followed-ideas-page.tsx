@@ -1,0 +1,310 @@
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'wouter';
+import { Idea } from '@shared/schema';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/use-auth';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Filter, Tag, Plus, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
+
+type FollowedIdeaWithUser = Idea & {
+  submitter?: {
+    id: number;
+    displayName: string;
+    department: string;
+    avatarUrl?: string;
+  }
+};
+
+export default function FollowedIdeasPage() {
+  const navigate = useNavigate();
+  const { user, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [sortBy, setSortBy] = useState('newest');
+  const [filteredIdeas, setFilteredIdeas] = useState<FollowedIdeaWithUser[]>([]);
+
+  // Fetch user's followed ideas
+  const { data: followedIdeas = [], isLoading, error, refetch } = useQuery<FollowedIdeaWithUser[]>({
+    queryKey: ['/api/ideas/my-follows'],
+    enabled: !!user,
+  });
+
+  useEffect(() => {
+    if (!user && !authLoading) {
+      // Redirect to auth page if not authenticated
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (followedIdeas) {
+      // Convert to array if it's not (API might return object)
+      const ideasArray = Array.isArray(followedIdeas) ? followedIdeas : [followedIdeas];
+      
+      // Apply search filter
+      let filtered = ideasArray;
+      
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = ideasArray.filter(idea => 
+          idea.title?.toLowerCase().includes(query) || 
+          idea.description?.toLowerCase().includes(query) ||
+          idea.tags?.some(tag => tag.toLowerCase().includes(query))
+        );
+      }
+      
+      // Apply tab filter
+      switch(currentTabIndex) {
+        case 0: // All
+          // No additional filtering needed
+          break;
+        case 1: // Ideas (Opportunities)
+          filtered = filtered.filter(idea => idea.category === 'opportunity');
+          break;
+        case 2: // Challenges
+          filtered = filtered.filter(idea => idea.category === 'challenge');
+          break;
+        case 3: // Pain Points
+          filtered = filtered.filter(idea => idea.category === 'pain-point');
+          break;
+      }
+      
+      // Apply sorting
+      switch(sortBy) {
+        case 'newest':
+          filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          break;
+        case 'oldest':
+          filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+          break;
+        case 'most-voted':
+          filtered.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+          break;
+        case 'status':
+          filtered.sort((a, b) => (a.status || '').localeCompare(b.status || ''));
+          break;
+      }
+      
+      setFilteredIdeas(filtered);
+    }
+  }, [followedIdeas, searchQuery, currentTabIndex, sortBy]);
+
+  const handleUnfollow = async (ideaId: number) => {
+    try {
+      // Send API request to unfollow
+      const response = await fetch(`/api/ideas/${ideaId}/follow`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to unfollow');
+      }
+      
+      toast({
+        title: 'Success',
+        description: 'Item unfollowed successfully',
+      });
+      
+      // Refresh the data
+      refetch();
+      
+    } catch (error) {
+      console.error('Error unfollowing idea:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to unfollow item',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Format category for display
+  const formatCategory = (category: string) => {
+    switch(category) {
+      case 'opportunity': return 'Idea';
+      case 'challenge': return 'Challenge';
+      case 'pain-point': return 'Pain Point';
+      default: return category;
+    }
+  };
+
+  // Format status for display
+  const formatStatus = (status: string) => {
+    return status.charAt(0).toUpperCase() + status.slice(1).replace(/-/g, ' ');
+  };
+
+  if (authLoading) {
+    return (
+      <div className="p-4 flex items-center justify-center min-h-[70vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect in useEffect
+  }
+
+  return (
+    <div className="container mx-auto p-4 my-8">
+      <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Followed Items</h1>
+          <p className="text-muted-foreground mt-1">Items you've pinned for later reference</p>
+        </div>
+      </div>
+
+      {/* Search and filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search items..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <div>
+          <div className="flex items-center space-x-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="sort-by">Sort by</Label>
+          </div>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger id="sort-by" className="w-full">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+              <SelectItem value="most-voted">Most Voted</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Tabs for filtering */}
+      <Tabs defaultValue="all" className="mb-6" onValueChange={(value) => {
+        switch(value) {
+          case 'all': setCurrentTabIndex(0); break;
+          case 'ideas': setCurrentTabIndex(1); break;
+          case 'challenges': setCurrentTabIndex(2); break;
+          case 'pain-points': setCurrentTabIndex(3); break;
+        }
+      }}>
+        <TabsList className="grid grid-cols-4 w-full md:w-1/2">
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="ideas">Ideas</TabsTrigger>
+          <TabsTrigger value="challenges">Challenges</TabsTrigger>
+          <TabsTrigger value="pain-points">Pain Points</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {/* Display ideas */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : error ? (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Failed to load followed items. Please try again later.
+          </AlertDescription>
+        </Alert>
+      ) : filteredIdeas.length === 0 ? (
+        <div className="text-center py-12 border rounded-lg">
+          <h3 className="text-lg font-medium mb-2">No items found</h3>
+          <p className="text-muted-foreground mb-6">You haven't followed any items yet or none match your current filters.</p>
+          <Button variant="outline" onClick={() => navigate('/')}>
+            <Plus className="h-4 w-4 mr-2" /> Browse Items
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredIdeas.map((idea) => (
+            <Card key={idea.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <Badge variant="outline" className="mb-2">
+                    {formatCategory(idea.category)}
+                  </Badge>
+                  <Badge className={`
+                    ${idea.status === 'submitted' ? 'bg-yellow-200 text-yellow-800' : ''}
+                    ${idea.status === 'in-review' ? 'bg-blue-200 text-blue-800' : ''}
+                    ${idea.status === 'merged' ? 'bg-green-200 text-green-800' : ''}
+                    ${idea.status === 'implemented' ? 'bg-purple-200 text-purple-800' : ''}
+                    ${idea.status === 'parked' ? 'bg-gray-200 text-gray-800' : ''}
+                  `}>
+                    {formatStatus(idea.status)}
+                  </Badge>
+                </div>
+                
+                <h3 className="text-xl font-semibold mb-2 cursor-pointer hover:text-primary"
+                    onClick={() => navigate(`/ideas/${idea.id}`)}>
+                  {idea.title}
+                </h3>
+                
+                <p className="text-muted-foreground line-clamp-2 mb-3">
+                  {idea.description}
+                </p>
+                
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center">
+                    <Avatar className="h-6 w-6 mr-2">
+                      <AvatarImage src={idea.submitter?.avatarUrl} />
+                      <AvatarFallback>{idea.submitter?.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm text-muted-foreground">{idea.submitter?.displayName}</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(idea.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                
+                {idea.tags && idea.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {idea.tags.slice(0, 3).map((tag, index) => (
+                      <div key={index} className="flex items-center text-xs bg-muted px-2 py-1 rounded">
+                        <Tag className="h-3 w-3 mr-1" />
+                        {tag}
+                      </div>
+                    ))}
+                    {idea.tags.length > 3 && (
+                      <span className="text-xs text-muted-foreground">+{idea.tags.length - 3} more</span>
+                    )}
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center mt-4">
+                  <div className="flex items-center space-x-2">
+                    <Button variant="ghost" size="sm" onClick={() => navigate(`/ideas/${idea.id}`)}>
+                      View Details
+                    </Button>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => handleUnfollow(idea.id)}>
+                    Unfollow
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

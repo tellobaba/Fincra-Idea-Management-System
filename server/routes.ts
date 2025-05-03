@@ -468,6 +468,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get voted ideas by current user
+  // Get user's followed/pinned ideas
+  app.get("/api/ideas/my-follows", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      console.log(`Getting followed ideas for user: ${req.user.id}`);
+      const followedIdeas = await dbStorage.getUserFollowedItems(req.user.id);
+      console.log(`Found followed ideas: ${followedIdeas.length}`);
+      
+      // Attach user info to each idea
+      const ideasWithUsers = await Promise.all(
+        followedIdeas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+            isFollowed: true, // Pre-set this flag since we know these are followed
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching followed ideas:', error);
+      res.status(500).json({ message: "Failed to fetch followed ideas" });
+    }
+  });
+
+  // Follow an idea
+  app.post("/api/ideas/:id/follow", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const ideaId = parseInt(req.params.id);
+      
+      if (isNaN(ideaId)) {
+        return res.status(400).json({ message: "Invalid idea ID" });
+      }
+      
+      // Get the idea to determine its category
+      const idea = await dbStorage.getIdea(ideaId);
+      
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Follow the idea
+      const follow = await dbStorage.followItem(req.user.id, ideaId, idea.category);
+      
+      res.status(200).json({ 
+        message: "Successfully followed the item",
+        follow: follow
+      });
+      
+    } catch (error) {
+      console.error('Error following idea:', error);
+      res.status(500).json({ message: "Failed to follow the item" });
+    }
+  });
+
+  // Unfollow an idea
+  app.delete("/api/ideas/:id/follow", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const ideaId = parseInt(req.params.id);
+      
+      if (isNaN(ideaId)) {
+        return res.status(400).json({ message: "Invalid idea ID" });
+      }
+      
+      // Get the idea to determine its category
+      const idea = await dbStorage.getIdea(ideaId);
+      
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Unfollow the idea
+      const success = await dbStorage.unfollowItem(req.user.id, ideaId, idea.category);
+      
+      if (success) {
+        res.status(200).json({ message: "Successfully unfollowed the item" });
+      } else {
+        res.status(400).json({ message: "Failed to unfollow the item" });
+      }
+      
+    } catch (error) {
+      console.error('Error unfollowing idea:', error);
+      res.status(500).json({ message: "Failed to unfollow the item" });
+    }
+  });
+  
+  // Check if user follows an idea
+  app.get("/api/ideas/:id/follow", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const ideaId = parseInt(req.params.id);
+      
+      if (isNaN(ideaId)) {
+        return res.status(400).json({ message: "Invalid idea ID" });
+      }
+      
+      // Get the idea to determine its category
+      const idea = await dbStorage.getIdea(ideaId);
+      
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Check if the user follows the idea
+      const isFollowing = await dbStorage.isItemFollowed(req.user.id, ideaId, idea.category);
+      
+      res.status(200).json({ isFollowing });
+      
+    } catch (error) {
+      console.error('Error checking follow status:', error);
+      res.status(500).json({ message: "Failed to check follow status" });
+    }
+  });
+
   app.get("/api/ideas/my-votes", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
@@ -554,6 +689,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
       
+      // Check if the current user is following this idea
+      let isFollowed = false;
+      if (req.isAuthenticated()) {
+        isFollowed = await dbStorage.isItemFollowed(req.user.id, id, idea.category);
+      }
+
       res.json({
         ...idea,
         submitter: submitter ? {
@@ -569,6 +710,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           avatarUrl: assignedTo.avatarUrl,
         } : null,
         comments: commentsWithUsers,
+        isFollowed: isFollowed,
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch idea" });

@@ -1,7 +1,7 @@
 import { users, ideas, comments, userVotes, follows, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment, type InsertUserVote, type UserVote, type InsertFollow, type Follow } from "@shared/schema";
 import session from "express-session";
 import { db } from "./db";
-import { eq, asc, desc, and, sql } from "drizzle-orm";
+import { eq, asc, desc, and, or, sql } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
@@ -642,6 +642,132 @@ export class DatabaseStorage implements IStorage {
         .filter(idea => idea.revenueGenerated !== null && idea.revenueGenerated !== undefined)
         .reduce((sum, idea) => sum + (idea.revenueGenerated || 0), 0),
     };
+  }
+
+  // Follow operations
+  async followItem(userId: number, itemId: number, itemType: string): Promise<Follow> {
+    // Check if the user has already followed this item
+    const isFollowed = await this.isItemFollowed(userId, itemId, itemType);
+    
+    if (isFollowed) {
+      // User already follows the item, return the existing follow record
+      const [follow] = await db
+        .select()
+        .from(follows)
+        .where(
+          and(
+            eq(follows.userId, userId),
+            eq(follows.itemId, itemId),
+            eq(follows.itemType, itemType)
+          )
+        );
+      return follow;
+    }
+    
+    // Create a new follow record
+    const [follow] = await db
+      .insert(follows)
+      .values({
+        userId,
+        itemId,
+        itemType,
+      })
+      .returning();
+    
+    return follow;
+  }
+  
+  async unfollowItem(userId: number, itemId: number, itemType: string): Promise<boolean> {
+    // Delete the follow record if it exists
+    try {
+      const result = await db
+        .delete(follows)
+        .where(
+          and(
+            eq(follows.userId, userId),
+            eq(follows.itemId, itemId),
+            eq(follows.itemType, itemType)
+          )
+        );
+      
+      return true;
+    } catch (error) {
+      console.error("Error unfollowing item:", error);
+      return false;
+    }
+  }
+  
+  async isItemFollowed(userId: number, itemId: number, itemType: string): Promise<boolean> {
+    const followRecords = await db
+      .select()
+      .from(follows)
+      .where(
+        and(
+          eq(follows.userId, userId),
+          eq(follows.itemId, itemId),
+          eq(follows.itemType, itemType)
+        )
+      );
+    
+    return followRecords.length > 0;
+  }
+  
+  async getUserFollowedItems(userId: number): Promise<Idea[]> {
+    // Get all items followed by the user using a join between follows and ideas
+    const result = await db
+      .select({
+        id: ideas.id,
+        title: ideas.title,
+        description: ideas.description,
+        category: ideas.category,
+        tags: ideas.tags,
+        department: ideas.department,
+        status: ideas.status,
+        priority: ideas.priority,
+        votes: ideas.votes,
+        submittedById: ideas.submittedById,
+        assignedToId: ideas.assignedToId,
+        createdAt: ideas.createdAt,
+        updatedAt: ideas.updatedAt,
+        impactScore: ideas.impactScore,
+        costSaved: ideas.costSaved,
+        revenueGenerated: ideas.revenueGenerated,
+        attachments: ideas.attachments,
+        mediaUrls: ideas.mediaUrls,
+        impact: ideas.impact,
+        adminNotes: ideas.adminNotes,
+        attachmentUrl: ideas.attachmentUrl,
+        organizationCategory: ideas.organizationCategory,
+        inspiration: ideas.inspiration,
+        similarSolutions: ideas.similarSolutions
+      })
+      .from(ideas)
+      .innerJoin(follows, eq(ideas.id, follows.itemId))
+      .where(
+        and(
+          eq(follows.userId, userId),
+          // itemType field in follows matches category field in ideas
+          // or is one of the specific categories we know about
+          or(
+            eq(follows.itemType, ideas.category),
+            and(
+              eq(follows.itemType, 'opportunity'),
+              eq(ideas.category, 'opportunity')
+            ),
+            and(
+              eq(follows.itemType, 'challenge'),
+              eq(ideas.category, 'challenge')
+            ),
+            and(
+              eq(follows.itemType, 'pain-point'),
+              eq(ideas.category, 'pain-point')
+            )
+          )
+        )
+      )
+      .orderBy(desc(ideas.createdAt));
+    
+    return result;
   }
 }
 
