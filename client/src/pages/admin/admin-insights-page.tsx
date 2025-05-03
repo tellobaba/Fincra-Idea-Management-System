@@ -147,7 +147,7 @@ export default function AdminInsightsPage() {
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="opportunity">Ideas</SelectItem>
                 <SelectItem value="pain-point">Pain Points</SelectItem>
                 <SelectItem value="challenge">Challenges</SelectItem>
@@ -163,7 +163,7 @@ export default function AdminInsightsPage() {
                 <SelectValue placeholder="Select department" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Departments</SelectItem>
+                <SelectItem value="all">All Departments</SelectItem>
                 <SelectItem value="Engineering">Engineering</SelectItem>
                 <SelectItem value="Product">Product</SelectItem>
                 <SelectItem value="Marketing">Marketing</SelectItem>

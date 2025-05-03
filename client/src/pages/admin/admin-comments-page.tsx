@@ -297,7 +297,7 @@ export default function AdminCommentsPage() {
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Users</SelectItem>
+              <SelectItem value="all">All Users</SelectItem>
               {users?.map(user => (
                 <SelectItem key={user.id} value={user.id.toString()}>
                   {user.displayName || user.username}

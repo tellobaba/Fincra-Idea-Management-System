@@ -328,7 +328,7 @@ export default function AdminSubmissionsPage() {
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="submitted">Submitted</SelectItem>
               <SelectItem value="in-review">In Review</SelectItem>
               <SelectItem value="merged">Merged</SelectItem>
@@ -346,7 +346,7 @@ export default function AdminSubmissionsPage() {
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               <SelectItem value="pain-point">Pain Point</SelectItem>
               <SelectItem value="opportunity">Opportunity</SelectItem>
               <SelectItem value="challenge">Challenge</SelectItem>
@@ -362,7 +362,7 @@ export default function AdminSubmissionsPage() {
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Departments</SelectItem>
+              <SelectItem value="all">All Departments</SelectItem>
               <SelectItem value="Engineering">Engineering</SelectItem>
               <SelectItem value="Product">Product</SelectItem>
               <SelectItem value="Marketing">Marketing</SelectItem>
@@ -724,7 +724,7 @@ export default function AdminSubmissionsPage() {
                   <SelectValue placeholder="Select a reviewer" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {users?.map(user => (
                     <SelectItem key={`reviewer-${user.id}`} value={String(user.id)}>
                       {user.displayName || user.username}
@@ -744,7 +744,7 @@ export default function AdminSubmissionsPage() {
                   <SelectValue placeholder="Select a transformer" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {users?.map(user => (
                     <SelectItem key={`transformer-${user.id}`} value={String(user.id)}>
                       {user.displayName || user.username}
