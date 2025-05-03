@@ -181,50 +181,62 @@ export function ExistingUserView() {
   return (
     <div className="p-6">
       {/* Call-to-action cards section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Got Ideas? */}
-        <div className="bg-green-50 rounded-lg p-6 border border-green-100 flex flex-col items-center text-center">
-          <h3 className="text-xl font-semibold mb-2">Got Ideas?</h3>
-          <p className="text-gray-600 mb-6">
-            Got a spark of innovation? Share your ideas to help Fincra move faster and smarter.
-          </p>
-          <button
-            onClick={handleSubmitIdea}
-            className="inline-flex items-center px-4 py-2 border border-green-200 text-sm font-medium rounded-md text-green-600 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Submit an Idea
-          </button>
+        <div className="bg-green-50 rounded-lg p-4 border border-green-100 flex flex-col justify-between h-full">
+          <div>
+            <h3 className="text-lg font-semibold mb-1 text-center">Got Ideas?</h3>
+            <p className="text-gray-600 text-sm mb-2">
+              Got a spark of innovation? Share your ideas to help Fincra move faster and smarter.
+            </p>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={handleSubmitIdea}
+              className="inline-flex items-center px-3 py-1.5 border border-green-200 text-sm font-medium rounded-md text-green-600 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Submit an Idea
+            </button>
+          </div>
         </div>
 
         {/* Challenge */}
-        <div className="bg-blue-50 rounded-lg p-6 border border-blue-100 flex flex-col items-center text-center">
-          <h3 className="text-xl font-semibold mb-2">Challenge</h3>
-          <p className="text-gray-600 mb-6">
-            Have a big question or a tough problem we should solve together?
-          </p>
-          <button
-            onClick={handlePostChallenge}
-            className="inline-flex items-center px-4 py-2 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <Sparkles className="mr-2 h-4 w-4" />
-            Post a Challenge
-          </button>
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 flex flex-col justify-between h-full">
+          <div>
+            <h3 className="text-lg font-semibold mb-1 text-center">Challenge</h3>
+            <p className="text-gray-600 text-sm mb-2">
+              Have a big question or a tough problem we should solve together?
+            </p>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={handlePostChallenge}
+              className="inline-flex items-center px-3 py-1.5 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Post a Challenge
+            </button>
+          </div>
         </div>
 
         {/* Pain points? */}
-        <div className="bg-red-50 rounded-lg p-6 border border-red-100 flex flex-col items-center text-center">
-          <h3 className="text-xl font-semibold mb-2">Pain points?</h3>
-          <p className="text-gray-600 mb-6">
-            Spot something that's slowing us down? Share what's blocking progress.
-          </p>
-          <button
-            onClick={handleRecordPainPoint}
-            className="inline-flex items-center px-4 py-2 border border-red-200 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            <AlertTriangle className="mr-2 h-4 w-4" />
-            Record Pain point
-          </button>
+        <div className="bg-red-50 rounded-lg p-4 border border-red-100 flex flex-col justify-between h-full">
+          <div>
+            <h3 className="text-lg font-semibold mb-1 text-center">Pain points?</h3>
+            <p className="text-gray-600 text-sm mb-2">
+              Spot something that's slowing us down? Share what's blocking progress.
+            </p>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={handleRecordPainPoint}
+              className="inline-flex items-center px-3 py-1.5 border border-red-200 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              Record Pain point
+            </button>
+          </div>
         </div>
       </div>
 
