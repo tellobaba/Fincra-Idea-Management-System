@@ -242,7 +242,6 @@ export default function AnalyticsPage() {
                     })}
                   </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-2 text-right">Updated: {new Date().toLocaleDateString()}</div>
               </CardContent>
             </Card>
           </div>
