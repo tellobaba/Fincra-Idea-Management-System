@@ -2,7 +2,7 @@ import { useParams, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
-import { SubmitIdeaForm } from "@/components/idea/submit-idea-form";
+import { EnhancedSubmitForm } from "@/components/idea/enhanced-submit-form";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Category } from "@shared/schema";
@@ -97,7 +97,7 @@ export default function SubmitIdeaPage() {
           </div>
           
           <div className="bg-card rounded-lg shadow p-6">
-            <SubmitIdeaForm 
+            <EnhancedSubmitForm 
               initialCategory={initialCategory}
               onSubmit={handleSubmit}
               onCancel={() => setLocation("/")}
