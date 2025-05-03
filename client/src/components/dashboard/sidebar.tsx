@@ -8,6 +8,11 @@ import {
   BarChart
 } from "lucide-react";
 import { CustomIcon } from "@/components/ui/custom-icon";
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+import { Idea } from "@shared/schema";
 
 // Import custom icons
 import ideasIcon from "@/assets/Ideas.png";
@@ -17,11 +22,6 @@ import myVotesIcon from "@/assets/MyVotes.png";
 import overviewIcon from "@/assets/Overview.png";
 import painPointsIcon from "@/assets/Painpoints.png";
 import pinnedIdeasIcon from "@/assets/PinnedIdeas.png";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useQuery } from "@tanstack/react-query";
-import { Idea } from "@shared/schema";
 
 interface Metrics {
   ideasSubmitted: number;
@@ -34,6 +34,13 @@ interface Metrics {
 interface SidebarProps {
   className?: string;
 }
+
+type NavItemWithIcon = {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }> | (() => React.ReactNode);
+  active: boolean;
+};
 
 export function Sidebar({ className }: SidebarProps) {
   const { user } = useAuth();
@@ -56,13 +63,8 @@ export function Sidebar({ className }: SidebarProps) {
   });
   
   const isAdmin = user?.role && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role);
-  
-  // Custom icon rendering function
-  const CustomIconComponent = ({ src, alt }: { src: string, alt: string }) => (
-    <CustomIcon src={src} alt={alt} />
-  );
 
-  const mainNavigationItems = [
+  const mainNavigationItems: NavItemWithIcon[] = [
     {
       name: "Overview",
       href: "/",
@@ -107,7 +109,7 @@ export function Sidebar({ className }: SidebarProps) {
     },
   ];
 
-  const subNavigationItems = [
+  const subNavigationItems: NavItemWithIcon[] = [
     {
       name: "Leaderboard",
       href: "/leaderboard",
@@ -141,6 +143,30 @@ export function Sidebar({ className }: SidebarProps) {
   const closeSidebar = () => {
     setMobileOpen(false);
   };
+
+  // Renders a navigation item with icon
+  const renderNavItem = (item: NavItemWithIcon) => (
+    <li key={item.name}>
+      <Link 
+        href={item.href}
+        onClick={closeSidebar}
+        className={cn(
+          "flex items-center px-2 py-2 rounded-md transition-colors relative",
+          item.active 
+            ? "bg-indigo-50 text-indigo-700 font-medium before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:rounded-r-full before:bg-indigo-700" 
+            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+        )}
+      >
+        <div className="w-5 h-5 mr-3 flex items-center justify-center">
+          {typeof item.icon === 'function' 
+            ? item.icon() 
+            : React.createElement(item.icon, { className: "w-5 h-5" })
+          }
+        </div>
+        <span>{item.name}</span>
+      </Link>
+    </li>
+  );
 
   return (
     <>
@@ -196,55 +222,17 @@ export function Sidebar({ className }: SidebarProps) {
           <div className="mb-6">
             <h2 className="text-xs font-semibold text-gray-400 px-2 mb-2">MAIN</h2>
             <ul className="space-y-1">
-              {mainNavigationItems.map((item) => (
-                <li key={item.name}>
-                  <Link 
-                    href={item.href}
-                    onClick={closeSidebar}
-                    className={cn(
-                      "flex items-center px-2 py-2 rounded-md transition-colors relative",
-                      item.active 
-                        ? "bg-indigo-50 text-indigo-700 font-medium before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:rounded-r-full before:bg-indigo-700" 
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    )}
-                  >
-                    <div className="w-5 h-5 mr-3">
-                      {typeof item.icon === 'function' ? item.icon() : <item.icon />}
-                    </div>
-                    <span>{item.name}</span>
-                  </Link>
-                </li>
-              ))}
+              {mainNavigationItems.map(renderNavItem)}
             </ul>
           </div>
           
           <div>
             <h2 className="text-xs font-semibold text-gray-400 px-2 mb-2">SUB</h2>
             <ul className="space-y-1">
-              {subNavigationItems.map((item) => (
-                <li key={item.name}>
-                  <Link 
-                    href={item.href}
-                    onClick={closeSidebar}
-                    className={cn(
-                      "flex items-center px-2 py-2 rounded-md transition-colors",
-                      item.active 
-                        ? "bg-indigo-50 text-indigo-700 font-medium before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:rounded-r-full before:bg-indigo-700" 
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    )}
-                  >
-                    <div className="w-5 h-5 mr-3">
-                      {typeof item.icon === 'function' ? item.icon() : <item.icon />}
-                    </div>
-                    <span>{item.name}</span>
-                  </Link>
-                </li>
-              ))}
+              {subNavigationItems.map(renderNavItem)}
             </ul>
           </div>
         </nav>
-        
-        {/* No Add New section per user request */}
         
         {/* User info */}
         {user && (
