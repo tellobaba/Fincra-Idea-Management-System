@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
-import { Bell, ChevronDown, PlusCircle, LightbulbIcon, AlertCircle, Trophy } from "lucide-react";
+import { PlusCircle, LightbulbIcon, AlertCircle, Trophy, Bell } from "lucide-react";
+import { NotificationDropdown } from "./notification-dropdown";
 import SearchBar from "../../components/search/search-bar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -104,20 +105,7 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
           </Button>
           
           {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-gray-500 hover:text-gray-700"
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]"
-            >
-              3
-            </Badge>
-          </Button>
+          <NotificationDropdown />
           
           {/* User Menu */}
           {user && (
