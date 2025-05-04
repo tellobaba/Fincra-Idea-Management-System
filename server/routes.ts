@@ -1089,6 +1089,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       delete updates.submittedById;
       delete updates.createdAt;
       
+      // Store the old status to check if it's being updated
+      const oldStatus = idea.status;
+      const newStatus = updates.status;
+      
       // Add media URLs if any were uploaded
       if (mediaUrls.length > 0) {
         // Append to existing media or create new array
@@ -1100,6 +1104,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!updatedIdea) {
         return res.status(500).json({ message: "Failed to update idea" });
+      }
+      
+      // Create a notification if the status was changed by an admin/reviewer/etc.
+      if (newStatus && oldStatus !== newStatus && 
+          idea.submittedById !== req.user.id && 
+          ['admin', 'reviewer', 'transformer', 'implementer'].includes(req.user.role)) {
+        try {
+          await dbStorage.createNotification({
+            userId: idea.submittedById,
+            title: "Status updated on your submission",
+            message: `${req.user.displayName} changed the status of your ${idea.category === 'pain-point' ? 'Pain Point' : idea.category === 'challenge' ? 'Challenge' : 'Idea'} "${idea.title}" to ${newStatus}`,
+            type: "status_change",
+            relatedItemId: idea.id,
+            relatedItemType: "idea",
+            actorId: req.user.id
+          });
+        } catch (notificationError) {
+          console.error('Error creating status change notification:', notificationError);
+          // Don't fail the main operation if notification creation fails
+        }
       }
       
       // Attach user info
@@ -1126,6 +1150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } : null,
       });
     } catch (error) {
+      console.error('Error updating idea:', error);
       res.status(500).json({ message: "Failed to update idea" });
     }
   });
@@ -1891,10 +1916,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid status value" });
       }
       
+      // Get idea before updating to check if status is changing
+      const idea = await dbStorage.getIdea(id);
+      
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
       const updatedIdea = await dbStorage.changeIdeaStatus(id, status);
       
       if (!updatedIdea) {
         return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Create a notification if status has changed
+      if (idea.status !== status) {
+        try {
+          const admin = req.user!;
+          
+          await dbStorage.createNotification({
+            userId: idea.submittedById,
+            title: "Status updated on your submission",
+            message: `${admin.displayName} changed the status of your ${idea.category === 'pain-point' ? 'Pain Point' : idea.category === 'challenge' ? 'Challenge' : 'Idea'} "${idea.title}" to ${status}`,
+            type: "status_change",
+            relatedItemId: idea.id,
+            relatedItemType: "idea",
+            actorId: admin.id
+          });
+        } catch (notificationError) {
+          console.error('Error creating status change notification:', notificationError);
+          // Don't fail the main operation if notification creation fails
+        }
       }
       
       res.json(updatedIdea);
