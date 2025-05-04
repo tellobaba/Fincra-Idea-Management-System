@@ -12,8 +12,15 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, ThumbsUp, Trash2 } from "lucide-react";
+import { Calendar, ThumbsUp, Trash2, ChevronDown } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import { Status, statusValues } from "@shared/schema";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -176,31 +183,9 @@ export default function IdeaDetailPage() {
   };
   
   // Handle status change (for admins)
-  const handleStatusChange = () => {
+  const handleStatusChange = (status: Status) => {
     if (!idea || !isAdmin) return;
-    
-    let nextStatus: string;
-    switch (idea.status) {
-      case "submitted":
-        nextStatus = "in-review";
-        break;
-      case "in-review":
-        nextStatus = "merged";
-        break;
-      case "merged":
-        nextStatus = "implemented";
-        break;
-      case "implemented":
-        nextStatus = "parked";
-        break;
-      case "parked":
-        nextStatus = "submitted";
-        break;
-      default:
-        nextStatus = "submitted";
-    }
-    
-    updateStatusMutation.mutate(nextStatus);
+    updateStatusMutation.mutate(status);
   };
   
   if (isLoading) {
@@ -477,26 +462,54 @@ export default function IdeaDetailPage() {
           {/* Admin Actions (Visible for admin roles) */}
           {isAdmin && (
             <div className="fixed bottom-4 right-4 shadow-lg rounded-lg overflow-hidden">
-              <Button 
-                onClick={handleStatusChange}
-                className="bg-primary hover:bg-primary/90 px-4 py-3 font-medium flex items-center"
-                disabled={updateStatusMutation.isPending}
-              >
-                {updateStatusMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 20h9"/>
-                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-                    </svg>
-                    Change Status
-                  </>
-                )}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    className="bg-primary hover:bg-primary/90 px-4 py-3 font-medium flex items-center"
+                    disabled={updateStatusMutation.isPending}
+                  >
+                    {updateStatusMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 20h9"/>
+                          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                        </svg>
+                        Change Status <ChevronDown className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {statusValues.map((status) => {
+                    // Get style based on status
+                    const isCurrentStatus = idea.status === status;
+                    const statusColor = isCurrentStatus ? "bg-primary/10 font-medium" : "";
+                    
+                    // Format status for display
+                    const displayStatus = status
+                      .split('-')
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(' ');
+                      
+                    return (
+                      <DropdownMenuItem
+                        key={status}
+                        className={`${statusColor} cursor-pointer ${isCurrentStatus ? 'cursor-not-allowed' : ''}`}
+                        disabled={isCurrentStatus || updateStatusMutation.isPending}
+                        onClick={() => handleStatusChange(status as Status)}
+                      >
+                        {displayStatus}
+                        {isCurrentStatus && " (Current)"}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </main>
