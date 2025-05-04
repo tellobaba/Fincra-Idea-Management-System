@@ -258,7 +258,6 @@ export function ExistingUserView() {
         <Card className="md:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-medium">Activity</CardTitle>
-            <button className="text-sm text-blue-600 hover:underline">See All</button>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -288,7 +287,6 @@ export function ExistingUserView() {
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-medium">Top Voted</CardTitle>
-            <button className="text-sm text-blue-600 hover:underline">See All</button>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
