@@ -16,6 +16,7 @@ export function NotificationDropdown() {
     closeNotifications,
     markAsRead,
     markAllAsRead,
+    createTestNotification,
   } = useNotifications();
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -89,6 +90,20 @@ export function NotificationDropdown() {
               </Button>
             </div>
           </div>
+          
+          {/* Test button for developers - hidden in production */}
+          {import.meta.env.MODE !== 'production' && (
+            <div className="p-2 border-b border-gray-100 bg-gray-50">
+              <Button
+                onClick={createTestNotification}
+                variant="outline"
+                size="sm"
+                className="w-full text-xs"
+              >
+                Create Test Notification
+              </Button>
+            </div>
+          )}
 
           <ScrollArea className="max-h-[70vh] overflow-y-auto">
             {isLoading ? (
