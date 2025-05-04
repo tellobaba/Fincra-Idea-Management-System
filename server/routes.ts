@@ -217,13 +217,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get recent activity data
   app.get("/api/ideas/recent-activity", async (_req, res) => {
     try {
-      // Get most recent ideas (limit to 5)
-      const recentIdeas = await dbStorage.getIdeas({sortBy: 'createdAt', sortDirection: 'desc', limit: 5});
+      // Get most recent ideas (limit to 10) - we'll get more since we're going to filter
+      const recentIdeas = await dbStorage.getIdeas({sortBy: 'createdAt', sortDirection: 'desc', limit: 10});
+      
+      // Check that each idea still exists by verifying its submitter exists
+      // This helps filter out ideas that may have been deleted but are still in the query results
+      const validIdeas = [];
+      for (const idea of recentIdeas) {
+        if (idea.submittedById) {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          if (submitter) {
+            validIdeas.push({
+              idea,
+              submitter
+            });
+            // Stop once we have 5 valid ideas
+            if (validIdeas.length >= 5) break;
+          }
+        }
+      }
       
       // Format ideas for activity feed
-      const activityData = await Promise.all(recentIdeas.map(async (idea) => {
-        const submitter = idea.submittedById ? await dbStorage.getUser(idea.submittedById) : null;
-        
+      const activityData = validIdeas.map(({idea, submitter}) => {
         return {
           id: idea.id,
           title: idea.title,
@@ -237,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             department: submitter.department || 'General'
           } : null
         };
-      }));
+      });
       
       res.json(activityData);
     } catch (error) {
@@ -249,23 +264,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get top ideas (most voted)
   app.get("/api/ideas/top", async (_req, res) => {
     try {
-      const topIdeas = await dbStorage.getTopIdeas(10);
+      const topIdeas = await dbStorage.getTopIdeas(15); // Get more ideas as we'll filter some out
       
-      // Attach submitter info to each idea
-      const ideasWithUsers = await Promise.all(
-        topIdeas.map(async (idea) => {
-          const submitter = idea.submittedById ? await dbStorage.getUser(idea.submittedById) : null;
-          
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName || 'Anonymous',
-              department: submitter.department || 'General'
-            } : null
-          };
-        })
-      );
+      // Check that each idea still exists by verifying its submitter exists
+      // This filters out ideas that may have been deleted but are still in the query results
+      const validIdeas = [];
+      for (const idea of topIdeas) {
+        if (idea.submittedById) {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          if (submitter) {
+            validIdeas.push({
+              idea,
+              submitter
+            });
+            // Stop once we have 10 valid ideas
+            if (validIdeas.length >= 10) break;
+          }
+        }
+      }
+      
+      // Format ideas with user info
+      const ideasWithUsers = validIdeas.map(({idea, submitter}) => {
+        return {
+          ...idea,
+          submitter: submitter ? {
+            id: submitter.id,
+            displayName: submitter.displayName || 'Anonymous',
+            department: submitter.department || 'General'
+          } : null
+        };
+      });
       
       res.json(ideasWithUsers);
     } catch (error) {
