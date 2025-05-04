@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
@@ -12,8 +12,19 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, ThumbsUp } from "lucide-react";
+import { Calendar, ThumbsUp, Trash2 } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function IdeaDetailPage() {
   const params = useParams();
@@ -21,6 +32,7 @@ export default function IdeaDetailPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isVoting, setIsVoting] = useState(false);
+  const [, navigate] = useLocation();
   
   // Check if current user has admin privileges
   const isAdmin = user?.role && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role);
@@ -89,6 +101,36 @@ export default function IdeaDetailPage() {
     },
   });
   
+  // Mutation for deleting an idea (admin only)
+  const deleteIdeaMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", `/api/ideas/${ideaId}`);
+    },
+    onSuccess: () => {
+      // Show a success toast
+      toast({
+        title: "Idea deleted",
+        description: "The idea has been permanently deleted.",
+      });
+      
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/top"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/recent-activity"] });
+      
+      // Navigate back to the ideas list
+      navigate("/");
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Failed to delete idea",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Mutation for updating idea status (admin only)
   const updateStatusMutation = useMutation({
     mutationFn: async (status: string) => {

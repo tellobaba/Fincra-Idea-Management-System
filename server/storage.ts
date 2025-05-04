@@ -284,8 +284,33 @@ export class DatabaseStorage implements IStorage {
   }
   
   async deleteIdea(id: number): Promise<boolean> {
-    const result = await db.delete(ideas).where(eq(ideas.id, id));
-    return !!result;
+    try {
+      // Use a transaction to ensure all related records are deleted atomically
+      await db.transaction(async (tx) => {
+        // First delete all votes for this idea
+        await tx.delete(userVotes).where(eq(userVotes.ideaId, id));
+        
+        // Then delete all comments for this idea
+        await tx.delete(comments).where(eq(comments.ideaId, id));
+        
+        // Delete all follows for this idea (for all category types)
+        await tx.delete(follows).where(eq(follows.itemId, id));
+        
+        // Delete all notifications related to this idea
+        await tx.delete(notifications).where(and(
+          eq(notifications.relatedItemId, id),
+          eq(notifications.relatedItemType, 'idea')
+        ));
+        
+        // Finally delete the idea itself
+        await tx.delete(ideas).where(eq(ideas.id, id));
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting idea:", error);
+      return false;
+    }
   }
   
   async voteIdea(id: number, userId: number): Promise<Idea | undefined> {

@@ -691,6 +691,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete an idea (admin only)
+  app.delete("/api/ideas/:id", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // Check if user has admin role
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Only administrators can delete ideas" });
+      }
+      
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid idea ID" });
+      }
+      
+      // Get the idea to verify it exists
+      const idea = await dbStorage.getIdea(id);
+      
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Delete the idea
+      const success = await dbStorage.deleteIdea(id);
+      
+      if (success) {
+        // Log the deletion for audit purposes
+        console.log(`Idea ID ${id} deleted by admin user ${req.user.username} (ID: ${req.user.id})`);
+        return res.status(200).json({ message: "Idea successfully deleted" });
+      } else {
+        return res.status(500).json({ message: "Failed to delete idea" });
+      }
+    } catch (error) {
+      console.error('Error deleting idea:', error);
+      res.status(500).json({ message: "Server error while deleting idea" });
+    }
+  });
+
   // Get single idea
   app.get("/api/ideas/:id", async (req, res) => {
     try {
