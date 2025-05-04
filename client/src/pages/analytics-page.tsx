@@ -181,81 +181,62 @@ export default function AnalyticsPage() {
               <CardContent>
                 {/* Trendline chart for Ideas Volume using recharts */}
                 <div className="h-[250px] w-full">
-                  {/* Prepare data for the trendline chart */}
-                  {(() => {
-                    // Sort the volume data by time period for proper trend display
-                    const sortOrder = {'5D': 1, '2W': 2, '1M': 3, '6M': 4, '1Y': 5};
-                    const sortedData = [...idealVolume].sort((a, b) => sortOrder[a.name as keyof typeof sortOrder] - sortOrder[b.name as keyof typeof sortOrder]);
-                    
-                    // Format data for the chart
-                    const chartData = sortedData.map(item => ({
-                      name: item.name,
-                      submissions: item.value
-                    }));
-                    
-                    return (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart
-                          data={chartData}
-                          margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-                          <XAxis 
-                            dataKey="name" 
-                            stroke="#888" 
-                            tickLine={false}
-                            tick={{ fontSize: 12 }}
-                          />
-                          <YAxis 
-                            stroke="#888" 
-                            tickLine={false}
-                            tick={{ fontSize: 12 }}
-                            axisLine={false}
-                            domain={[0, 30]} // Set upper bound to 30 to show upward trend
-                            ticks={[0, 5, 10, 15, 20, 25, 30]} // Set specific ticks in increments of 5
-                          />
-                          <Tooltip 
-                            formatter={(value: number) => [`${value} submissions`, 'Total']}
-                            labelFormatter={(label) => {
-                              const labels: {[key: string]: string} = {
-                                '5D': '5 Days',
-                                '2W': '2 Weeks',
-                                '1M': '1 Month',
-                                '6M': '6 Months',
-                                '1Y': '1 Year'
-                              };
-                              return labels[label] || label;
-                            }}
-                            contentStyle={{
-                              backgroundColor: "white",
-                              border: "1px solid #ddd",
-                              borderRadius: "6px",
-                              padding: "8px",
-                              fontSize: "12px",
-                            }}
-                          />
-                          <Line
-                            type="monotone"
-                            dataKey="submissions"
-                            stroke="#6B46C1"
-                            strokeWidth={2}
-                            dot={{
-                              stroke: '#6B46C1',
-                              strokeWidth: 2,
-                              fill: '#fff',
-                              r: 4
-                            }}
-                            activeDot={{
-                              stroke: '#6B46C1',
-                              strokeWidth: 2,
-                              fill: '#6B46C1',
-                              r: 6
-                            }}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    );
-                  })()} 
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={idealVolume.map((item: {name: string; value: number}) => ({
+                        name: item.name, // Date in MM/DD format
+                        submissions: item.value
+                      }))}
+                      margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                      <XAxis 
+                        dataKey="name" 
+                        stroke="#888" 
+                        tickLine={false}
+                        tick={{ fontSize: 12 }}
+                        label={{ value: 'Date (MM/DD)', position: 'insideBottom', offset: -10, fontSize: 12 }}
+                      />
+                      <YAxis 
+                        stroke="#888" 
+                        tickLine={false}
+                        tick={{ fontSize: 12 }}
+                        axisLine={false}
+                        domain={[0, 30]} // Set upper bound to 30 to show upward trend
+                        ticks={[0, 5, 10, 15, 20, 25, 30]} // Set specific ticks in increments of 5
+                        label={{ value: 'Submissions', angle: -90, position: 'insideLeft', offset: 0, fontSize: 12 }}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => [`${value} submissions`, 'Total']}
+                        labelFormatter={(label) => `Date: ${label}`}
+                        contentStyle={{
+                          backgroundColor: "white",
+                          border: "1px solid #ddd",
+                          borderRadius: "6px",
+                          padding: "8px",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="submissions"
+                        stroke="#6B46C1"
+                        strokeWidth={2}
+                        dot={{
+                          stroke: '#6B46C1',
+                          strokeWidth: 2,
+                          fill: '#fff',
+                          r: 4
+                        }}
+                        activeDot={{
+                          stroke: '#6B46C1',
+                          strokeWidth: 2,
+                          fill: '#6B46C1',
+                          r: 6
+                        }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
