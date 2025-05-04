@@ -88,15 +88,13 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
         {/* Right Section */}
         <div className="flex items-center gap-4">
           {/* Search */}
-          <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="pl-10 w-[250px] border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="hidden md:block">
+            <Link href="/search">
+              <Button variant="outline" className="border-gray-200 gap-2">
+                <Search className="h-4 w-4 text-gray-400" />
+                <span className="text-gray-500">Search...</span>
+              </Button>
+            </Link>
           </div>
           
           {/* Add New button - always show as per user request */}

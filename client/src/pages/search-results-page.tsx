@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SearchBar from '@/components/search/search-bar';
 
 type SearchResult = {
   id: number;
@@ -43,7 +44,7 @@ export default function SearchResultsPage() {
       setQuery(q);
       performSearch(q);
     } else {
-      setLocation('/');
+      setLocation('/search');
     }
   }, [setLocation]);
   

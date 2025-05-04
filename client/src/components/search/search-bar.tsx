@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, X, Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { useLocation } from 'wouter';
+import { Badge } from '@/components/ui/badge';
 
 type SearchSuggestion = {
   id: number;
@@ -18,59 +17,55 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [, setLocation] = useLocation();
-  const searchRef = useRef<HTMLDivElement>(null);
-  
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
   
   // Fetch suggestions when query changes
   useEffect(() => {
+    // Clear suggestions if query is too short
+    if (!query || query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    
+    // Set loading state
+    setIsLoading(true);
+    
+    // Create a function to fetch suggestions
     const fetchSuggestions = async () => {
-      if (query.length < 2) {
-        setSuggestions([]);
-        return;
-      }
-      
-      setIsLoading(true);
       try {
+        console.log('Fetching suggestions for:', query);
         const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
+        
         if (response.ok) {
           const data = await response.json();
-          console.log('Search suggestions:', data);
+          console.log('Got suggestions:', data);
           setSuggestions(data);
+        } else {
+          console.error('Error response:', response.status);
+          setSuggestions([]);
         }
       } catch (error) {
-        console.error('Error fetching suggestions:', error);
+        console.error('Failed to fetch suggestions:', error);
+        setSuggestions([]);
       } finally {
         setIsLoading(false);
       }
     };
     
-    const debounce = setTimeout(() => {
+    // Debounce the API call
+    const timeoutId = setTimeout(() => {
       fetchSuggestions();
     }, 300);
     
-    return () => clearTimeout(debounce);
+    // Clean up the timeout
+    return () => clearTimeout(timeoutId);
   }, [query]);
   
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      console.log('Searching for:', query);
       setLocation(`/search?q=${encodeURIComponent(query)}`);
-      setShowSuggestions(false);
     }
   };
   
@@ -81,8 +76,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
     else if (category === 'challenge') categoryPath = 'challenges';
     else if (category === 'pain-point') categoryPath = 'pain-points';
     
+    console.log(`Navigating to ${categoryPath}/${id}`);
     setLocation(`/${categoryPath}/${id}`);
-    setShowSuggestions(false);
     setQuery('');
   };
   
@@ -99,67 +94,65 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
     }
   };
   
-  // Debug values to help troubleshoot
-  console.log('showSuggestions:', showSuggestions);
-  console.log('query.length:', query.length);
-  console.log('suggestions.length:', suggestions.length);
+  // Show dropdown if we have a query with at least 2 characters
+  const showDropdown = query.length >= 2;
+  console.log('showDropdown:', showDropdown, 'isLoading:', isLoading, 'suggestions:', suggestions.length);
   
   return (
-    <div className={`relative ${className}`} ref={searchRef}>
-      <form onSubmit={handleSearch} className="relative">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-          <Input
+    <div className={`relative ${className}`}>
+      {/* Search form */}
+      <form onSubmit={handleSearch} className="flex w-full items-center relative">
+        <div className="relative flex-grow">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <input
             type="text"
-            placeholder="Search ideas, challenges & pain points..."
-            className="pl-10 pr-10 h-10 w-full focus-visible:ring-violet-500"
             value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setShowSuggestions(true);
-            }}
-            onFocus={() => setShowSuggestions(true)}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search ideas, challenges & pain points..."
+            className="h-10 w-full rounded-md border border-input bg-background pl-10 pr-10 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
           {query && (
             <button
               type="button"
-              onClick={() => {
-                setQuery('');
-                setSuggestions([]);
-              }}
-              className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400"
+              onClick={() => setQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
+        
+        <button type="submit" className="ml-2 bg-violet-600 text-white px-4 py-2 rounded-md hover:bg-violet-700">
+          Search
+        </button>
       </form>
       
-      {/* Suggestions dropdown - forcing visibility for debugging */}
-      {query.length >= 2 && (
-        <div className="absolute top-full left-0 z-[100] mt-1 w-full rounded-md bg-white shadow-lg dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      {/* Suggestions dropdown - only show when we have a query */}
+      {showDropdown && (
+        <div className="absolute left-0 right-0 top-12 z-50 rounded-md border border-gray-200 bg-white shadow-lg">
           {isLoading ? (
-            <div className="p-4 flex justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+            <div className="flex justify-center p-4">
+              <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
             </div>
           ) : suggestions.length > 0 ? (
             <ul className="max-h-60 overflow-auto py-1">
               {suggestions.map((suggestion) => (
                 <li
                   key={suggestion.id}
-                  className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex justify-between items-center"
                   onClick={() => handleSuggestionClick(suggestion.id, suggestion.category)}
+                  className="flex cursor-pointer items-center justify-between px-4 py-2 hover:bg-gray-100"
                 >
-                  <div>
-                    <div className="text-sm">
-                      {highlightMatchedText(suggestion.title, query)}
-                    </div>
-                  </div>
+                  <span className="text-sm font-medium">{suggestion.title}</span>
                   <div>{getCategoryBadge(suggestion.category)}</div>
                 </li>
               ))}
-              <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-center text-violet-600 text-sm font-medium">
-                <button onClick={handleSearch}>See all results</button>
+              <li className="border-t border-gray-100 p-2 text-center">
+                <button 
+                  onClick={handleSearch}
+                  className="text-sm font-medium text-violet-600 hover:text-violet-800"
+                >
+                  See all results
+                </button>
               </li>
             </ul>
           ) : (
@@ -172,32 +165,5 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
     </div>
   );
 };
-
-// Helper function to highlight matched text
-function highlightMatchedText(text: string, query: string) {
-  if (!query) return text;
-  
-  try {
-    const regex = new RegExp(`(${query})`, 'gi');
-    const parts = text.split(regex);
-    
-    return (
-      <>
-        {parts.map((part, i) => 
-          regex.test(part) ? (
-            <span key={i} className="bg-yellow-100 text-gray-900 dark:bg-yellow-800 dark:text-gray-100">
-              {part}
-            </span>
-          ) : (
-            part
-          )
-        )}
-      </>
-    );
-  } catch (e) {
-    // If regex fails (e.g. with special characters), just return the plain text
-    return text;
-  }
-}
 
 export default SearchBar;

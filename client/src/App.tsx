@@ -25,6 +25,7 @@ import MyVotesPage from "@/pages/my-votes-page";
 import FollowedIdeasPage from "@/pages/followed-ideas-page";
 import AnalyticsPage from "@/pages/analytics-page";
 import SearchResultsPage from "@/pages/search-results-page";
+import SearchPage from "@/pages/search-page";
 
 // Lazy loaded admin routes to improve initial loading performance
 import { lazy, Suspense } from "react";
@@ -88,7 +89,8 @@ function Router() {
       <ProtectedRoute path="/submit/idea" component={SubmitIdeaPage} />
       <ProtectedRoute path="/submit/challenge" component={SubmitChallengePage} />
       <ProtectedRoute path="/submit/pain-point" component={SubmitPainPointPage} />
-      <ProtectedRoute path="/search" component={SearchResultsPage} />
+      <ProtectedRoute path="/search" component={SearchPage} />
+      <ProtectedRoute path="/search/results" component={SearchResultsPage} />
       <Route component={NotFound} />
     </Switch>
   );
