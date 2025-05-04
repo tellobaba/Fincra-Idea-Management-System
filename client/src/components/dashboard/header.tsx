@@ -75,14 +75,14 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-30 px-4 md:px-6">
+    <header className="bg-background border-b border-border sticky top-0 z-30 px-4 md:px-6">
       <div className="flex items-center justify-between h-16">
         {/* Left Section */}
         <div className="flex-1 flex items-center">
           {welcomeMessage && (
             <div className="hidden md:block">
-              <h1 className="text-xl font-semibold">{welcomeMessage} {user?.displayName.split(' ')[0] || 'User'} ✨</h1>
-              <p className="text-sm text-gray-500">Share your pain-points, pitch new ideas, or post a challenge</p>
+              <h1 className="text-xl font-semibold text-foreground">{welcomeMessage} {user?.displayName.split(' ')[0] || 'User'} ✨</h1>
+              <p className="text-sm text-muted-foreground">Share your pain-points, pitch new ideas, or post a challenge</p>
             </div>
           )}
         </div>
@@ -97,7 +97,7 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
           {/* Add New button - always show as per user request */}
           <Button 
             variant="default" 
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={handleAddNew}
           >
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -111,7 +111,7 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2 text-gray-700">
+                <Button variant="ghost" className="gap-2 text-foreground/80 hover:text-foreground">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.avatarUrl || undefined} alt={user.displayName} />
                     <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
@@ -142,8 +142,8 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
         <div className="flex mt-2 mb-4">
           <nav className="-mb-px flex space-x-8">
             <button
-              className={`flex items-center border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "ideas" ? "border-indigo-500 text-indigo-600" : ""
+              className={`flex items-center border-transparent text-muted-foreground hover:text-foreground hover:border-border whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "ideas" ? "border-primary text-primary" : ""
               }`}
               onClick={() => handleTabChange("ideas")}
             >
@@ -151,8 +151,8 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
               Ideas {ideasCount > 0 && `(${ideasCount})`}
             </button>
             <button
-              className={`flex items-center border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "challenges" ? "border-indigo-500 text-indigo-600" : ""
+              className={`flex items-center border-transparent text-muted-foreground hover:text-foreground hover:border-border whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "challenges" ? "border-primary text-primary" : ""
               }`}
               onClick={() => handleTabChange("challenges")}
             >
@@ -160,8 +160,8 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
               Challenge {challengesCount > 0 && `(${challengesCount})`}
             </button>
             <button
-              className={`flex items-center border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "pain-points" ? "border-indigo-500 text-indigo-600" : ""
+              className={`flex items-center border-transparent text-muted-foreground hover:text-foreground hover:border-border whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "pain-points" ? "border-primary text-primary" : ""
               }`}
               onClick={() => handleTabChange("pain-points")}
             >
