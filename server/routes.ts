@@ -1557,6 +1557,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Test endpoint to create a notification for the current user
+  app.post("/api/test/create-notification", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const notification = await dbStorage.createNotification({
+        userId: req.user.id,
+        title: "Test Notification",
+        message: "This is a test notification to verify the notification system.",
+        type: "comment",
+        relatedItemId: 1, // Using a placeholder ID
+        relatedItemType: "idea",
+        actorId: req.user.id
+      });
+      
+      res.status(201).json(notification);
+    } catch (error) {
+      console.error('Error creating test notification:', error);
+      res.status(500).json({ message: "Failed to create test notification" });
+    }
+  });
+  
   // Define specialized routes before generic ones
   
   // Add endpoints to get ideas by specific category type

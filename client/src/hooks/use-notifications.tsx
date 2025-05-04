@@ -132,6 +132,35 @@ export function useNotifications() {
   const markAllAsRead = () => {
     markAllAsReadMutation.mutate();
   };
+  
+  // Mutation to create a test notification
+  const createTestNotificationMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest('POST', '/api/test/create-notification');
+      if (!res.ok) throw new Error('Failed to create test notification');
+      return await res.json();
+    },
+    onSuccess: () => {
+      // Invalidate queries to refetch notifications and unread count
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
+      toast({
+        title: 'Success',
+        description: 'Test notification created',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+  
+  const createTestNotification = () => {
+    createTestNotificationMutation.mutate();
+  };
 
   return {
     notifications,
@@ -143,5 +172,6 @@ export function useNotifications() {
     closeNotifications,
     markAsRead,
     markAllAsRead,
+    createTestNotification,
   };
 }
