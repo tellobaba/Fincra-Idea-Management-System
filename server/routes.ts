@@ -284,6 +284,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If user is authenticated and 'all' query param is not true, filter by user's submitted ideas
       if (req.isAuthenticated() && req.query.all !== 'true') {
         filters.submittedById = req.user.id;
+        console.log(`Filtering opportunities by user ID: ${req.user.id}, username: ${req.user.username}`);
+      } else {
+        console.log('Showing all opportunity ideas');
       }
       
       const opportunityIdeas = await dbStorage.getIdeas(filters);
@@ -319,6 +322,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If user is authenticated and 'all' query param is not true, filter by user's submitted ideas
       if (req.isAuthenticated() && req.query.all !== 'true') {
         filters.submittedById = req.user.id;
+        console.log(`Filtering challenges by user ID: ${req.user.id}, username: ${req.user.username}`);
+      } else {
+        console.log('Showing all challenge ideas');
       }
       
       const challengeIdeas = await dbStorage.getIdeas(filters);
@@ -354,6 +360,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If user is authenticated and 'all' query param is not true, filter by user's submitted ideas
       if (req.isAuthenticated() && req.query.all !== 'true') {
         filters.submittedById = req.user.id;
+        console.log(`Filtering pain points by user ID: ${req.user.id}, username: ${req.user.username}`);
+      } else {
+        console.log('Showing all pain point ideas');
       }
       
       const painPointIdeas = await dbStorage.getIdeas(filters);
