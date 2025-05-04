@@ -4,7 +4,7 @@ import path from "path";
 import fs from 'fs';
 import { setupAuth } from "./auth";
 import { storage as dbStorage } from "./storage";
-import { insertIdeaSchema, insertCommentSchema } from "@shared/schema";
+import { insertIdeaSchema, insertCommentSchema, insertNotificationSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from 'multer';
 import { categorySchema, statusSchema, prioritySchema, departmentSchema, roleSchema, type Idea, type User } from '@shared/schema';
@@ -923,6 +923,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to vote for idea" });
       }
       
+      // Create a notification for the idea owner if it's not the same user
+      if (updatedIdea.submittedById !== userId) {
+        try {
+          const voter = req.user!;
+          
+          await dbStorage.createNotification({
+            userId: updatedIdea.submittedById,
+            title: "New vote on your idea",
+            message: `${voter.displayName} voted on your idea: ${updatedIdea.title}`,
+            type: "vote",
+            relatedItemId: updatedIdea.id,
+            relatedItemType: "idea",
+            actorId: voter.id
+          });
+        } catch (notificationError) {
+          console.error('Error creating vote notification:', notificationError);
+          // Don't fail the main operation if notification creation fails
+        }
+      }
+      
       // Get submitter details for the response
       const submitter = await dbStorage.getUser(updatedIdea.submittedById);
       
@@ -972,6 +992,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const comment = await dbStorage.createComment(validationResult.data);
+      
+      // Create a notification for the idea owner if it's not the same user
+      if (idea.submittedById !== req.user.id) {
+        try {
+          const commenter = req.user!;
+          
+          await dbStorage.createNotification({
+            userId: idea.submittedById,
+            title: "New comment on your idea",
+            message: `${commenter.displayName} commented on your idea: ${idea.title}`,
+            type: "comment",
+            relatedItemId: idea.id,
+            relatedItemType: "idea",
+            actorId: commenter.id
+          });
+        } catch (notificationError) {
+          console.error('Error creating comment notification:', notificationError);
+          // Don't fail the main operation if notification creation fails
+        }
+      }
       
       // Attach user info
       const user = await dbStorage.getUser(comment.userId);
@@ -1026,6 +1066,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to assign idea" });
       }
       
+      // Create notification for the idea owner about the assignment
+      try {
+        const admin = req.user!;
+        
+        // Notify the idea owner
+        await dbStorage.createNotification({
+          userId: idea.submittedById,
+          title: "Your idea has been assigned",
+          message: `${admin.displayName} assigned your idea "${idea.title}" to ${user.displayName}`,
+          type: "assignment",
+          relatedItemId: idea.id,
+          relatedItemType: "idea",
+          actorId: admin.id
+        });
+        
+        // Notify the assignee
+        if (parseInt(userId) !== idea.submittedById) {
+          await dbStorage.createNotification({
+            userId: parseInt(userId),
+            title: "Idea assigned to you",
+            message: `${admin.displayName} assigned an idea to you: "${idea.title}"`,
+            type: "assignment",
+            relatedItemId: idea.id,
+            relatedItemType: "idea",
+            actorId: admin.id
+          });
+        }
+      } catch (notificationError) {
+        console.error('Error creating assignment notification:', notificationError);
+        // Don't fail the main operation if notification creation fails
+      }
+      
       // Attach user info
       const assignedTo = updatedIdea.assignedToId ? await dbStorage.getUser(updatedIdea.assignedToId) : null;
       
@@ -1072,6 +1144,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!updatedIdea) {
         return res.status(500).json({ message: "Failed to change idea status" });
+      }
+      
+      // Create a notification for the idea owner about the status change
+      try {
+        const admin = req.user!;
+        
+        await dbStorage.createNotification({
+          userId: idea.submittedById,
+          title: "Status updated on your idea",
+          message: `${admin.displayName} changed the status of your idea "${idea.title}" to ${status}`,
+          type: "status_change",
+          relatedItemId: idea.id,
+          relatedItemType: "idea",
+          actorId: admin.id
+        });
+      } catch (notificationError) {
+        console.error('Error creating status change notification:', notificationError);
+        // Don't fail the main operation if notification creation fails
       }
       
       res.json(updatedIdea);
@@ -1399,6 +1489,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error fetching leaderboard data:', error);
       // Return empty array instead of error to prevent UI disruption
       res.json([]);
+    }
+  });
+  
+  // Notifications API routes
+  app.get("/api/notifications", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+      const onlyUnread = req.query.onlyUnread === 'true';
+      
+      const notifications = await dbStorage.getUserNotifications(req.user.id, limit, onlyUnread);
+      res.json(notifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+  
+  app.get("/api/notifications/unread-count", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const count = await dbStorage.getUnreadNotificationCount(req.user.id);
+      res.json({ count });
+    } catch (error) {
+      console.error('Error fetching unread notification count:', error);
+      res.status(500).json({ message: "Failed to fetch unread notification count" });
+    }
+  });
+  
+  app.post("/api/notifications/:id/mark-as-read", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const notificationId = parseInt(req.params.id, 10);
+      if (isNaN(notificationId)) {
+        return res.status(400).json({ message: "Invalid notification ID" });
+      }
+      
+      const notification = await dbStorage.markNotificationAsRead(notificationId);
+      res.json(notification);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+  
+  app.post("/api/notifications/mark-all-as-read", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      await dbStorage.markAllNotificationsAsRead(req.user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
     }
   });
   
