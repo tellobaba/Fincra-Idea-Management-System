@@ -60,7 +60,7 @@ export function NotificationDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={toggleOpen}
-        className="relative p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 rounded-full"
+        className="relative p-2 text-header-foreground/70 hover:text-header-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary rounded-full"
       >
         <span className="sr-only">Notifications</span>
         <Bell className="h-6 w-6" />
@@ -72,7 +72,7 @@ export function NotificationDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white border border-gray-200 rounded-md shadow-lg z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-96 bg-popover border border-border rounded-md shadow-lg z-50 overflow-hidden">
           <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
             <h3 className="text-lg font-medium text-gray-800">Notifications</h3>
             <div className="flex space-x-2">
