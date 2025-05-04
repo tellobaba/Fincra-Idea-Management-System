@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
-import { Search, Bell, ChevronDown, PlusCircle, LightbulbIcon, AlertCircle, Trophy } from "lucide-react";
+import { Bell, ChevronDown, PlusCircle, LightbulbIcon, AlertCircle, Trophy } from "lucide-react";
+import SearchBar from "../../components/search/search-bar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -88,13 +89,8 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
         {/* Right Section */}
         <div className="flex items-center gap-4">
           {/* Search */}
-          <div className="hidden md:block">
-            <Link href="/search">
-              <Button variant="outline" className="border-gray-200 gap-2">
-                <Search className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-500">Search...</span>
-              </Button>
-            </Link>
+          <div className="hidden md:block w-64">
+            <SearchBar className="w-full" />
           </div>
           
           {/* Add New button - always show as per user request */}
