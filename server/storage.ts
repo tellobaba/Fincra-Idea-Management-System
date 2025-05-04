@@ -1,4 +1,4 @@
-import { users, ideas, comments, userVotes, follows, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment, type InsertUserVote, type UserVote, type InsertFollow, type Follow } from "@shared/schema";
+import { users, ideas, comments, userVotes, follows, notifications, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment, type InsertUserVote, type UserVote, type InsertFollow, type Follow, type InsertNotification, type Notification } from "@shared/schema";
 import session from "express-session";
 import { db } from "./db";
 import { eq, asc, desc, and, or, sql } from "drizzle-orm";
@@ -79,6 +79,13 @@ export interface IStorage {
     painPoints: (Idea & { submitter?: { id: number; displayName: string; department: string; avatarUrl?: string; } })[]
   }>;
   getSearchSuggestions(query: string): Promise<{ id: number; title: string; category: string }[]>;
+  
+  // Notification operations
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: number, limit?: number, onlyUnread?: boolean): Promise<(Notification & { actor?: { id: number; displayName: string; avatarUrl?: string; } })[]>;
+  markNotificationAsRead(id: number): Promise<Notification>;
+  markAllNotificationsAsRead(userId: number): Promise<void>;
+  getUnreadNotificationCount(userId: number): Promise<number>;
   
   // Session store
   sessionStore: session.SessionStore;
@@ -869,6 +876,107 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error getting search suggestions:', error);
       return [];
+    }
+  }
+  
+  // Notification operations
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    try {
+      const [result] = await db
+        .insert(notifications)
+        .values({
+          ...notification,
+          isRead: false,
+          createdAt: new Date()
+        })
+        .returning();
+        
+      return result;
+    } catch (error) {
+      console.error('Error creating notification:', error);
+      throw error;
+    }
+  }
+  
+  async getUserNotifications(userId: number, limit: number = 10, onlyUnread: boolean = false): Promise<(Notification & { actor?: { id: number; displayName: string; avatarUrl?: string; } })[]> {
+    try {
+      let query = db
+        .select({
+          notification: notifications,
+          actor: {
+            id: users.id,
+            displayName: users.displayName,
+            avatarUrl: users.avatarUrl
+          }
+        })
+        .from(notifications)
+        .leftJoin(users, eq(notifications.actorId, users.id))
+        .where(eq(notifications.userId, userId));
+      
+      if (onlyUnread) {
+        query = query.where(eq(notifications.isRead, false));
+      }
+      
+      const results = await query
+        .orderBy(desc(notifications.createdAt))
+        .limit(limit);
+        
+      // Transform the results to match the expected return type
+      return results.map(row => ({
+        ...row.notification,
+        actor: row.actor.id ? {
+          id: row.actor.id,
+          displayName: row.actor.displayName,
+          avatarUrl: row.actor.avatarUrl
+        } : undefined
+      }));
+    } catch (error) {
+      console.error('Error fetching user notifications:', error);
+      return [];
+    }
+  }
+  
+  async markNotificationAsRead(id: number): Promise<Notification> {
+    try {
+      const [notification] = await db
+        .update(notifications)
+        .set({ isRead: true })
+        .where(eq(notifications.id, id))
+        .returning();
+        
+      return notification;
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  }
+  
+  async markAllNotificationsAsRead(userId: number): Promise<void> {
+    try {
+      await db
+        .update(notifications)
+        .set({ isRead: true })
+        .where(eq(notifications.userId, userId));
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw error;
+    }
+  }
+  
+  async getUnreadNotificationCount(userId: number): Promise<number> {
+    try {
+      const result = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(notifications)
+        .where(and(
+          eq(notifications.userId, userId),
+          eq(notifications.isRead, false)
+        ));
+        
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting unread notification count:', error);
+      return 0;
     }
   }
 }
