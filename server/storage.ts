@@ -792,8 +792,8 @@ export class DatabaseStorage implements IStorage {
         sql`${ideas.title} ILIKE ${searchTerm}`,
         sql`${ideas.description} ILIKE ${searchTerm}`,
         sql`${ideas.impact} ILIKE ${searchTerm}`,
-        sql`${ideas.adminNotes} ILIKE ${searchTerm}`,
-        sql`${ideas.tags} ILIKE ${searchTerm}`
+        sql`${ideas.adminNotes} ILIKE ${searchTerm}`
+        // Removing the tags search as it's causing an error with the array type
       );
       
       // Get all matching ideas
