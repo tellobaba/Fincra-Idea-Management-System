@@ -161,13 +161,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Ideas volume endpoint
   app.get("/api/ideas/volume", async (req, res) => {
     try {
-      // Return real volume data from database
+      const ideas = await dbStorage.getIdeas();
+      
+      // Get today's date and calculate dates for periods
+      const today = new Date();
+      const fiveDaysAgo = new Date(today);
+      fiveDaysAgo.setDate(today.getDate() - 5);
+      
+      const twoWeeksAgo = new Date(today);
+      twoWeeksAgo.setDate(today.getDate() - 14);
+      
+      const oneMonthAgo = new Date(today);
+      oneMonthAgo.setMonth(today.getMonth() - 1);
+      
+      const sixMonthsAgo = new Date(today);
+      sixMonthsAgo.setMonth(today.getMonth() - 6);
+      
+      const oneYearAgo = new Date(today);
+      oneYearAgo.setFullYear(today.getFullYear() - 1);
+      
+      console.log('Calculating idea volumes with total ideas count:', ideas.length);
+      
+      // Count ideas in each period (handling missing createdAt)
+      const fiveDaysCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= fiveDaysAgo).length;
+      const twoWeeksCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= twoWeeksAgo).length;
+      const oneMonthCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= oneMonthAgo).length;
+      const sixMonthsCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= sixMonthsAgo).length;
+      const oneYearCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= oneYearAgo).length;
+      
+      console.log('Volume counts:', { fiveDaysCount, twoWeeksCount, oneMonthCount, sixMonthsCount, oneYearCount });
+      
       const volumeData = [
-        { name: "5D", value: 3 },
-        { name: "2W", value: 7 },
-        { name: "1M", value: 12 },
-        { name: "6M", value: 28 },
-        { name: "1Y", value: 52 }
+        { name: "5D", value: fiveDaysCount },
+        { name: "2W", value: twoWeeksCount },
+        { name: "1M", value: oneMonthCount },
+        { name: "6M", value: sixMonthsCount },
+        { name: "1Y", value: oneYearCount }
       ];
       
       res.json(volumeData);
@@ -1364,50 +1393,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Specific category endpoints for each page
   // These endpoints were moved lower in the file - see below
-  
-  // Ideas Volume Over Time
-  app.get("/api/ideas/volume", async (_req, res) => {
-    try {
-      const ideas = await dbStorage.getIdeas();
-      
-      // Get today's date and calculate dates for periods
-      const today = new Date();
-      const fiveDaysAgo = new Date(today);
-      fiveDaysAgo.setDate(today.getDate() - 5);
-      
-      const twoWeeksAgo = new Date(today);
-      twoWeeksAgo.setDate(today.getDate() - 14);
-      
-      const oneMonthAgo = new Date(today);
-      oneMonthAgo.setMonth(today.getMonth() - 1);
-      
-      const sixMonthsAgo = new Date(today);
-      sixMonthsAgo.setMonth(today.getMonth() - 6);
-      
-      const oneYearAgo = new Date(today);
-      oneYearAgo.setFullYear(today.getFullYear() - 1);
-      
-      // Count ideas in each period (handling missing createdAt)
-      const fiveDaysCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= fiveDaysAgo).length;
-      const twoWeeksCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= twoWeeksAgo).length;
-      const oneMonthCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= oneMonthAgo).length;
-      const sixMonthsCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= sixMonthsAgo).length;
-      const oneYearCount = ideas.filter(idea => idea.createdAt && (idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)) >= oneYearAgo).length;
-      
-      const volumeData = [
-        { name: "5D", value: fiveDaysCount },
-        { name: "2W", value: twoWeeksCount },
-        { name: "1M", value: oneMonthCount },
-        { name: "6M", value: sixMonthsCount },
-        { name: "1Y", value: oneYearCount }
-      ];
-      
-      res.json(volumeData);
-    } catch (error) {
-      console.error('Error fetching idea volume:', error);
-      res.status(500).json({ message: "Failed to fetch idea volume" });
-    }
-  });
   
   // Get recent activity (latest ideas)
   app.get("/api/ideas/recent-activity", async (_req, res) => {
