@@ -262,7 +262,38 @@ export default function IdeaDetailPage() {
           
           <div className="bg-card rounded-lg shadow overflow-hidden mb-6">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-2">{idea.title}</h2>
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold">{idea.title}</h2>
+                
+                {/* Admin delete button with confirmation dialog */}
+                {isAdmin && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to delete this submission?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the submission
+                          and all associated data including comments, votes, and follow status.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => deleteIdeaMutation.mutate()}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
               
               <div className="flex flex-wrap items-center gap-3 mb-6">
                 <Badge 
