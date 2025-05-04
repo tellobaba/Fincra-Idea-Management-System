@@ -73,8 +73,8 @@ export function NotificationDropdown() {
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-96 bg-popover border border-border rounded-md shadow-lg z-50 overflow-hidden">
-          <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-            <h3 className="text-lg font-medium text-gray-800">Notifications</h3>
+          <div className="p-3 border-b border-border flex justify-between items-center bg-secondary/20">
+            <h3 className="text-lg font-medium text-popover-foreground">Notifications</h3>
             <div className="flex space-x-2">
               <Button
                 onClick={markAllAsRead}
@@ -93,7 +93,7 @@ export function NotificationDropdown() {
           
           {/* Test button for developers - hidden in production */}
           {import.meta.env.MODE !== 'production' && (
-            <div className="p-2 border-b border-gray-100 bg-gray-50">
+            <div className="p-2 border-b border-border bg-secondary/20">
               <Button
                 onClick={createTestNotification}
                 variant="outline"
@@ -107,17 +107,17 @@ export function NotificationDropdown() {
 
           <ScrollArea className="max-h-[70vh] overflow-y-auto">
             {isLoading ? (
-              <div className="p-4 text-center text-gray-500">Loading notifications...</div>
+              <div className="p-4 text-center text-muted-foreground">Loading notifications...</div>
             ) : notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">No notifications yet</div>
+              <div className="p-4 text-center text-muted-foreground">No notifications yet</div>
             ) : (
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-border">
                 {notifications.map((notification) => (
                   <li
                     key={notification.id}
                     className={cn(
-                      'p-4 hover:bg-gray-50 transition-colors duration-100 cursor-pointer',
-                      !notification.read && 'bg-blue-50'
+                      'p-4 hover:bg-secondary/20 transition-colors duration-100 cursor-pointer',
+                      !notification.read && 'bg-blue-50/20 dark:bg-blue-950/20'
                     )}
                     onClick={() => !notification.read && markAsRead(notification.id)}
                   >
@@ -127,12 +127,12 @@ export function NotificationDropdown() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-900">{notification.title}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-sm font-medium text-popover-foreground">{notification.title}</p>
+                          <p className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                           </p>
                         </div>
-                        <p className="mt-1 text-sm text-gray-600">{notification.message}</p>
+                        <p className="mt-1 text-sm text-popover-foreground/80">{notification.message}</p>
                         {notification.actor && (
                           <div className="mt-2 flex items-center">
                             <div className="flex-shrink-0">
@@ -143,13 +143,13 @@ export function NotificationDropdown() {
                                   alt={notification.actor.displayName}
                                 />
                               ) : (
-                                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-medium">
+                                <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-sm font-medium">
                                   {notification.actor.displayName.charAt(0).toUpperCase()}
                                 </div>
                               )}
                             </div>
                             <div className="ml-2">
-                              <p className="text-xs font-medium text-gray-900">{notification.actor.displayName}</p>
+                              <p className="text-xs font-medium text-popover-foreground">{notification.actor.displayName}</p>
                             </div>
                           </div>
                         )}
