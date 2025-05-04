@@ -1,10 +1,24 @@
 import { Status } from "@shared/schema";
-import { CheckIcon, ArrowUpDown, Drill, Code, FlagIcon } from "lucide-react";
+import { 
+  CheckIcon, 
+  ArrowUpDown, 
+  Drill, 
+  Code, 
+  FlagIcon, 
+  FileCheck, 
+  Search, 
+  Wrench, 
+  Check, 
+  Ban
+} from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface StatusStep {
   status: Status;
   label: string;
   icon: React.ReactNode;
+  color: string;
+  description: string;
 }
 
 interface IdeaStatusTrackerProps {
@@ -16,27 +30,37 @@ export function IdeaStatusTracker({ currentStatus }: IdeaStatusTrackerProps) {
     { 
       status: "submitted", 
       label: "Submitted", 
-      icon: <CheckIcon className="text-sm" />,
+      icon: <FileCheck className="h-4 w-4" />,
+      color: "bg-blue-500",
+      description: "Idea has been submitted and is awaiting review"
     },
     { 
       status: "in-review", 
       label: "In Review", 
-      icon: <ArrowUpDown className="text-sm" /> 
+      icon: <Search className="h-4 w-4" />,
+      color: "bg-amber-500",
+      description: "Idea is currently being evaluated by the review team"
     },
     { 
-      status: "in-refinement", 
-      label: "In Refinement", 
-      icon: <Drill className="text-sm" /> 
+      status: "merged", 
+      label: "Merged", 
+      icon: <Wrench className="h-4 w-4" />,
+      color: "bg-orange-500",
+      description: "Idea has been merged into the implementation pipeline"
     },
     { 
       status: "implemented", 
       label: "Implemented", 
-      icon: <Code className="text-sm" /> 
+      icon: <Check className="h-4 w-4" />,
+      color: "bg-green-500",
+      description: "Idea has been successfully implemented"
     },
     { 
-      status: "closed", 
-      label: "Closed", 
-      icon: <FlagIcon className="text-sm" /> 
+      status: "parked", 
+      label: "Parked", 
+      icon: <Ban className="h-4 w-4" />,
+      color: "bg-gray-500",
+      description: "Idea has been parked for future consideration"
     },
   ];
 
@@ -56,26 +80,45 @@ export function IdeaStatusTracker({ currentStatus }: IdeaStatusTrackerProps) {
         </div>
         
         {/* Status steps */}
-        <ul className="relative flex justify-between">
-          {statuses.map((step, index) => {
-            // Status circle color based on current status
-            const isActive = index <= currentStatusIndex;
-            const bgColor = isActive 
-              ? index === currentStatusIndex 
-                ? "bg-warning text-white" // Current step
-                : "bg-success text-white" // Completed step
-              : "bg-gray-200 text-muted-foreground"; // Future step
-            
-            return (
-              <li key={step.status} className="flex flex-col items-center">
-                <div className={`rounded-full h-8 w-8 flex items-center justify-center ${bgColor} border-2 border-white`}>
-                  {step.icon}
-                </div>
-                <span className="text-xs font-medium mt-2">{step.label}</span>
-              </li>
-            );
-          })}
-        </ul>
+        <TooltipProvider>
+          <ul className="relative flex justify-between">
+            {statuses.map((step, index) => {
+              // Status circle color based on current status
+              const isActive = index <= currentStatusIndex;
+              const isCompleted = index < currentStatusIndex;
+              const isCurrent = index === currentStatusIndex;
+              
+              let finalColor = "bg-gray-200 text-gray-500";
+              
+              if (isCompleted) {
+                finalColor = "bg-green-500 text-white";
+              } else if (isCurrent) {
+                finalColor = `${step.color} text-white`;
+              }
+              
+              // Add animation class if this is the current status
+              const animationClass = isCurrent ? "animate-pulse" : "";
+              
+              return (
+                <li key={step.status} className="flex flex-col items-center">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div 
+                        className={`rounded-full h-10 w-10 flex items-center justify-center ${finalColor} ${animationClass} border-2 border-white shadow-md transition-all duration-300`}
+                      >
+                        {step.icon}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{step.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <span className={`text-xs font-medium mt-2 ${isCurrent ? 'font-bold' : ''}`}>{step.label}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </TooltipProvider>
       </div>
     </div>
   );
