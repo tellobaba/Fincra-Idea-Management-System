@@ -26,6 +26,7 @@ import FollowedIdeasPage from "@/pages/followed-ideas-page";
 import AnalyticsPage from "@/pages/analytics-page";
 import SearchResultsPage from "@/pages/search-results-page";
 import SearchPage from "@/pages/search-page";
+import ProfileSettingsPage from "@/pages/profile-settings-page";
 
 // Lazy loaded admin routes to improve initial loading performance
 import { lazy, Suspense } from "react";
@@ -86,6 +87,7 @@ function Router() {
         <FollowedIdeasPage />
       </ProtectedRoute>
       <ProtectedRoute path="/analytics" component={AnalyticsPage} />
+      <ProtectedRoute path="/profile-settings" component={ProfileSettingsPage} />
       <ProtectedRoute path="/submit/idea" component={SubmitIdeaPage} />
       <ProtectedRoute path="/submit/challenge" component={SubmitChallengePage} />
       <ProtectedRoute path="/submit/pain-point" component={SubmitPainPointPage} />

@@ -7,6 +7,24 @@ import { storage as dbStorage } from "./storage";
 import { insertIdeaSchema, insertCommentSchema, insertNotificationSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from 'multer';
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+
+// Password utility functions
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
+
+async function comparePasswords(supplied: string, stored: string) {
+  const [hashed, salt] = stored.split(".");
+  const hashedBuf = Buffer.from(hashed, "hex");
+  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+  return timingSafeEqual(hashedBuf, suppliedBuf);
+}
 import { categorySchema, statusSchema, prioritySchema, departmentSchema, roleSchema, type Idea, type User } from '@shared/schema';
 
 // Middleware to check if user is admin
@@ -156,6 +174,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   setupAuth(app);
 
+  // User profile update endpoint
+  app.patch("/api/user/:id", async (req, res) => {
+    try {
+      // Check authentication
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // Parse and validate the user ID
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Only allow users to update their own profile unless they're an admin
+      if (req.user.id !== userId && req.user.role !== "admin") {
+        return res.status(403).json({ message: "You can only update your own profile" });
+      }
+      
+      // Get the current user data
+      const user = await dbStorage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Process allowed fields for update
+      const updates: Partial<User> = {};
+      
+      // Handle display name update
+      if (req.body.displayName && typeof req.body.displayName === "string") {
+        updates.displayName = req.body.displayName.trim();
+      }
+      
+      // Handle department update
+      if (req.body.department) {
+        try {
+          const validatedDepartment = departmentSchema.parse(req.body.department);
+          updates.department = validatedDepartment;
+        } catch (error) {
+          return res.status(400).json({ message: "Invalid department value" });
+        }
+      }
+      
+      // Update the user in the database
+      if (Object.keys(updates).length > 0) {
+        const updatedUser = await dbStorage.updateUser(userId, updates);
+        
+        if (updatedUser) {
+          // Remove sensitive information before sending the response
+          const { password, ...userResponse } = updatedUser;
+          return res.status(200).json(userResponse);
+        } else {
+          return res.status(500).json({ message: "Failed to update user" });
+        }
+      } else {
+        return res.status(400).json({ message: "No valid fields to update" });
+      }
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Password change endpoint
+  app.post("/api/user/:id/change-password", async (req, res) => {
+    try {
+      // Check authentication
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // Parse and validate the user ID
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Only allow users to change their own password unless they're an admin
+      if (req.user.id !== userId && req.user.role !== "admin") {
+        return res.status(403).json({ message: "You can only change your own password" });
+      }
+      
+      // Validate request body
+      if (!req.body.currentPassword || !req.body.newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+      
+      // Get the current user data
+      const user = await dbStorage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Verify current password
+      const isPasswordValid = await comparePasswords(req.body.currentPassword, user.password);
+      if (!isPasswordValid) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      
+      // Password strength validation - can be enhanced
+      if (req.body.newPassword.length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters" });
+      }
+      
+      // Hash the new password
+      const hashedPassword = await hashPassword(req.body.newPassword);
+      
+      // Update the password
+      const updatedUser = await dbStorage.updateUser(userId, { password: hashedPassword });
+      
+      if (updatedUser) {
+        return res.status(200).json({ message: "Password updated successfully" });
+      } else {
+        return res.status(500).json({ message: "Failed to update password" });
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
   // Custom endpoints with specific paths must go first
   
   // Ideas volume endpoint - now returning daily data for the last 5 days

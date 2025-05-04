@@ -246,7 +246,7 @@ export function Sidebar({ className }: SidebarProps) {
         {/* User info */}
         {user && (
           <div className="p-4 border-t border-gray-100 mt-2">
-            <Link href="/profile" className="flex items-center">
+            <Link href="/profile-settings" className="flex items-center">
               <Avatar className="h-8 w-8 mr-3">
                 <AvatarImage src={user.avatarUrl || undefined} alt={user.displayName} />
                 <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
