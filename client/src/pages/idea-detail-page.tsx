@@ -185,13 +185,16 @@ export default function IdeaDetailPage() {
         nextStatus = "in-review";
         break;
       case "in-review":
-        nextStatus = "in-refinement";
+        nextStatus = "merged";
         break;
-      case "in-refinement":
+      case "merged":
         nextStatus = "implemented";
         break;
       case "implemented":
-        nextStatus = "closed";
+        nextStatus = "parked";
+        break;
+      case "parked":
+        nextStatus = "submitted";
         break;
       default:
         nextStatus = "submitted";

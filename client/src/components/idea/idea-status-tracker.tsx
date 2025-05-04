@@ -26,37 +26,38 @@ interface IdeaStatusTrackerProps {
 }
 
 export function IdeaStatusTracker({ currentStatus }: IdeaStatusTrackerProps) {
+  // Make sure all statuses match those in the schema
   const statuses: StatusStep[] = [
     { 
-      status: "submitted", 
+      status: "submitted" as Status, 
       label: "Submitted", 
       icon: <FileCheck className="h-4 w-4" />,
       color: "bg-blue-500",
       description: "Idea has been submitted and is awaiting review"
     },
     { 
-      status: "in-review", 
+      status: "in-review" as Status, 
       label: "In Review", 
       icon: <Search className="h-4 w-4" />,
       color: "bg-amber-500",
       description: "Idea is currently being evaluated by the review team"
     },
     { 
-      status: "merged", 
+      status: "merged" as Status, 
       label: "Merged", 
       icon: <Wrench className="h-4 w-4" />,
       color: "bg-orange-500",
       description: "Idea has been merged into the implementation pipeline"
     },
     { 
-      status: "implemented", 
+      status: "implemented" as Status, 
       label: "Implemented", 
       icon: <Check className="h-4 w-4" />,
       color: "bg-green-500",
       description: "Idea has been successfully implemented"
     },
     { 
-      status: "parked", 
+      status: "parked" as Status, 
       label: "Parked", 
       icon: <Ban className="h-4 w-4" />,
       color: "bg-gray-500",
