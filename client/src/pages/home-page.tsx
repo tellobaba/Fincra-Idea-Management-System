@@ -1,16 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { IdeaWithUser, Metrics } from "@/types/ideas";
 import { Loader2 } from "lucide-react";
-import { NewUserView } from "@/components/dashboard/new-user-view";
 import { ExistingUserView } from "@/components/dashboard/existing-user-view";
 
 export default function HomePage() {
   const { user } = useAuth();
-  const [isNewUser, setIsNewUser] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   
   // Fetch metrics for KPI cards
@@ -36,13 +34,6 @@ export default function HomePage() {
     console.log("Searching for:", query);
   };
   
-  // Determine if user is new based on whether they have submitted any ideas
-  useEffect(() => {
-    if (!userIdeasLoading && user) {
-      setIsNewUser(userIdeas.length === 0);
-    }
-  }, [user, userIdeas, userIdeasLoading]);
-  
   if (metricsLoading || ideasLoading || userIdeasLoading) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -61,24 +52,13 @@ export default function HomePage() {
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        {isNewUser ? (
-          <>
-            <Header onSearch={handleSearch} />
-            <main className="flex-1 overflow-y-auto">
-              <NewUserView />
-            </main>
-          </>
-        ) : (
-          <>
-            <Header 
-              onSearch={handleSearch}
-              welcomeMessage="Welcome back,"
-            />
-            <main className="flex-1 overflow-y-auto">
-              <ExistingUserView />
-            </main>
-          </>
-        )}
+        <Header 
+          onSearch={handleSearch}
+          welcomeMessage="Welcome,"
+        />
+        <main className="flex-1 overflow-y-auto">
+          <ExistingUserView />
+        </main>
       </div>
     </div>
   );
