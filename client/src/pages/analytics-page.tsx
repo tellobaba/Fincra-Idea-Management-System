@@ -211,6 +211,8 @@ export default function AnalyticsPage() {
                             tickLine={false}
                             tick={{ fontSize: 12 }}
                             axisLine={false}
+                            domain={[0, 30]} // Set upper bound to 30 to show upward trend
+                            ticks={[0, 5, 10, 15, 20, 25, 30]} // Set specific ticks in increments of 5
                           />
                           <Tooltip 
                             formatter={(value: number) => [`${value} submissions`, 'Total']}
