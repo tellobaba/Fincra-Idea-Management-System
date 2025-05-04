@@ -46,7 +46,7 @@ export default function SearchResultsPage() {
     } else {
       setLocation('/search');
     }
-  }, [setLocation]);
+  }, [setLocation, window.location.search]);
   
   const performSearch = async (searchQuery: string) => {
     setIsLoading(true);
@@ -66,7 +66,7 @@ export default function SearchResultsPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      setLocation(`/search?q=${encodeURIComponent(query)}`);
+      setLocation(`/search/results?q=${encodeURIComponent(query)}`);
       performSearch(query);
     }
   };
@@ -100,29 +100,17 @@ export default function SearchResultsPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setLocation('/')}
+          onClick={() => setLocation('/search')}
           className="mr-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+          Back to Search
         </Button>
         <h1 className="text-2xl font-semibold">Search Results</h1>
       </div>
       
-      <div className="mb-6">
-        <form onSubmit={handleSearch} className="relative max-w-xl">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search ideas, challenges & pain points..."
-            className="pl-10 pr-4 py-2 h-12 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <Button type="submit" className="absolute right-1 top-1 h-10">
-            Search
-          </Button>
-        </form>
+      <div className="mb-6 max-w-xl">
+        <SearchBar className="w-full" />
       </div>
       
       {isLoading ? (
