@@ -179,68 +179,81 @@ export default function AnalyticsPage() {
                 <CardTitle className="text-lg font-medium">Ideas Volume</CardTitle>
               </CardHeader>
               <CardContent>
-                {/* Custom DIV-based Bar chart for Ideas Volume (by time period) */}
-                <div className="h-[200px] w-full flex flex-col justify-center pb-2 pt-2">
-                  <div className="flex justify-between px-2 mb-2">
-                    <div className="text-xs font-medium text-gray-500">Time Period</div>
-                    <div className="text-xs font-medium text-gray-500">Submissions</div>
-                  </div>
-                  
-                  <div className="space-y-3 flex-grow">
-                    {idealVolume.map((item: {name: string; value: number}, index: number) => {
-                      // Calculate percentage of max for bar width
-                      const maxValue = Math.max(...idealVolume.map((d: {value: number}) => d.value));
-                      const percentage = maxValue ? (item.value / maxValue) * 100 : 0;
-                      
-                      // Map the time period code to a more readable format
-                      let timePeriod = item.name;
-                      let description = '';
-                      
-                      switch(item.name) {
-                        case '5D':
-                          timePeriod = '5D';
-                          description = '5 Days';
-                          break;
-                        case '2W':
-                          timePeriod = '2W';
-                          description = '2 Weeks';
-                          break;
-                        case '1M':
-                          timePeriod = '1M';
-                          description = '1 Month';
-                          break;
-                        case '6M':
-                          timePeriod = '6M';
-                          description = '6 Months';
-                          break;
-                        case '1Y':
-                          timePeriod = '1Y';
-                          description = '1 Year';
-                          break;
-                      }
-                      
-                      return (
-                        <div key={index} className="flex items-center space-x-3">
-                          <div className="w-16 flex-shrink-0">
-                            <div className="text-sm font-medium text-gray-700">{timePeriod}</div>
-                            <div className="text-xs text-gray-500">{description}</div>
-                          </div>
-                          <div className="flex-grow h-6 bg-gray-100 rounded overflow-hidden relative">
-                            <div 
-                              className="h-full" 
-                              style={{
-                                width: `${percentage}%`,
-                                backgroundColor: "#6B46C1"
-                              }}
-                            />
-                          </div>
-                          <div className="w-8 flex-shrink-0 text-right text-sm font-semibold">
-                            {item.value}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                {/* Trendline chart for Ideas Volume using recharts */}
+                <div className="h-[250px] w-full">
+                  {/* Prepare data for the trendline chart */}
+                  {(() => {
+                    // Sort the volume data by time period for proper trend display
+                    const sortOrder = {'5D': 1, '2W': 2, '1M': 3, '6M': 4, '1Y': 5};
+                    const sortedData = [...idealVolume].sort((a, b) => sortOrder[a.name as keyof typeof sortOrder] - sortOrder[b.name as keyof typeof sortOrder]);
+                    
+                    // Format data for the chart
+                    const chartData = sortedData.map(item => ({
+                      name: item.name,
+                      submissions: item.value
+                    }));
+                    
+                    return (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={chartData}
+                          margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                          <XAxis 
+                            dataKey="name" 
+                            stroke="#888" 
+                            tickLine={false}
+                            tick={{ fontSize: 12 }}
+                          />
+                          <YAxis 
+                            stroke="#888" 
+                            tickLine={false}
+                            tick={{ fontSize: 12 }}
+                            axisLine={false}
+                          />
+                          <Tooltip 
+                            formatter={(value: number) => [`${value} submissions`, 'Total']}
+                            labelFormatter={(label) => {
+                              const labels: {[key: string]: string} = {
+                                '5D': '5 Days',
+                                '2W': '2 Weeks',
+                                '1M': '1 Month',
+                                '6M': '6 Months',
+                                '1Y': '1 Year'
+                              };
+                              return labels[label] || label;
+                            }}
+                            contentStyle={{
+                              backgroundColor: "white",
+                              border: "1px solid #ddd",
+                              borderRadius: "6px",
+                              padding: "8px",
+                              fontSize: "12px",
+                            }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="submissions"
+                            stroke="#6B46C1"
+                            strokeWidth={2}
+                            dot={{
+                              stroke: '#6B46C1',
+                              strokeWidth: 2,
+                              fill: '#fff',
+                              r: 4
+                            }}
+                            activeDot={{
+                              stroke: '#6B46C1',
+                              strokeWidth: 2,
+                              fill: '#6B46C1',
+                              r: 6
+                            }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    );
+                  })()} 
                 </div>
               </CardContent>
             </Card>
