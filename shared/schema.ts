@@ -65,6 +65,20 @@ export const follows = pgTable("follows", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Notifications table for user alerts
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(), // User receiving the notification
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(), // 'comment', 'status_change', 'follow', 'vote', 'assignment'
+  relatedItemId: integer("related_item_id").notNull(), // ID of the related item (idea, comment, etc.)
+  relatedItemType: text("related_item_type").notNull(), // Type of the related item ('opportunity', 'challenge', 'pain-point')
+  actorId: integer("actor_id"), // User who triggered the notification (commenter, follower, etc.)
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -111,6 +125,16 @@ export const insertFollowSchema = createInsertSchema(follows).pick({
   itemType: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).pick({
+  userId: true,
+  title: true,
+  message: true,
+  type: true,
+  relatedItemId: true,
+  relatedItemType: true,
+  actorId: true,
+});
+
 // Type exports
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -127,6 +151,9 @@ export type UserVote = typeof userVotes.$inferSelect;
 export type InsertFollow = z.infer<typeof insertFollowSchema>;
 export type Follow = typeof follows.$inferSelect;
 
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+
 // Category type
 export const categorySchema = z.enum(['pain-point', 'opportunity', 'challenge']);
 export type Category = z.infer<typeof categorySchema>;
@@ -139,10 +166,15 @@ export type Status = z.infer<typeof statusSchema>;
 export const prioritySchema = z.enum(['high', 'medium', 'low']);
 export type Priority = z.infer<typeof prioritySchema>;
 
+// Notification type
+export const notificationTypeSchema = z.enum(['comment', 'status_change', 'follow', 'vote', 'assignment']);
+export type NotificationType = z.infer<typeof notificationTypeSchema>;
+
 // Export values for easier usage in frontend
 export const categoryValues = categorySchema.options;
 export const statusValues = statusSchema.options;
 export const priorityValues = prioritySchema.options;
+export const notificationTypeValues = notificationTypeSchema.options;
 
 // Department type
 export const departmentSchema = z.enum([
