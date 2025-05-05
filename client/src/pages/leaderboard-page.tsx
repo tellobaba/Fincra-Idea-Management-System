@@ -27,9 +27,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { departmentSchema, categoryValues } from "@shared/schema";
 
 type TimeRange = 'all-time' | 'this-week' | 'this-month' | 'this-year';
-type SortBy = 'ideas' | 'impact' | 'votes' | 'approved';
+type SortBy = 'ideas' | 'votes' | 'approved'; // 'impact' removed as per user request
 
 export default function LeaderboardPage() {
+  // Default to 'ideas' sorting (ensure it's not 'impact' which was removed)
   const [sortBy, setSortBy] = useState<SortBy>("ideas");
   const [timeRange, setTimeRange] = useState<TimeRange>("all-time");
   const [category, setCategory] = useState<string>("none");
@@ -54,7 +55,6 @@ export default function LeaderboardPage() {
   function mapSortByToApiParam(sort: SortBy): string {
     switch (sort) {
       case 'ideas': return 'submissions';
-      case 'impact': return 'impact';
       case 'votes': return 'votes';
       case 'approved': return 'approved';
       default: return 'submissions';
@@ -180,7 +180,7 @@ export default function LeaderboardPage() {
                 <Tabs defaultValue={sortBy} onValueChange={(value) => setSortBy(value as SortBy)} className="w-full">
                   <TabsList className="w-full">
                     <TabsTrigger value="ideas" className="flex-1">Ideas</TabsTrigger>
-                    <TabsTrigger value="impact" className="flex-1">Impact</TabsTrigger>
+                    {/* Impact tab removed as per user request */}
                     <TabsTrigger value="votes" className="flex-1">Votes</TabsTrigger>
                     <TabsTrigger value="approved" className="flex-1">Approved</TabsTrigger>
                   </TabsList>
@@ -253,7 +253,7 @@ export default function LeaderboardPage() {
                       <TableHead>Status</TableHead>
                       <TableHead className="text-center">Ideas</TableHead>
                       <TableHead className="text-center">Implementation Rate</TableHead>
-                      <TableHead className="text-center">Impact Score</TableHead>
+                      {/* Impact Score column removed as per user request */}
                       <TableHead className="text-center">Votes</TableHead>
                       <TableHead className="text-center">Activity</TableHead>
                     </TableRow>
@@ -285,11 +285,11 @@ export default function LeaderboardPage() {
                         <TableCell>
                           <div className="flex items-center">
                             <Avatar className="h-10 w-10 mr-3">
-                              <AvatarImage src={entry.user.avatarUrl} alt={entry.user.displayName || entry.user.username || `User ${entry.user.id}`} />
-                              <AvatarFallback>{entry.user.displayName ? entry.user.displayName.charAt(0) : (entry.user.username ? entry.user.username.charAt(0) : '?')}</AvatarFallback>
+                              <AvatarImage src={entry.user.avatarUrl} alt={entry.user.displayName || `User ${entry.user.id}`} />
+                              <AvatarFallback>{entry.user.displayName ? entry.user.displayName.charAt(0) : '?'}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="text-sm font-medium">{entry.user.displayName || entry.user.username || `User ${entry.user.id}`}</div>
+                              <div className="text-sm font-medium">{entry.user.displayName || `User ${entry.user.id}`}</div>
                               <div className="text-xs text-muted-foreground">{entry.user.email || `user-${entry.user.id}@fincra.com`}</div>
                             </div>
                           </div>
@@ -325,9 +325,7 @@ export default function LeaderboardPage() {
                             {entry.ideasImplemented} implemented
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">
-                          <div className="text-sm font-medium">{entry.impactScore.toFixed(1)}</div>
-                        </TableCell>
+                        {/* Impact Score cell removed as per user request */}
                         <TableCell className="text-center">
                           <div className="text-sm font-medium">{entry.votesReceived}</div>
                         </TableCell>
