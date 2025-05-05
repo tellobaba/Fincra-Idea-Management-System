@@ -363,7 +363,7 @@ export function ExistingUserView() {
                       <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
                       </span>
-                      <span className="text-xs text-gray-400">{item.date}</span>
+                      <span className="text-xs font-medium bg-gray-50 px-2 py-1 rounded-md text-gray-500">{item.date}</span>
                     </div>
                   </div>
                 ))

@@ -330,7 +330,7 @@ export default function ChallengeDetailPage() {
                     <div className="mb-6 border-t pt-4 border-gray-100">
                       <h4 className="text-sm font-medium text-gray-500 mb-2">Tags</h4>
                       <div className="flex flex-wrap gap-2">
-                        {challenge.tags.map((tag, idx) => (
+                        {challenge.tags.map((tag: string, idx: number) => (
                           <Badge key={idx} variant="outline" className="bg-gray-50">{tag}</Badge>
                         ))}
                       </div>
@@ -341,7 +341,7 @@ export default function ChallengeDetailPage() {
                     <h4 className="text-sm font-medium text-gray-500 mb-2">Description</h4>
                     <div className="prose max-w-none text-foreground">
                       {/* Display idea description with support for line breaks */}
-                      {challenge.description.split('\n').map((paragraph, i) => (
+                      {challenge.description.split('\n').map((paragraph: string, i: number) => (
                         <p key={i}>{paragraph}</p>
                       ))}
                     </div>
