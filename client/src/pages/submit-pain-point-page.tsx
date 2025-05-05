@@ -17,7 +17,6 @@ export default function SubmitPainPointPage() {
   const submitPainPointMutation = useMutation({
     mutationFn: async (formData: {
       title: string;
-      department: string;
       description: string;
       urgency: string;
       rootCause: string;
@@ -29,7 +28,7 @@ export default function SubmitPainPointPage() {
         title: formData.title,
         description: formData.description,
         category: 'pain-point', // Set category explicitly
-        department: formData.department,
+        department: user?.department || 'Other', // Use user's department from auth context
         status: 'submitted', // default status
         priority: formData.urgency, // Map urgency to priority
         impact: formData.rootCause || '', // Map rootCause to impact

@@ -27,7 +27,6 @@ import {
 interface PainPointSubmitFormProps {
   onSubmit: (data: {
     title: string;
-    department: string;
     description: string;
     urgency: string;
     rootCause: string;
@@ -37,7 +36,6 @@ interface PainPointSubmitFormProps {
   onCancel?: () => void;
   initialData?: {
     title?: string;
-    department?: string;
     description?: string;
     urgency?: string;
     rootCause?: string;
@@ -47,7 +45,7 @@ interface PainPointSubmitFormProps {
 // Form schema for input validation
 const formSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }).max(100, { message: "Title must be less than 100 characters" }),
-  department: z.string().min(1, { message: "Please select a department" }),
+  // department field removed as per user request
   description: z.string().min(20, { message: "Description must be at least 20 characters" }),
   urgency: z.string().min(1, { message: "Please select an urgency level" }),
   rootCause: z.string().min(10, { message: "Root cause analysis must be at least 10 characters" }),
@@ -73,7 +71,7 @@ export function PainPointSubmitForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: initialData.title || "",
-      department: initialData.department || "",
+      // department removed as per user request
       description: initialData.description || "",
       urgency: initialData.urgency || "",
       rootCause: initialData.rootCause || "",
@@ -197,62 +195,31 @@ export function PainPointSubmitForm({
           )}
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="department"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Department Related to Problem</FormLabel>
-                <Select 
-                  defaultValue={field.value} 
-                  onValueChange={field.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Organisation Health">Organisation Health</SelectItem>
-                    <SelectItem value="Technology & Systems">Technology & Systems</SelectItem>
-                    <SelectItem value="Commercial & Strategy">Commercial & Strategy</SelectItem>
-                    <SelectItem value="Process">Process</SelectItem>
-                    <SelectItem value="Cost Leadership">Cost Leadership</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="urgency"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Urgency</FormLabel>
-                <Select 
-                  defaultValue={field.value} 
-                  onValueChange={field.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select urgency level" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="High">High</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="Low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="urgency"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Urgency</FormLabel>
+              <Select 
+                defaultValue={field.value} 
+                onValueChange={field.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select urgency level" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="High">High</SelectItem>
+                  <SelectItem value="Medium">Medium</SelectItem>
+                  <SelectItem value="Low">Low</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         <FormField
           control={form.control}
