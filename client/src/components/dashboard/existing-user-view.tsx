@@ -185,6 +185,7 @@ export function ExistingUserView() {
             : 'No description provided',
           votes: idea.votes || 0,
           status: idea.status || 'submitted',
+          category: idea.category || 'opportunity',
           date: idea.createdAt ? formatRelativeTime(new Date(idea.createdAt)) : 'Recently'
         }))
     : [];

@@ -87,11 +87,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
   const handleSuggestionClick = (id: number, category: string) => {
     // Format the category to match URL paths
     let categoryPath = '';
-    if (category === 'opportunity') categoryPath = 'ideas';
-    else if (category === 'challenge') categoryPath = 'challenges';
-    else if (category === 'pain-point') categoryPath = 'pain-points';
     
-    setLocation(`/${categoryPath}/${id}`);
+    // Ensure we're mapping to the correct route paths
+    if (category === 'opportunity') {
+      setLocation(`/ideas/${id}`);
+    } else if (category === 'challenge') {
+      setLocation(`/challenges/${id}`);
+    } else if (category === 'pain-point') {
+      setLocation(`/pain-points/${id}`);
+    }
+    
     setQuery('');
     setIsFocused(false);
   };
