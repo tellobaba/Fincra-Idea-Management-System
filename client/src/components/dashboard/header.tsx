@@ -108,15 +108,7 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
             <SearchBar className="w-full" />
           </div>
           
-          {/* Add New button - always show as per user request */}
-          <Button 
-            variant="default" 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            onClick={handleAddNew}
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add new
-          </Button>
+          {/* Add New button removed as per user request */}
           
           {/* Notifications */}
           <NotificationDropdown />
