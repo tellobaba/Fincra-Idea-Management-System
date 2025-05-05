@@ -71,17 +71,21 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
   };
   
   const handleAddNew = () => {
-    // Check if the current location contains a category indicator to determine where to navigate
-    if (location.includes('/ideas')) {
+    // Check the current location to determine where to navigate
+    // Using exact path matches and checking for path segments
+    if (location === '/ideas' || location.startsWith('/ideas/')) {
       navigate('/submit/idea');
-    } else if (location.includes('/challenges')) {
+    } else if (location === '/challenges' || location.startsWith('/challenges/')) {
       navigate('/submit/challenge');
-    } else if (location.includes('/pain-points')) {
+    } else if (location === '/pain-points' || location.startsWith('/pain-points/')) {
       navigate('/submit/pain-point');
     } else {
       // If not on a specific page, show the modal with all options
       setNewIdeaModalOpen(true);
     }
+    
+    // Log the current location and destination for debugging
+    console.log('Current location:', location);
   };
 
   return (
