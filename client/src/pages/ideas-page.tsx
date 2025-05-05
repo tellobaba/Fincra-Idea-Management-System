@@ -308,12 +308,22 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-                <Link href={`/submit/${categoryType}`}>
-                  <Button size="sm">
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Add New
-                  </Button>
-                </Link>
+                <Button 
+                  size="sm" 
+                  onClick={() => {
+                    // Direct navigation to the correct submission form
+                    const linkPath = categoryType === 'opportunity' 
+                      ? '/submit/idea'
+                      : categoryType === 'challenge'
+                        ? '/submit/challenge'
+                        : '/submit/pain-point';
+                    window.location.href = linkPath;
+                    console.log('Navigating to:', linkPath);
+                  }}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add New
+                </Button>
               </div>
             </div>
             
