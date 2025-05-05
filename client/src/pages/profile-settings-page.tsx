@@ -32,7 +32,7 @@ import { Loader2, User, Settings, Key } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { departmentSchema } from "@shared/schema";
+import { departmentSchema, type Department } from "@shared/schema";
 
 // Schema for profile information form
 const profileFormSchema = z.object({
@@ -128,12 +128,12 @@ export default function ProfileSettingsPage() {
 
 
   // Handle profile form submission
-  const onProfileSubmit = (data: ProfileFormValues) => {
+  const onProfileSubmit: any = (data: ProfileFormValues) => {
     updateProfileMutation.mutate(data);
   };
 
   // Handle password form submission
-  const onPasswordSubmit = (data: PasswordFormValues) => {
+  const onPasswordSubmit: any = (data: PasswordFormValues) => {
     changePasswordMutation.mutate(data);
   };
 
@@ -144,7 +144,7 @@ export default function ProfileSettingsPage() {
     if (user) {
       profileForm.reset({
         displayName: user.displayName || "",
-        department: user.department || undefined,
+        department: user.department as Department | undefined,
         email: user.username || "",
       });
     }
