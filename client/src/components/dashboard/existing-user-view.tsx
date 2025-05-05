@@ -386,7 +386,12 @@ export function ExistingUserView() {
               {topVotedData.length > 0 ? (
                 topVotedData.map((item) => (
                   <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                    <h3 className="font-medium text-sm">{item.title}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-medium text-sm">{item.title}</h3>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${getCategoryBadgeClasses(item.category)}`}>
+                        {getCategoryName(item.category)}
+                      </span>
+                    </div>
                     <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-xs text-blue-700">{item.votes} Votes</span>
