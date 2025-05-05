@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, LineChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { PieChart, PlusCircle, Sparkles, AlertTriangle } from "lucide-react";
+import { PieChart, PlusCircle, Sparkles, AlertTriangle, ThumbsUp } from "lucide-react";
 import { IdeaTable } from "./idea-table";
 import { useQuery } from "@tanstack/react-query";
 import { IdeaWithUser } from "@/types/ideas";
@@ -56,17 +56,17 @@ export function ExistingUserView() {
   const getStatusBadgeClasses = (status: string) => {
     switch(status) {
       case 'in-review':
-        return 'bg-orange-100 text-orange-700';
+        return 'bg-orange-100 text-orange-700 border border-orange-200 font-medium';
       case 'submitted':
-        return 'bg-green-100 text-green-700';
+        return 'bg-green-100 text-green-700 border border-green-200 font-medium';
       case 'merged':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-blue-100 text-blue-700 border border-blue-200 font-medium';
       case 'parked':
-        return 'bg-red-100 text-red-700';
+        return 'bg-red-100 text-red-700 border border-red-200 font-medium';
       case 'implemented':
-        return 'bg-purple-100 text-purple-700';
+        return 'bg-purple-100 text-purple-700 border border-purple-200 font-medium';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-700 border border-gray-200 font-medium';
     }
   };
   
@@ -354,7 +354,7 @@ export function ExistingUserView() {
                   <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-medium text-sm">{item.title}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${getCategoryBadgeClasses(item.category)}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${getCategoryBadgeClasses(item.category)}`}>
                         {getCategoryName(item.category)}
                       </span>
                     </div>
@@ -388,18 +388,18 @@ export function ExistingUserView() {
                   <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-medium text-sm">{item.title}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${getCategoryBadgeClasses(item.category)}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${getCategoryBadgeClasses(item.category)}`}>
                         {getCategoryName(item.category)}
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs text-blue-700">{item.votes} Votes</span>
+                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-100"><ThumbsUp className="inline-block w-3 h-3 mr-1" /> {item.votes} Votes</span>
                       <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
                       </span>
                     </div>
-                    <div className="text-right text-xs text-gray-400 mt-1">{item.date}</div>
+                    <div className="text-right text-xs font-medium bg-gray-50 px-2 py-1 rounded-md text-gray-500 mt-2 inline-block ml-auto">{item.date}</div>
                   </div>
                 ))
               ) : (
@@ -465,9 +465,9 @@ export function ExistingUserView() {
                         <span className="font-medium">Time remaining</span>
                         <span className="font-bold">{challenge.remainingDays} days</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div className="w-full bg-gray-200 rounded-md font-medium h-2.5">
                         <div 
-                          className={`h-2.5 rounded-full ${challenge.accentColor.replace('text', 'bg')}`} 
+                          className={`h-2.5 rounded-md font-medium ${challenge.accentColor.replace('text', 'bg')}`} 
                           style={{ width: `${Math.min(100, (challenge.remainingDays / 15) * 100)}%` }}
                         ></div>
                       </div>
