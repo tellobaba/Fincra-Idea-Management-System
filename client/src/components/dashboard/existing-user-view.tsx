@@ -70,6 +70,34 @@ export function ExistingUserView() {
     }
   };
   
+  // Helper function to get category badge styling
+  const getCategoryBadgeClasses = (category: string) => {
+    switch(category) {
+      case 'opportunity':
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+      case 'challenge':
+        return 'bg-blue-50 text-blue-700 border border-blue-200';
+      case 'pain-point':
+        return 'bg-red-50 text-red-700 border border-red-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border border-gray-200';
+    }
+  };
+  
+  // Helper to get friendly category name
+  const getCategoryName = (category: string) => {
+    switch(category) {
+      case 'opportunity':
+        return 'Idea';
+      case 'challenge':
+        return 'Challenge';
+      case 'pain-point':
+        return 'Pain Point';
+      default:
+        return 'Other';
+    }
+  };
+  
   
   // Fetch recent activity from dedicated endpoint
   const { data: recentActivity = [], isLoading: activityLoading } = useQuery<any>({
@@ -82,6 +110,7 @@ export function ExistingUserView() {
     title: string;
     description: string;
     status: string;
+    category: string;
     date: string;
     submitter?: any;
   };
@@ -95,6 +124,7 @@ export function ExistingUserView() {
           ? activity.description.substring(0, 80) + (activity.description.length > 80 ? '...' : '')
           : 'No description provided',
         status: activity.status || 'submitted',
+        category: activity.category || 'opportunity',
         date: activity.createdAt ? formatRelativeTime(new Date(activity.createdAt)) : 'Recently',
         submitter: activity.submitter
       }))
@@ -158,6 +188,43 @@ export function ExistingUserView() {
           date: idea.createdAt ? formatRelativeTime(new Date(idea.createdAt)) : 'Recently'
         }))
     : [];
+    
+  // Create dummy challenge data as requested
+  const challengesData = [
+    {
+      id: 1,
+      title: "API Performance Optimization",
+      description: "Help us improve our payment API response times by 30%. Share your ideas on optimizing our backend systems.",
+      startDate: new Date('2025-05-01'),
+      endDate: new Date('2025-05-15'),
+      reward: "$1,000 Cash Prize",
+      remainingDays: 10,
+      submissions: 8,
+      difficulty: "Medium"
+    },
+    {
+      id: 2,
+      title: "Mobile App UX Redesign",
+      description: "Propose a new user experience for our mobile app that increases engagement by 25%.",
+      startDate: new Date('2025-05-03'),
+      endDate: new Date('2025-05-20'),
+      reward: "$750 Cash Prize + Recognition",
+      remainingDays: 15,
+      submissions: 5,
+      difficulty: "Hard"
+    },
+    {
+      id: 3,
+      title: "Cost Reduction Initiative",
+      description: "Identify areas where we can reduce operational costs without affecting service quality.",
+      startDate: new Date('2025-04-25'),
+      endDate: new Date('2025-05-10'),
+      reward: "$500 + Team Dinner",
+      remainingDays: 5,
+      submissions: 12,
+      difficulty: "Easy"
+    }
+  ];
 
   // Combine all loading states for overall loading indicator
   const isLoading = topIdeasLoading || volumeLoading || statusLoading || activityLoading || leaderboardLoading;
@@ -253,6 +320,7 @@ export function ExistingUserView() {
         )}        
       </div>
       
+      {/* First row with Activity and Top Voted */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {/* Activity section */}
         <Card className="md:col-span-1">
@@ -264,7 +332,12 @@ export function ExistingUserView() {
               {activityData.length > 0 ? (
                 activityData.map((item: ActivityItem) => (
                   <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                    <h3 className="font-medium text-sm">{item.title}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-medium text-sm">{item.title}</h3>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${getCategoryBadgeClasses(item.category)}`}>
+                        {getCategoryName(item.category)}
+                      </span>
+                    </div>
                     <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
                       <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
@@ -309,6 +382,78 @@ export function ExistingUserView() {
                   <p className="text-gray-500 text-sm">No voted ideas available</p>
                 </div>
               )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Second row with Challenges section */}
+      <div className="mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-medium">Challenges</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Challenges grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {challengesData.map((challenge) => (
+                <div key={challenge.id} className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-blue-700">{challenge.title}</h3>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      challenge.difficulty === "Easy" ? "bg-green-100 text-green-700" : 
+                      challenge.difficulty === "Medium" ? "bg-orange-100 text-orange-700" : 
+                      "bg-red-100 text-red-700"
+                    }`}>
+                      {challenge.difficulty}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">{challenge.description}</p>
+                  
+                  {/* Challenge details */}
+                  <div className="space-y-2 mb-3">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-500">Duration:</span>
+                      <span className="font-medium">
+                        {challenge.startDate.toLocaleDateString()} - {challenge.endDate.toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-500">Reward:</span>
+                      <span className="font-medium text-blue-600">{challenge.reward}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-500">Submissions:</span>
+                      <span className="font-medium">{challenge.submissions}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Time remaining indicator */}
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>Time remaining:</span>
+                      <span className="font-medium">{challenge.remainingDays} days</span>
+                    </div>
+                    <div className="w-full bg-blue-200 rounded-full h-1.5">
+                      <div 
+                        className="bg-blue-600 h-1.5 rounded-full" 
+                        style={{ width: `${Math.min(100, (challenge.remainingDays / 15) * 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  {/* Challenge button */}
+                  <div className="mt-4 text-center">
+                    <button
+                      onClick={handlePostChallenge}
+                      className="inline-flex items-center px-3 py-1.5 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Take Challenge
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
