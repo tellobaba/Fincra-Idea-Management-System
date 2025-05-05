@@ -27,8 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Loader2, User, Settings, Key, Sun, Moon } from "lucide-react";
+
+import { Loader2, User, Settings, Key } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,14 +57,13 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 export default function ProfileSettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [theme, setTheme] = useState<string>(localStorage.getItem("theme") || "light");
   
   // Profile form
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       displayName: user?.displayName || "",
-      department: user?.department || undefined,
+      department: user?.department as Department | undefined,
       email: user?.username || "",
     },
   });
@@ -126,24 +125,7 @@ export default function ProfileSettingsPage() {
     },
   });
 
-  // Toggle theme function
-  const handleThemeChange = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    
-    // Apply theme to document
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    
-    toast({
-      title: "Theme changed",
-      description: `Theme has been changed to ${newTheme} mode.`,
-    });
-  };
+
 
   // Handle profile form submission
   const onProfileSubmit = (data: ProfileFormValues) => {
@@ -155,14 +137,7 @@ export default function ProfileSettingsPage() {
     changePasswordMutation.mutate(data);
   };
 
-  // Set theme on component mount
-  useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
+
 
   // Reset form when user data changes
   useEffect(() => {
@@ -274,17 +249,15 @@ export default function ProfileSettingsPage() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="Engineering">Engineering</SelectItem>
-                                  <SelectItem value="Product">Product</SelectItem>
-                                  <SelectItem value="Design">Design</SelectItem>
-                                  <SelectItem value="Marketing">Marketing</SelectItem>
-                                  <SelectItem value="Finance">Finance</SelectItem>
-                                  <SelectItem value="HR">Human Resources</SelectItem>
+                                  <SelectItem value="Organisation Health">Organisation Health</SelectItem>
+                                  <SelectItem value="Tech & Systems">Tech & Systems</SelectItem>
+                                  <SelectItem value="Commercial & Strategy">Commercial & Strategy</SelectItem>
                                   <SelectItem value="Operations">Operations</SelectItem>
+                                  <SelectItem value="Finance">Finance</SelectItem>
+                                  <SelectItem value="Marketing">Marketing</SelectItem>
                                   <SelectItem value="Sales">Sales</SelectItem>
-                                  <SelectItem value="Support">Support</SelectItem>
-                                  <SelectItem value="Legal">Legal</SelectItem>
-                                  <SelectItem value="Transformation">Transformation</SelectItem>
+                                  <SelectItem value="Product">Product</SelectItem>
+                                  <SelectItem value="Other">Other</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -393,22 +366,10 @@ export default function ProfileSettingsPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Theme Toggle */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-base">Theme</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Choose between light and dark mode
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Sun className="h-5 w-5 text-muted-foreground" />
-                        <Switch 
-                          checked={theme === "dark"}
-                          onCheckedChange={handleThemeChange}
-                        />
-                        <Moon className="h-5 w-5 text-muted-foreground" />
-                      </div>
+                    <div className="p-4 rounded-md bg-muted">
+                      <p className="text-sm text-muted-foreground">
+                        Additional application preferences will be available in future updates.
+                      </p>
                     </div>
                     
                     {/* Additional settings can be added here */}
