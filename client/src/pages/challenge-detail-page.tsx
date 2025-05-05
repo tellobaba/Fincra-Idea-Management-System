@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Status } from "@shared/schema";
 import { Loader2, Calendar, Award, Users, ArrowLeft } from "lucide-react";
+import { Sidebar } from "@/components/dashboard/sidebar";
 
 // Define CommentWithUser interface for proper typing
 interface CommentWithUser {
@@ -21,7 +22,7 @@ interface CommentWithUser {
     avatarUrl?: string;
   };
 };
-import { Sidebar } from "@/components/dashboard/sidebar";
+
 import { Header } from "@/components/dashboard/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
