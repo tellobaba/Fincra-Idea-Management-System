@@ -310,8 +310,108 @@ export default function IdeaDetailPage() {
               <IdeaStatusTracker currentStatus={idea.status as any} />
               
               <div className="mb-8">
-                <h3 className="text-lg font-medium mb-4">Description</h3>
+                {/* Add complete idea details section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Idea Details</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">Title</h4>
+                        <p className="mt-1">{idea.title}</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">Category</h4>
+                        <p className="mt-1 capitalize">{idea.category.replace('-', ' ')}</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">Status</h4>
+                        <p className="mt-1 capitalize">{idea.status.replace('-', ' ')}</p>
+                      </div>
+                      
+                      {idea.department && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Department</h4>
+                          <p className="mt-1">{idea.department}</p>
+                        </div>
+                      )}
+                      
+                      {idea.priority && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Priority</h4>
+                          <p className="mt-1 capitalize">{idea.priority}</p>
+                        </div>
+                      )}
+                      
+                      {idea.tags && idea.tags.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Tags</h4>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {idea.tags.map((tag, idx) => (
+                              <Badge key={idx} variant="outline">{tag}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Additional Information</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">Submitted By</h4>
+                        <div className="mt-1 flex items-center">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                            <span className="text-primary text-sm font-medium">
+                              {idea.submitter?.displayName?.charAt(0) || 'U'}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{idea.submitter?.displayName || 'Unknown'}</p>
+                            <p className="text-xs text-muted-foreground">{idea.submitter?.department || ''}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">Submission Date</h4>
+                        <p className="mt-1">{formatDate(idea.createdAt)}</p>
+                      </div>
+                      
+                      {idea.impactArea && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Impact Area</h4>
+                          <p className="mt-1">{idea.impactArea}</p>
+                        </div>
+                      )}
+                      
+                      {(idea.estimatedCostSavings !== undefined && idea.estimatedCostSavings !== null) && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Estimated Cost Savings</h4>
+                          <p className="mt-1">${idea.estimatedCostSavings.toLocaleString()}</p>
+                        </div>
+                      )}
+                      
+                      {(idea.estimatedRevenue !== undefined && idea.estimatedRevenue !== null) && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Estimated Revenue Impact</h4>
+                          <p className="mt-1">${idea.estimatedRevenue.toLocaleString()}</p>
+                        </div>
+                      )}
+                      
+                      {idea.targetDate && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Target Date</h4>
+                          <p className="mt-1">{formatDate(idea.targetDate)}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 
+                <h3 className="text-lg font-medium mb-4">Description</h3>
                 <div className="prose max-w-none text-foreground">
                   {/* Display idea description with support for line breaks */}
                   {idea.description.split('\n').map((paragraph, i) => (

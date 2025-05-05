@@ -71,7 +71,17 @@ export function Header({ onSearch, welcomeMessage, showTabs = false, showAddNewB
   };
   
   const handleAddNew = () => {
-    setNewIdeaModalOpen(true);
+    // Check if the current location contains a category indicator to determine where to navigate
+    if (location.includes('/ideas')) {
+      navigate('/submit/idea');
+    } else if (location.includes('/challenges')) {
+      navigate('/submit/challenge');
+    } else if (location.includes('/pain-points')) {
+      navigate('/submit/pain-point');
+    } else {
+      // If not on a specific page, show the modal with all options
+      setNewIdeaModalOpen(true);
+    }
   };
 
   return (
