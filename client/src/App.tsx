@@ -22,6 +22,7 @@ import SubmitPainPointPage from "@/pages/submit-pain-point-page";
 import IdeasPage from "@/pages/ideas-page";
 import ChallengesPage from "@/pages/challenges-page";
 import PainPointsPage from "@/pages/pain-points-page";
+import PainPointDetailPage from "@/pages/pain-point-detail-page";
 import MyVotesPage from "@/pages/my-votes-page";
 import FollowedIdeasPage from "@/pages/followed-ideas-page";
 import AnalyticsPage from "@/pages/analytics-page";
@@ -84,6 +85,7 @@ function Router() {
       <ProtectedRoute path="/challenges" component={ChallengesPage} />
       <ProtectedRoute path="/challenges/:id" component={ChallengeDetailPage} />
       <ProtectedRoute path="/pain-points" component={PainPointsPage} />
+      <ProtectedRoute path="/pain-points/:id" component={PainPointDetailPage} />
       <ProtectedRoute path="/my-votes" component={MyVotesPage} />
       <ProtectedRoute path="/pinned">
         <FollowedIdeasPage />

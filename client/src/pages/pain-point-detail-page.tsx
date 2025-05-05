@@ -240,7 +240,7 @@ export default function PainPointDetailPage() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500 mb-2">Problem Description</h3>
                         <div className="prose max-w-none">
-                          {painPoint.description.split('\n').map((paragraph, i) => (
+                          {painPoint.description.split('\n').map((paragraph: string, i: number) => (
                             <p key={i}>{paragraph}</p>
                           ))}
                         </div>
@@ -249,7 +249,7 @@ export default function PainPointDetailPage() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500 mb-2">Root Cause Analysis</h3>
                         <div className="prose max-w-none">
-                          {painPoint.rootCause.split('\n').map((paragraph, i) => (
+                          {painPoint.rootCause.split('\n').map((paragraph: string, i: number) => (
                             <p key={i}>{paragraph}</p>
                           ))}
                         </div>
@@ -287,7 +287,7 @@ export default function PainPointDetailPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {painPoint.mediaUrls.map((media: {type: string; url: string}, index) => {
+                      {painPoint.mediaUrls.map((media: {type: string; url: string}, index: number) => {
                         // Use absolute URLs for media
                         const fullUrl = media.url.startsWith('http') 
                           ? media.url 
