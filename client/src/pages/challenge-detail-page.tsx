@@ -4,7 +4,23 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { Status } from "@shared/schema";
 import { Loader2, Calendar, Award, Users, ArrowLeft } from "lucide-react";
+
+// Define CommentWithUser interface for proper typing
+interface CommentWithUser {
+  id: number;
+  content: string;
+  createdAt: string;
+  submitterId: number;
+  parentId?: number;
+  submitter?: {
+    id: number;
+    displayName: string;
+    department: string;
+    avatarUrl?: string;
+  };
+};
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { Button } from "@/components/ui/button";
@@ -13,7 +29,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import FollowButton from "@/components/idea/follow-button";
-import { IdeaComments } from "@/components/idea/idea-comments";
+import { CommentSection } from "@/components/idea/comment-section";
 import { IdeaStatusTracker } from "@/components/idea/idea-status-tracker";
 
 // Challenge detail page that uses the same IdeaDetailPage structure but with challenge-specific UI elements
@@ -212,9 +228,9 @@ export default function ChallengeDetailPage() {
                 </Button>
                 
                 <FollowButton 
-                  itemId={numericId} 
-                  itemType="idea" 
-                  initialFollowed={isFollowed} 
+                  ideaId={numericId} 
+                  isFollowed={isFollowed || false} 
+                  variant="outline"
                 />
               </div>
             </div>
@@ -292,7 +308,14 @@ export default function ChallengeDetailPage() {
                   <CardDescription>Share your thoughts and discuss this challenge</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <IdeaComments ideaId={numericId} />
+                  <CommentSection 
+                    comments={challenge.comments || []} 
+                    ideaId={numericId}
+                    onAddComment={async (content) => {
+                      await apiRequest("POST", `/api/ideas/${numericId}/comments`, { content });
+                      queryClient.invalidateQueries({ queryKey: ["/api/ideas", numericId] });
+                    }}
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -304,9 +327,7 @@ export default function ChallengeDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <IdeaStatusTracker 
-                    currentStatus={challenge.status} 
-                    isAdmin={user?.role === "admin"} 
-                    ideaId={numericId}
+                    currentStatus={challenge.status as Status}
                   />
                 </CardContent>
               </Card>
