@@ -352,7 +352,7 @@ export function ExistingUserView() {
               {activityData.length > 0 ? (
                 activityData.map((item: ActivityItem) => (
                   <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center justify-between mb-1">
                       <h3 className="font-medium text-sm">{item.title}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${getCategoryBadgeClasses(item.category)}`}>
                         {getCategoryName(item.category)}

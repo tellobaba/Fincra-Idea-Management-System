@@ -250,8 +250,8 @@ export default function LeaderboardPage() {
                       <TableHead className="w-16">Rank</TableHead>
                       <TableHead>User</TableHead>
                       <TableHead>Department</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-center">Ideas</TableHead>
+                      {/* Status column removed as per user request */}
+                      <TableHead className="text-center">Contributions</TableHead>
                       <TableHead className="text-center">Implementation Rate</TableHead>
                       {/* Impact Score column removed as per user request */}
                       <TableHead className="text-center">Votes</TableHead>
@@ -297,18 +297,7 @@ export default function LeaderboardPage() {
                         <TableCell>
                           <div className="text-sm">{entry.user.department || "N/A"}</div>
                         </TableCell>
-                        <TableCell>
-                          {entry.status && (
-                            <Badge 
-                              variant="outline"
-                              className={`${entry.status === 'Top Contributor' ? 'border-amber-200 bg-amber-50 text-amber-800' : 
-                                         entry.status === 'Active Contributor' ? 'border-green-200 bg-green-50 text-green-800' : 
-                                         'border-blue-200 bg-blue-50 text-blue-800'}`}
-                            >
-                              {entry.status}
-                            </Badge>
-                          )}
-                        </TableCell>
+                        {/* Status cell removed as per user request */}
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-1">
                             <span className="text-sm font-medium">{entry.ideasSubmitted}</span>
