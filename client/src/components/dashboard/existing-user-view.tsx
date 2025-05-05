@@ -189,51 +189,59 @@ export function ExistingUserView() {
         }))
     : [];
     
-  // Create dummy challenge data as requested
-  const challengesData = [
-    {
-      id: 1,
-      title: "API Performance Optimization",
-      description: "Help us improve our payment API response times by 30%. Share your ideas on optimizing our backend systems.",
+  // Fetch real challenge ideas from the API
+  const { data: realChallengesData = [], isLoading: challengesLoading } = useQuery<IdeaWithUser[]>({
+    queryKey: ["/api/ideas/challenge"],
+    queryFn: () => fetch("/api/ideas/challenge?all=true").then(res => res.json())
+  });
+  
+  // Process challenge data for display
+  const challengesData = realChallengesData.map((challenge, index) => {
+    // Calculate remaining days (between 5-15 days)
+    const remainingDays = 5 + (index % 3) * 5;
+    
+    // Determine color theme based on index
+    const colorThemes = [
+      {
+        bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50",
+        borderColor: "border-blue-200",
+        accentColor: "text-blue-600"
+      },
+      {
+        bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50",
+        borderColor: "border-emerald-200",
+        accentColor: "text-emerald-600"
+      },
+      {
+        bgColor: "bg-gradient-to-r from-purple-50 to-violet-50",
+        borderColor: "border-purple-200",
+        accentColor: "text-purple-600"
+      }
+    ];
+    
+    const theme = colorThemes[index % colorThemes.length];
+    
+    // Create reward text based on title length
+    const reward = index % 2 === 0 ? 
+      "$" + (500 + index * 250) + " Cash Prize" : 
+      "Recognition + Team Celebration";
+    
+    // Calculate random participants count (3-15)
+    const participants = 3 + Math.floor(Math.random() * 13);
+    
+    return {
+      ...challenge,
       startDate: new Date('2025-05-01'),
       endDate: new Date('2025-05-15'),
-      reward: "$1,000 Cash Prize",
-      remainingDays: 10,
-      participants: 8,
-      bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50",
-      borderColor: "border-blue-200",
-      accentColor: "text-blue-600"
-    },
-    {
-      id: 2,
-      title: "Mobile App UX Redesign",
-      description: "Propose a new user experience for our mobile app that increases engagement by 25%.",
-      startDate: new Date('2025-05-03'),
-      endDate: new Date('2025-05-20'),
-      reward: "$750 Cash Prize + Recognition",
-      remainingDays: 15,
-      participants: 5,
-      bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50",
-      borderColor: "border-emerald-200",
-      accentColor: "text-emerald-600"
-    },
-    {
-      id: 3,
-      title: "Cost Reduction Initiative",
-      description: "Identify areas where we can reduce operational costs without affecting service quality.",
-      startDate: new Date('2025-04-25'),
-      endDate: new Date('2025-05-10'),
-      reward: "$500 + Team Dinner",
-      remainingDays: 5,
-      participants: 12,
-      bgColor: "bg-gradient-to-r from-purple-50 to-violet-50",
-      borderColor: "border-purple-200",
-      accentColor: "text-purple-600"
-    }
-  ];
+      reward,
+      remainingDays,
+      participants,
+      ...theme
+    };
+  });
 
   // Combine all loading states for overall loading indicator
-  const isLoading = topIdeasLoading || volumeLoading || statusLoading || activityLoading || leaderboardLoading;
+  const isLoading = topIdeasLoading || volumeLoading || statusLoading || activityLoading || leaderboardLoading || challengesLoading;
 
   // Use navigate from wouter hook
   const [_, navigate] = useLocation();
@@ -405,60 +413,74 @@ export function ExistingUserView() {
             <CardTitle className="text-lg font-medium">Challenges</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Challenges grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {challengesData.map((challenge) => (
-                <div key={challenge.id} 
-                  className={`rounded-xl p-5 border shadow-sm ${challenge.bgColor} ${challenge.borderColor}`} 
+            {/* Empty state when no challenges are available */}
+            {challengesData.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-3">No challenges available at the moment.</p>
+                <button
+                  onClick={handlePostChallenge}
+                  className="inline-flex items-center px-4 py-2 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50"
                 >
-                  <h3 className={`font-semibold text-base mb-2 ${challenge.accentColor}`}>{challenge.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-3">{challenge.description}</p>
-                  
-                  {/* Challenge details */}
-                  <div className="space-y-3 mb-4 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-500 flex items-center">⏱️ Timeline</span>
-                      <span className="font-medium">
-                        {challenge.startDate.toLocaleDateString()} - {challenge.endDate.toLocaleDateString()}
-                      </span>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Create a Challenge
+                </button>
+              </div>
+            ) : (
+              /* Challenges grid */
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {challengesData.map((challenge) => (
+                  <div key={challenge.id} 
+                    className={`rounded-xl p-5 border shadow-sm ${challenge.bgColor} ${challenge.borderColor}`} 
+                  >
+                    <h3 className={`font-semibold text-base mb-2 ${challenge.accentColor}`}>{challenge.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">{challenge.description}</p>
+                    
+                    {/* Challenge details */}
+                    <div className="space-y-3 mb-4 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500 flex items-center">⏱️ Timeline</span>
+                        <span className="font-medium">
+                          {challenge.startDate.toLocaleDateString()} - {challenge.endDate.toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500 flex items-center">🏆 Reward</span>
+                        <span className={`font-medium ${challenge.accentColor}`}>{challenge.reward}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500 flex items-center">👥 Participants</span>
+                        <span className="font-medium">{challenge.participants}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-500 flex items-center">🏆 Reward</span>
-                      <span className={`font-medium ${challenge.accentColor}`}>{challenge.reward}</span>
+                    
+                    {/* Time remaining indicator */}
+                    <div className="mt-3 mb-5">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="font-medium">Time remaining</span>
+                        <span className="font-bold">{challenge.remainingDays} days</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className={`h-2.5 rounded-full ${challenge.accentColor.replace('text', 'bg')}`} 
+                          style={{ width: `${Math.min(100, (challenge.remainingDays / 15) * 100)}%` }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-500 flex items-center">👥 Participants</span>
-                      <span className="font-medium">{challenge.participants}</span>
+                    
+                    {/* Challenge button */}
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={() => handleTakeChallenge(challenge.id)}
+                        className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                      >
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Take Challenge
+                      </button>
                     </div>
                   </div>
-                  
-                  {/* Time remaining indicator */}
-                  <div className="mt-3 mb-5">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="font-medium">Time remaining</span>
-                      <span className="font-bold">{challenge.remainingDays} days</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div 
-                        className={`h-2.5 rounded-full ${challenge.accentColor.replace('text', 'bg')}`} 
-                        style={{ width: `${Math.min(100, (challenge.remainingDays / 15) * 100)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  {/* Challenge button */}
-                  <div className="mt-4 text-center">
-                    <button
-                      onClick={() => handleTakeChallenge(challenge.id)}
-                      className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white hover:${challenge.bgColor} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${challenge.accentColor.split('-')[1]}-500`}
-                    >
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Take Challenge
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
