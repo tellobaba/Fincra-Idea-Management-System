@@ -74,13 +74,13 @@ export function ExistingUserView() {
   const getCategoryBadgeClasses = (category: string) => {
     switch(category) {
       case 'opportunity':
-        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm hover:bg-emerald-100';
       case 'challenge':
-        return 'bg-blue-50 text-blue-700 border border-blue-200';
+        return 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm hover:bg-blue-100';
       case 'pain-point':
-        return 'bg-red-50 text-red-700 border border-red-200';
+        return 'bg-red-50 text-red-700 border border-red-200 shadow-sm hover:bg-red-100';
       default:
-        return 'bg-gray-50 text-gray-700 border border-gray-200';
+        return 'bg-gray-50 text-gray-700 border border-gray-200 shadow-sm hover:bg-gray-100';
     }
   };
   
