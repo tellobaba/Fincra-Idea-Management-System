@@ -399,7 +399,7 @@ export function ExistingUserView() {
                         {item.status}
                       </span>
                     </div>
-                    <div className="text-right text-xs font-medium bg-gray-50 px-2 py-1 rounded-md text-gray-500 mt-2 inline-block ml-auto">{item.date}</div>
+                    {/* Time submitted removed as per user request */}
                   </div>
                 ))
               ) : (
