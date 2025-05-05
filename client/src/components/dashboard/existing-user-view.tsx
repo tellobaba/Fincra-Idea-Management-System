@@ -199,8 +199,10 @@ export function ExistingUserView() {
       endDate: new Date('2025-05-15'),
       reward: "$1,000 Cash Prize",
       remainingDays: 10,
-      submissions: 8,
-      difficulty: "Medium"
+      participants: 8,
+      bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50",
+      borderColor: "border-blue-200",
+      accentColor: "text-blue-600"
     },
     {
       id: 2,
@@ -210,8 +212,10 @@ export function ExistingUserView() {
       endDate: new Date('2025-05-20'),
       reward: "$750 Cash Prize + Recognition",
       remainingDays: 15,
-      submissions: 5,
-      difficulty: "Hard"
+      participants: 5,
+      bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50",
+      borderColor: "border-emerald-200",
+      accentColor: "text-emerald-600"
     },
     {
       id: 3,
@@ -221,8 +225,10 @@ export function ExistingUserView() {
       endDate: new Date('2025-05-10'),
       reward: "$500 + Team Dinner",
       remainingDays: 5,
-      submissions: 12,
-      difficulty: "Easy"
+      participants: 12,
+      bgColor: "bg-gradient-to-r from-purple-50 to-violet-50",
+      borderColor: "border-purple-200",
+      accentColor: "text-purple-600"
     }
   ];
 
@@ -243,6 +249,11 @@ export function ExistingUserView() {
 
   const handleRecordPainPoint = () => {
     navigate("/submit/pain-point");
+  };
+  
+  // Function to navigate to challenge detail page
+  const handleTakeChallenge = (challengeId: number) => {
+    navigate(`/challenges/${challengeId}`);
   };
 
   return (
@@ -395,48 +406,41 @@ export function ExistingUserView() {
           </CardHeader>
           <CardContent>
             {/* Challenges grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {challengesData.map((challenge) => (
-                <div key={challenge.id} className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-blue-700">{challenge.title}</h3>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      challenge.difficulty === "Easy" ? "bg-green-100 text-green-700" : 
-                      challenge.difficulty === "Medium" ? "bg-orange-100 text-orange-700" : 
-                      "bg-red-100 text-red-700"
-                    }`}>
-                      {challenge.difficulty}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">{challenge.description}</p>
+                <div key={challenge.id} 
+                  className={`rounded-xl p-5 border shadow-sm ${challenge.bgColor} ${challenge.borderColor}`} 
+                >
+                  <h3 className={`font-semibold text-base mb-2 ${challenge.accentColor}`}>{challenge.title}</h3>
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-3">{challenge.description}</p>
                   
                   {/* Challenge details */}
-                  <div className="space-y-2 mb-3">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Duration:</span>
+                  <div className="space-y-3 mb-4 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500 flex items-center">⏱️ Timeline</span>
                       <span className="font-medium">
                         {challenge.startDate.toLocaleDateString()} - {challenge.endDate.toLocaleDateString()}
                       </span>
                     </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Reward:</span>
-                      <span className="font-medium text-blue-600">{challenge.reward}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500 flex items-center">🏆 Reward</span>
+                      <span className={`font-medium ${challenge.accentColor}`}>{challenge.reward}</span>
                     </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Submissions:</span>
-                      <span className="font-medium">{challenge.submissions}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500 flex items-center">👥 Participants</span>
+                      <span className="font-medium">{challenge.participants}</span>
                     </div>
                   </div>
                   
                   {/* Time remaining indicator */}
-                  <div className="mt-3">
+                  <div className="mt-3 mb-5">
                     <div className="flex justify-between text-xs mb-1">
-                      <span>Time remaining:</span>
-                      <span className="font-medium">{challenge.remainingDays} days</span>
+                      <span className="font-medium">Time remaining</span>
+                      <span className="font-bold">{challenge.remainingDays} days</span>
                     </div>
-                    <div className="w-full bg-blue-200 rounded-full h-1.5">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div 
-                        className="bg-blue-600 h-1.5 rounded-full" 
+                        className={`h-2.5 rounded-full ${challenge.accentColor.replace('text', 'bg')}`} 
                         style={{ width: `${Math.min(100, (challenge.remainingDays / 15) * 100)}%` }}
                       ></div>
                     </div>
@@ -445,8 +449,8 @@ export function ExistingUserView() {
                   {/* Challenge button */}
                   <div className="mt-4 text-center">
                     <button
-                      onClick={handlePostChallenge}
-                      className="inline-flex items-center px-3 py-1.5 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      onClick={() => handleTakeChallenge(challenge.id)}
+                      className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white hover:${challenge.bgColor} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${challenge.accentColor.split('-')[1]}-500`}
                     >
                       <Sparkles className="mr-2 h-4 w-4" />
                       Take Challenge
