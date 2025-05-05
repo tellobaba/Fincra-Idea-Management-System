@@ -244,8 +244,107 @@ export default function ChallengeDetailPage() {
                   <CardTitle>Challenge Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose max-w-none">
-                    <p>{challenge.description}</p>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Title</h4>
+                          <p className="mt-1 text-base font-medium">{challenge.title}</p>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Category</h4>
+                          <p className="mt-1 capitalize">{challenge.category.replace('-', ' ')}</p>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Status</h4>
+                          <div className="mt-1">
+                            <Badge 
+                              className={`
+                                ${challenge.status === 'submitted' ? 'bg-gray-100 text-gray-800' : ''}
+                                ${challenge.status === 'in-review' ? 'bg-blue-100 text-blue-800' : ''}
+                                ${challenge.status === 'merged' ? 'bg-purple-100 text-purple-800' : ''}
+                                ${challenge.status === 'parked' ? 'bg-amber-100 text-amber-800' : ''}
+                                ${challenge.status === 'implemented' ? 'bg-green-100 text-green-800' : ''}
+                              `}
+                            >
+                              {challenge.status.replace('-', ' ').charAt(0).toUpperCase() + challenge.status.replace('-', ' ').slice(1)}
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        {challenge.department && (
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500">Department</h4>
+                            <p className="mt-1">{challenge.department}</p>
+                          </div>
+                        )}
+                        
+                        {challenge.priority && (
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500">Priority</h4>
+                            <div className="mt-1">
+                              <Badge 
+                                className={`
+                                  ${challenge.priority === 'high' ? 'bg-red-100 text-red-800' : ''}
+                                  ${challenge.priority === 'medium' ? 'bg-amber-100 text-amber-800' : ''}
+                                  ${challenge.priority === 'low' ? 'bg-green-100 text-green-800' : ''}
+                                `}
+                              >
+                                {challenge.priority.charAt(0).toUpperCase() + challenge.priority.slice(1)}
+                              </Badge>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Submitted By</h4>
+                          <div className="mt-1 flex items-center">
+                            <Avatar className="h-8 w-8 mr-2">
+                              <AvatarImage src={challenge.submitter?.avatarUrl} />
+                              <AvatarFallback className="bg-primary/10 text-primary">
+                                {getInitial(challenge.submitter?.displayName || '')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{challenge.submitter?.displayName || 'Unknown'}</p>
+                              <p className="text-xs text-muted-foreground">{challenge.submitter?.department || ''}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500">Submission Date</h4>
+                          <p className="mt-1">{formattedDate}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {challenge.tags && challenge.tags.length > 0 && (
+                    <div className="mb-6 border-t pt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Tags</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {challenge.tags.map((tag, idx) => (
+                          <Badge key={idx} variant="outline" className="bg-gray-50">{tag}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="border-t pt-4 border-gray-100">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Description</h4>
+                    <div className="prose max-w-none text-foreground">
+                      {/* Display idea description with support for line breaks */}
+                      {challenge.description.split('\n').map((paragraph, i) => (
+                        <p key={i}>{paragraph}</p>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
