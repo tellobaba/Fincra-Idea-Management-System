@@ -249,9 +249,13 @@ export default function PainPointDetailPage() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500 mb-2">Root Cause Analysis</h3>
                         <div className="prose max-w-none">
-                          {painPoint.rootCause.split('\n').map((paragraph: string, i: number) => (
-                            <p key={i}>{paragraph}</p>
-                          ))}
+                          {painPoint.rootCause ? (
+                            painPoint.rootCause.split('\n').map((paragraph: string, i: number) => (
+                              <p key={i}>{paragraph}</p>
+                            ))
+                          ) : (
+                            <p>No root cause analysis provided</p>
+                          )}
                         </div>
                       </div>
                     </div>
