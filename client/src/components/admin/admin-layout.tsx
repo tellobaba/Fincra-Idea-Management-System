@@ -80,10 +80,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className="hidden md:flex w-64 flex-col fixed inset-y-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="h-16 px-4 flex items-center justify-center border-b border-gray-200 dark:border-gray-700">
+      <div className="hidden md:flex w-64 flex-col fixed inset-y-0 bg-white border-r border-gray-200 shadow-sm">
+        <div className="h-16 px-4 flex items-center justify-center border-b border-gray-200">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
               <img src="/assets/Logomark.png" alt="Fincra Logo" className="h-5 w-5" />
@@ -99,13 +99,13 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors",
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors",
                   isActive
-                    ? "bg-primary/10 text-primary dark:bg-primary/20"
-                    : "text-gray-700 dark:text-gray-200"
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-700"
                 )}
               >
-                <span className={cn("mr-3", isActive ? "text-primary" : "text-gray-500 dark:text-gray-400")}>
+                <span className={cn("mr-3", isActive ? "text-primary" : "text-gray-500")}>
                   {item.icon}
                 </span>
                 {item.title}
@@ -113,7 +113,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             );
           })}
         </div>
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-4 border-t border-gray-200">
           <div className="flex items-center mb-4">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
               <span className="text-primary text-sm font-medium">{user?.displayName?.charAt(0) || user?.username?.charAt(0) || 'A'}</span>
@@ -136,7 +136,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Mobile header */}
-      <div className="md:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 w-full fixed top-0 z-10 px-4 h-16 flex items-center justify-between">
+      <div className="md:hidden bg-white border-b border-gray-200 w-full fixed top-0 z-10 px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
             <img src="/assets/Logomark.png" alt="Fincra Logo" className="h-5 w-5" />

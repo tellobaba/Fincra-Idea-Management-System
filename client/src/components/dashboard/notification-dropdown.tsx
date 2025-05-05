@@ -117,7 +117,7 @@ export function NotificationDropdown() {
                     key={notification.id}
                     className={cn(
                       'p-4 hover:bg-secondary/20 transition-colors duration-100 cursor-pointer',
-                      !notification.read && 'bg-blue-50/20 dark:bg-blue-950/20'
+                      !notification.read && 'bg-blue-50/20'
                     )}
                     onClick={() => !notification.read && markAsRead(notification.id)}
                   >
