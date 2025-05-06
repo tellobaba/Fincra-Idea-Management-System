@@ -56,17 +56,17 @@ export function ExistingUserView() {
   const getStatusBadgeClasses = (status: string) => {
     switch(status) {
       case 'in-review':
-        return 'bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-900 font-medium';
+        return 'bg-orange-100 dark:bg-orange-900/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-900/20 font-medium';
       case 'submitted':
-        return 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900 font-medium';
+        return 'bg-green-100 dark:bg-green-900/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/20 font-medium';
       case 'merged':
-        return 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-medium';
+        return 'bg-blue-100 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/20 font-medium';
       case 'parked':
-        return 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900 font-medium';
+        return 'bg-red-100 dark:bg-red-900/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/20 font-medium';
       case 'implemented':
-        return 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-900 font-medium';
+        return 'bg-purple-100 dark:bg-purple-900/10 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-900/20 font-medium';
       default:
-        return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700 font-medium';
+        return 'bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700/20 font-medium';
     }
   };
   
@@ -74,13 +74,13 @@ export function ExistingUserView() {
   const getCategoryBadgeClasses = (category: string) => {
     switch(category) {
       case 'opportunity':
-        return 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900';
+        return 'bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/20 shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/20';
       case 'challenge':
-        return 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900';
+        return 'bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/20 shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/20';
       case 'pain-point':
-        return 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900 shadow-sm hover:bg-red-100 dark:hover:bg-red-900';
+        return 'bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/20 shadow-sm hover:bg-red-100 dark:hover:bg-red-900/20';
       default:
-        return 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700';
+        return 'bg-gray-50 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700/20 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700/20';
     }
   };
   
@@ -204,18 +204,18 @@ export function ExistingUserView() {
     // Determine color theme based on index
     const colorThemes = [
       {
-        bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950",
-        borderColor: "border-blue-200 dark:border-blue-800",
+        bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10",
+        borderColor: "border-blue-200 dark:border-blue-900/20",
         accentColor: "text-blue-600 dark:text-blue-400"
       },
       {
-        bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950",
-        borderColor: "border-emerald-200 dark:border-emerald-800",
+        bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10",
+        borderColor: "border-emerald-200 dark:border-emerald-900/20",
         accentColor: "text-emerald-600 dark:text-emerald-400"
       },
       {
-        bgColor: "bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950",
-        borderColor: "border-purple-200 dark:border-purple-800",
+        bgColor: "bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/10 dark:to-violet-900/10",
+        borderColor: "border-purple-200 dark:border-purple-900/20",
         accentColor: "text-purple-600 dark:text-purple-400"
       }
     ];
@@ -270,7 +270,7 @@ export function ExistingUserView() {
       {/* Call-to-action cards section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Got Ideas? */}
-        <div className="bg-[#f0faf0] dark:bg-green-900/30 rounded-lg p-4 border border-[#e0f0e0] dark:border-green-800 flex flex-col justify-between h-full">
+        <div className="bg-[#f0faf0] dark:bg-green-900/20 rounded-lg p-4 border border-[#e0f0e0] dark:border-green-900/30 flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold mb-1 text-center">Got Ideas?</h3>
             <p className="text-[#475f56] dark:text-gray-400 text-sm mb-2">
@@ -280,7 +280,7 @@ export function ExistingUserView() {
           <div className="text-center">
             <button
               onClick={handleSubmitIdea}
-              className="inline-flex items-center px-3 py-1.5 border border-green-200 dark:border-green-600 text-sm font-medium rounded-md text-green-600 dark:text-green-300 bg-white dark:bg-gray-700 hover:bg-green-50 dark:hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              className="inline-flex items-center px-4 py-2 border border-green-200 dark:border-green-800/50 text-sm font-medium rounded-md text-green-600 dark:text-green-300 bg-white dark:bg-gray-800/80 hover:bg-green-50 dark:hover:bg-green-900/20 focus:outline-none"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Submit an Idea
@@ -289,7 +289,7 @@ export function ExistingUserView() {
         </div>
 
         {/* Challenge */}
-        <div className="bg-[#f0f5ff] dark:bg-blue-900/30 rounded-lg p-4 border border-[#e0ebff] dark:border-blue-800 flex flex-col justify-between h-full">
+        <div className="bg-[#f0f5ff] dark:bg-blue-900/20 rounded-lg p-4 border border-[#e0ebff] dark:border-blue-900/30 flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold mb-1 text-center">Challenge</h3>
             <p className="text-[#47556f] dark:text-gray-400 text-sm mb-2">
@@ -299,7 +299,7 @@ export function ExistingUserView() {
           <div className="text-center">
             <button
               onClick={handlePostChallenge}
-              className="inline-flex items-center px-3 py-1.5 border border-blue-200 dark:border-blue-600 text-sm font-medium rounded-md text-blue-600 dark:text-blue-300 bg-white dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 border border-blue-200 dark:border-blue-800/50 text-sm font-medium rounded-md text-blue-600 dark:text-blue-300 bg-white dark:bg-gray-800/80 hover:bg-blue-50 dark:hover:bg-blue-900/20 focus:outline-none"
             >
               <Sparkles className="mr-2 h-4 w-4" />
               Post a Challenge
@@ -308,7 +308,7 @@ export function ExistingUserView() {
         </div>
 
         {/* Pain points? */}
-        <div className="bg-[#fff5f5] dark:bg-red-900/30 rounded-lg p-4 border border-[#ffe0e0] dark:border-red-800 flex flex-col justify-between h-full">
+        <div className="bg-[#fff5f5] dark:bg-red-900/20 rounded-lg p-4 border border-[#ffe0e0] dark:border-red-900/30 flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold mb-1 text-center">Pain points?</h3>
             <p className="text-[#6f4747] dark:text-gray-400 text-sm mb-2">
@@ -318,7 +318,7 @@ export function ExistingUserView() {
           <div className="text-center">
             <button
               onClick={handleRecordPainPoint}
-              className="inline-flex items-center px-3 py-1.5 border border-red-200 dark:border-red-600 text-sm font-medium rounded-md text-red-600 dark:text-red-300 bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="inline-flex items-center px-4 py-2 border border-red-200 dark:border-red-800/50 text-sm font-medium rounded-md text-red-600 dark:text-red-300 bg-white dark:bg-gray-800/80 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none"
             >
               <AlertTriangle className="mr-2 h-4 w-4" />
               Record Pain point
@@ -425,7 +425,7 @@ export function ExistingUserView() {
                 <p className="text-gray-500 dark:text-gray-400 mb-3">No challenges available at the moment.</p>
                 <button
                   onClick={handlePostChallenge}
-                  className="inline-flex items-center px-4 py-2 border border-blue-200 dark:border-blue-600 text-sm font-medium rounded-md text-blue-600 dark:text-blue-300 bg-white dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-700"
+                  className="inline-flex items-center px-4 py-2 border border-blue-200 dark:border-blue-800/50 text-sm font-medium rounded-md text-blue-600 dark:text-blue-300 bg-white dark:bg-gray-800/80 hover:bg-blue-50 dark:hover:bg-blue-900/20 focus:outline-none"
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
                   Create a Challenge
@@ -477,7 +477,7 @@ export function ExistingUserView() {
                     <div className="mt-4 text-center">
                       <button
                         onClick={() => handleTakeChallenge(challenge.id)}
-                        className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white dark:bg-gray-700 hover:bg-opacity-50 dark:hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                        className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white dark:bg-gray-800/80 hover:bg-opacity-50 dark:hover:bg-opacity-80 focus:outline-none`}
                       >
                         <Sparkles className="mr-2 h-4 w-4" />
                         Take Challenge
