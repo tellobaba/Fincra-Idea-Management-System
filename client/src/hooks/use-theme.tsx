@@ -28,9 +28,12 @@ export function ThemeProvider({
   storageKey = "fincra-ideas-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  // Force light mode by default
+  const [theme, setTheme] = useState<Theme>("light");
+  
+  useEffect(() => {
+    localStorage.setItem(storageKey, "light");
+  }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;
