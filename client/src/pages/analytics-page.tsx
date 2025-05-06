@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
   
   // Fetch recent highlights for the highlights section
   const { data: recentHighlights = [], isLoading: highlightsLoading } = useQuery<any>({
-    queryKey: ["/api/ideas/recent-highlights"],
+    queryKey: ["/api/highlights/random"],
   });
   
   // Fetch all ideas for the modal view
@@ -164,11 +164,11 @@ export default function AnalyticsPage() {
     let matchesStatus = true;
     let matchesDate = true;
     
-    if (categoryFilter) {
+    if (categoryFilter && categoryFilter !== 'all-categories') {
       matchesCategory = submission.category === categoryFilter;
     }
     
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== 'all-statuses') {
       matchesStatus = submission.status === statusFilter;
     }
     
@@ -457,12 +457,12 @@ export default function AnalyticsPage() {
             {/* Category Filter */}
             <div>
               <label className="text-sm font-medium mb-1 block">Category</label>
-              <Select value={categoryFilter || ''} onValueChange={(value) => setCategoryFilter(value || null)}>
+              <Select value={categoryFilter || 'all-categories'} onValueChange={(value) => setCategoryFilter(value === 'all-categories' ? null : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all-categories">All Categories</SelectItem>
                   <SelectItem value="opportunity">Ideas</SelectItem>
                   <SelectItem value="challenge">Challenges</SelectItem>
                   <SelectItem value="pain-point">Pain Points</SelectItem>
@@ -473,12 +473,12 @@ export default function AnalyticsPage() {
             {/* Status Filter */}
             <div>
               <label className="text-sm font-medium mb-1 block">Status</label>
-              <Select value={statusFilter || ''} onValueChange={(value) => setStatusFilter(value || null)}>
+              <Select value={statusFilter || 'all-statuses'} onValueChange={(value) => setStatusFilter(value === 'all-statuses' ? null : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all-statuses">All Statuses</SelectItem>
                   <SelectItem value="submitted">Submitted</SelectItem>
                   <SelectItem value="in-review">In Review</SelectItem>
                   <SelectItem value="merged">Merged</SelectItem>
@@ -509,7 +509,7 @@ export default function AnalyticsPage() {
                   <Calendar
                     mode="single"
                     selected={dateFilter || undefined}
-                    onSelect={(date) => setDateFilter(date)}
+                    onSelect={(date: Date | null) => setDateFilter(date)}
                     initialFocus
                   />
                   {dateFilter && (
