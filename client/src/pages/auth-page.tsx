@@ -270,33 +270,80 @@ export default function AuthPage() {
           </div>
           
           {/* Right column - Image */}
-          <div className="hidden md:block bg-gradient-to-br from-blue-50 to-indigo-100 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-600/20 z-0"></div>
+          <div className="hidden md:block bg-gradient-to-br from-indigo-50 to-purple-100 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-600/20 z-0"></div>
             <div className="relative z-10 p-12 flex flex-col justify-center h-full">
               <div className="max-w-md mx-auto text-center">
-                <h2 className="text-2xl font-bold text-blue-800 mb-6">Idea Management System</h2>
+                <h2 className="text-2xl font-bold text-indigo-800 mb-6">Idea Management System</h2>
                 
-                {/* Featured graphics/charts */}
+                {/* Featured graphics/charts - using a more sophisticated visualization */}
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-5 mb-6">
                   <div className="mb-4">
-                    <h3 className="text-lg font-medium text-gray-800 mb-2">Submissions by Category</h3>
+                    <h3 className="text-lg font-medium text-gray-800 mb-3">Ideas Journey</h3>
                     <div className="flex justify-center">
-                      <div className="w-full h-40 bg-white rounded-lg flex items-end justify-around px-4 pt-4 pb-2">
-                        <div className="w-1/4 bg-green-500 rounded-t-lg" style={{ height: '70%' }}>
-                          <div className="text-xs font-medium text-white text-center mt-2">Ideas</div>
+                      <div className="w-full bg-white rounded-lg p-4">
+                        {/* Process flow visualization */}
+                        <div className="relative py-4">
+                          {/* Connection line */}
+                          <div className="absolute top-1/2 left-0 right-0 h-1 bg-indigo-200 -translate-y-1/2"></div>
+                          
+                          {/* Process steps */}
+                          <div className="relative flex justify-between items-center">
+                            {/* Step 1 */}
+                            <div className="flex flex-col items-center relative z-10">
+                              <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md">
+                                1
+                              </div>
+                              <div className="mt-2 text-xs font-medium">Submit</div>
+                            </div>
+                            
+                            {/* Step 2 */}
+                            <div className="flex flex-col items-center relative z-10">
+                              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-md">
+                                2
+                              </div>
+                              <div className="mt-2 text-xs font-medium">Review</div>
+                            </div>
+                            
+                            {/* Step 3 */}
+                            <div className="flex flex-col items-center relative z-10">
+                              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold shadow-md">
+                                3
+                              </div>
+                              <div className="mt-2 text-xs font-medium">Implement</div>
+                            </div>
+                            
+                            {/* Step 4 */}
+                            <div className="flex flex-col items-center relative z-10">
+                              <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold shadow-md">
+                                4
+                              </div>
+                              <div className="mt-2 text-xs font-medium">Impact</div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="w-1/4 bg-blue-500 rounded-t-lg" style={{ height: '40%' }}>
-                          <div className="text-xs font-medium text-white text-center mt-2">Challenges</div>
-                        </div>
-                        <div className="w-1/4 bg-red-500 rounded-t-lg" style={{ height: '30%' }}>
-                          <div className="text-xs font-medium text-white text-center mt-2">Pain Points</div>
+                        
+                        {/* Categories */}
+                        <div className="mt-6 grid grid-cols-3 gap-2">
+                          <div className="p-2 bg-indigo-100 border border-indigo-200 rounded-md">
+                            <div className="text-xs font-medium text-indigo-700">Ideas</div>
+                            <div className="text-center text-xl font-bold text-indigo-800 mt-1">20</div>
+                          </div>
+                          <div className="p-2 bg-blue-100 border border-blue-200 rounded-md">
+                            <div className="text-xs font-medium text-blue-700">Challenges</div>
+                            <div className="text-center text-xl font-bold text-blue-800 mt-1">15</div>
+                          </div>
+                          <div className="p-2 bg-red-100 border border-red-200 rounded-md">
+                            <div className="text-xs font-medium text-red-700">Pain Points</div>
+                            <div className="text-center text-xl font-bold text-red-800 mt-1">12</div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="text-blue-900/80">
+                <div className="text-indigo-900/80">
                   <p className="text-lg font-medium mb-4">Transform your ideas into innovation</p>
                   <p className="text-sm">Capture, organize, and implement great ideas from across your organization. Drive creativity and collaboration in one unified platform.</p>
                 </div>
