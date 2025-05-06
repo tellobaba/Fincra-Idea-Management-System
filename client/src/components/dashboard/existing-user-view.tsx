@@ -204,19 +204,19 @@ export function ExistingUserView() {
     // Determine color theme based on index
     const colorThemes = [
       {
-        bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950",
-        borderColor: "border-blue-200 dark:border-blue-800",
-        accentColor: "text-blue-600 dark:text-blue-400"
+        bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50",
+        borderColor: "border-blue-200 dark:border-blue-700",
+        accentColor: "text-blue-600 dark:text-blue-300"
       },
       {
-        bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950",
-        borderColor: "border-emerald-200 dark:border-emerald-800",
-        accentColor: "text-emerald-600 dark:text-emerald-400"
+        bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/50 dark:to-teal-900/50",
+        borderColor: "border-emerald-200 dark:border-emerald-700",
+        accentColor: "text-emerald-600 dark:text-emerald-300"
       },
       {
-        bgColor: "bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950",
-        borderColor: "border-purple-200 dark:border-purple-800",
-        accentColor: "text-purple-600 dark:text-purple-400"
+        bgColor: "bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/50 dark:to-violet-900/50",
+        borderColor: "border-purple-200 dark:border-purple-700",
+        accentColor: "text-purple-600 dark:text-purple-300"
       }
     ];
     
