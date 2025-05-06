@@ -64,34 +64,34 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-6xl bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="w-full max-w-5xl bg-white rounded-lg shadow-lg overflow-hidden h-[550px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 h-full">
           {/* Left column - Login form */}
-          <div className="p-8 lg:p-12">
-            <div className="mb-8">
-              <div className="flex items-center mb-6">
+          <div className="p-6 overflow-y-auto">
+            <div className="mb-5">
+              <div className="flex items-center mb-4">
                 <img 
                   src="/Logomark.png" 
                   alt="Fincra Logo" 
-                  className="h-10 w-10 mr-3" 
+                  className="h-8 w-8 mr-2" 
                 />
-                <h2 className="text-xl font-semibold">Fincra Ideas Hub</h2>
+                <h2 className="text-lg font-semibold">Fincra Ideas Hub</h2>
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold">Welcome back</h1>
-              <p className="text-muted-foreground mt-2">
+              <h1 className="text-xl font-bold">Welcome back</h1>
+              <p className="text-muted-foreground mt-1 text-sm">
                 Where ideas come to life. Log in to shape the future with your contributions.
               </p>
             </div>
 
-            <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab} className="mt-6">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+            <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab} className="mt-4">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="login">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
                 <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
+                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                     <FormField
                       control={loginForm.control}
                       name="username"
@@ -272,18 +272,18 @@ export default function AuthPage() {
           {/* Right column - Image */}
           <div className="hidden md:block bg-gradient-to-br from-indigo-50 to-purple-100 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-600/20 z-0"></div>
-            <div className="relative z-10 p-12 flex flex-col justify-center h-full">
+            <div className="relative z-10 p-8 flex flex-col justify-center h-full">
               <div className="max-w-md mx-auto text-center">
-                <h2 className="text-2xl font-bold text-indigo-800 mb-6">Idea Management System</h2>
+                <h2 className="text-xl font-bold text-indigo-800 mb-4">Idea Management System</h2>
                 
                 {/* Featured graphics/charts - using a more sophisticated visualization */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-5 mb-6">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-4 mb-4">
                   <div className="mb-4">
                     <h3 className="text-lg font-medium text-gray-800 mb-3">Ideas Journey</h3>
                     <div className="flex justify-center">
                       <div className="w-full bg-white rounded-lg p-4">
                         {/* Process flow visualization */}
-                        <div className="relative py-4">
+                        <div className="relative py-2">
                           {/* Connection line */}
                           <div className="absolute top-1/2 left-0 right-0 h-1 bg-indigo-200 -translate-y-1/2"></div>
                           
@@ -291,40 +291,40 @@ export default function AuthPage() {
                           <div className="relative flex justify-between items-center">
                             {/* Step 1 */}
                             <div className="flex flex-col items-center relative z-10">
-                              <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md">
+                              <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md text-xs">
                                 1
                               </div>
-                              <div className="mt-2 text-xs font-medium">Submit</div>
+                              <div className="mt-1 text-xs font-medium">Submit</div>
                             </div>
                             
                             {/* Step 2 */}
                             <div className="flex flex-col items-center relative z-10">
-                              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-md">
+                              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-md text-xs">
                                 2
                               </div>
-                              <div className="mt-2 text-xs font-medium">Review</div>
+                              <div className="mt-1 text-xs font-medium">Review</div>
                             </div>
                             
                             {/* Step 3 */}
                             <div className="flex flex-col items-center relative z-10">
-                              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold shadow-md">
+                              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold shadow-md text-xs">
                                 3
                               </div>
-                              <div className="mt-2 text-xs font-medium">Implement</div>
+                              <div className="mt-1 text-xs font-medium">Implement</div>
                             </div>
                             
                             {/* Step 4 */}
                             <div className="flex flex-col items-center relative z-10">
-                              <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold shadow-md">
+                              <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold shadow-md text-xs">
                                 4
                               </div>
-                              <div className="mt-2 text-xs font-medium">Impact</div>
+                              <div className="mt-1 text-xs font-medium">Impact</div>
                             </div>
                           </div>
                         </div>
                         
                         {/* Categories */}
-                        <div className="mt-6 grid grid-cols-3 gap-2">
+                        <div className="mt-4 grid grid-cols-3 gap-2">
                           <div className="p-2 bg-indigo-100 border border-indigo-200 rounded-md">
                             <div className="text-xs font-medium text-indigo-700">Ideas</div>
                             <div className="text-center text-xl font-bold text-indigo-800 mt-1">20</div>
@@ -344,8 +344,8 @@ export default function AuthPage() {
                 </div>
                 
                 <div className="text-indigo-900/80">
-                  <p className="text-lg font-medium mb-4">Transform your ideas into innovation</p>
-                  <p className="text-sm">Capture, organize, and implement great ideas from across your organization. Drive creativity and collaboration in one unified platform.</p>
+                  <p className="text-base font-medium mb-2">Transform your ideas into innovation</p>
+                  <p className="text-xs">Capture, organize, and implement great ideas from across your organization. Drive creativity and collaboration in one unified platform.</p>
                 </div>
               </div>
             </div>
