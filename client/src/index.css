@@ -49,5 +49,15 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+  
+  /* Force black text on headers in light mode */
+  h1, h2, h3, h4, h5, h6, .card-title, .text-lg {
+    color: #000 !important;
+  }
+  
+  /* Keep white text in dark mode */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6, .dark .card-title, .dark .text-lg {
+    color: #fff !important;
+  }
 }
 
