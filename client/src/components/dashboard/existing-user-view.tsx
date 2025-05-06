@@ -351,14 +351,14 @@ export function ExistingUserView() {
             <div className="space-y-6">
               {activityData.length > 0 ? (
                 activityData.map((item: ActivityItem) => (
-                  <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                  <div key={item.id} className="border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-medium text-sm">{item.title}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${getCategoryBadgeClasses(item.category)}`}>
                         {getCategoryName(item.category)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
                       <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
@@ -385,14 +385,14 @@ export function ExistingUserView() {
             <div className="space-y-6">
               {topVotedData.length > 0 ? (
                 topVotedData.map((item) => (
-                  <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                  <div key={item.id} className="border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-medium text-sm">{item.title}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${getCategoryBadgeClasses(item.category)}`}>
                         {getCategoryName(item.category)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
                     <div className="flex items-center gap-1 mt-2">
                       <span className={`text-xs font-medium rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
