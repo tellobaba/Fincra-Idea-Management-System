@@ -12,24 +12,10 @@ import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { CATEGORY_CONFIG } from "@/types/ideas";
-import { Loader2, CheckIcon, MessageSquare, UserPlus } from "lucide-react";
-import { Label } from "@/components/ui/label";
+import { Loader2, CheckIcon, MessageSquare, UserPlus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+
 import {
   Table,
   TableBody,
@@ -43,6 +29,10 @@ export default function AdminPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedIdeas, setSelectedIdeas] = useState<number[]>([]);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [assignIdea, setAssignIdea] = useState<number | null>(null);
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("reviewer");
   
   // Fetch ideas for review
   const { data: ideasForReview, isLoading } = useQuery<IdeaWithUser[]>({
@@ -118,20 +108,39 @@ export default function AdminPage() {
     }
   };
   
-  // Handle bulk approve action
-  const handleApproveSelected = () => {
-    if (selectedIdeas.length === 0) {
+  // Handle role assignment submission
+  const handleRoleAssignment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assignIdea) return;
+    
+    if (!email || !role) {
       toast({
-        title: "No ideas selected",
-        description: "Please select at least one idea to approve.",
-        variant: "destructive",
+        title: "Missing information",
+        description: "Please provide both email and role",
+        variant: "destructive"
       });
       return;
     }
     
-    // Update status for each selected idea
-    selectedIdeas.forEach(id => {
-      updateStatusMutation.mutate({ id, status: "in-review" });
+    // Call API to assign role
+    apiRequest("POST", `/api/ideas/${assignIdea}/assign`, {
+      role,
+      userId: 'email:' + email // Special format to indicate email assignment
+    }).then(() => {
+      toast({
+        title: "Role assigned",
+        description: `Successfully assigned ${role} role to ${email}`
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas/review"] });
+      setAssignModalOpen(false);
+      setEmail("");
+      setRole("reviewer");
+    }).catch((error) => {
+      toast({
+        title: "Assignment failed",
+        description: error instanceof Error ? error.message : "Failed to assign role",
+        variant: "destructive"
+      });
     });
   };
 
@@ -158,26 +167,9 @@ export default function AdminPage() {
               <h2 className="text-lg font-semibold">Pending Review Queue</h2>
               
               <div className="flex space-x-2">
-                <Button 
-                  variant="outline" 
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  onClick={handleApproveSelected}
-                  disabled={selectedIdeas.length === 0 || updateStatusMutation.isPending}
-                >
-                  {updateStatusMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <CheckIcon className="mr-2 h-4 w-4" />
-                  )}
-                  Approve Selected
-                </Button>
                 <Button variant="outline">
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Request More Info
-                </Button>
-                <Button variant="outline">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Assign Transformer
                 </Button>
               </div>
             </div>
@@ -281,46 +273,8 @@ export default function AdminPage() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                
-                                // Prompt for email and role
-                                const email = prompt("Enter email address for assignment:");
-                                if (!email) return;
-                                
-                                const roleOptions = "Select role (type 1, 2, or 3):\n1. Reviewer\n2. Transformer\n3. Implementer";
-                                const roleSelection = prompt(roleOptions);
-                                if (!roleSelection) return;
-                                
-                                let role = "";
-                                switch(roleSelection) {
-                                  case "1": role = "reviewer"; break;
-                                  case "2": role = "transformer"; break;
-                                  case "3": role = "implementer"; break;
-                                  default: 
-                                    toast({
-                                      title: "Invalid selection",
-                                      description: "Please select 1, 2, or 3 for the role",
-                                      variant: "destructive"
-                                    });
-                                    return;
-                                }
-                                
-                                // Call API to assign role
-                                apiRequest("POST", `/api/ideas/${idea.id}/assign`, {
-                                  role,
-                                  userId: 'email:' + email // Special format to indicate email assignment
-                                }).then(() => {
-                                  toast({
-                                    title: "Role assigned",
-                                    description: `Successfully assigned ${role} role to ${email}`
-                                  });
-                                  queryClient.invalidateQueries({ queryKey: ["/api/ideas/review"] });
-                                }).catch((error) => {
-                                  toast({
-                                    title: "Assignment failed",
-                                    description: error instanceof Error ? error.message : "Failed to assign role",
-                                    variant: "destructive"
-                                  });
-                                });
+                                setAssignIdea(idea.id);
+                                setAssignModalOpen(true);
                               }}
                             >
                               <UserPlus className="h-4 w-4" />
@@ -336,6 +290,68 @@ export default function AdminPage() {
           </div>
         </main>
       </div>
+      
+      {/* Assignment Modal */}
+      {assignModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card rounded-lg shadow-lg w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Assign Role</h3>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setAssignModalOpen(false)}
+                className="rounded-full"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <p className="text-muted-foreground mb-4">Assign a user to this idea with a specific role.</p>
+            
+            <form onSubmit={handleRoleAssignment}>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email address</Label>
+                  <Input 
+                    id="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    type="email" 
+                    placeholder="user@example.com" 
+                    required 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="role">Select role</Label>
+                  <select 
+                    id="role" 
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                  >
+                    <option value="reviewer">Reviewer</option>
+                    <option value="transformer">Transformer</option>
+                    <option value="implementer">Implementer</option>
+                  </select>
+                </div>
+                
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setAssignModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit">Assign Role</Button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
