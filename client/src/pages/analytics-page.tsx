@@ -346,16 +346,16 @@ export default function AnalyticsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {highlightsLoading ? (
                   Array(3).fill(0).map((_, index) => (
-                    <div key={index} className="border border-gray-100 rounded-lg p-4 h-48 animate-pulse">
+                    <div key={index} className="border border-gray-200 rounded-lg p-4 h-48 animate-pulse shadow-md hover:shadow-lg transition-all">
                       <div className="flex items-center mb-3">
-                        <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
-                        <div className="space-y-2">
-                          <div className="h-4 w-20 bg-gray-200 rounded"></div>
-                          <div className="h-3 w-16 bg-gray-100 rounded"></div>
+                        <div className="w-8 h-8 rounded-full bg-gray-200 mr-3"></div>
+                        <div className="space-y-1">
+                          <div className="h-3 w-16 bg-gray-200 rounded"></div>
+                          <div className="h-2 w-12 bg-gray-100 rounded"></div>
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <div className="h-4 w-3/4 bg-gray-200 rounded"></div>
+                        <div className="h-5 w-3/4 bg-gray-200 rounded"></div>
                         <div className="h-3 w-full bg-gray-100 rounded"></div>
                         <div className="h-3 w-4/5 bg-gray-100 rounded"></div>
                         <div className="h-3 w-2/3 bg-gray-100 rounded"></div>
@@ -368,19 +368,27 @@ export default function AnalyticsPage() {
                   ))
                 ) : recentHighlights.length > 0 ? (
                   recentHighlights.map((highlight: any, index: number) => (
-                    <div key={index} className="border border-gray-100 rounded-lg p-4 h-full flex flex-col">
-                      <div className="flex items-center mb-3">
-                        <Avatar className="h-10 w-10 mr-3">
+                    <a 
+                      href={`/ideas/${highlight.id}`} 
+                      key={index} 
+                      className="border border-gray-200 rounded-lg p-4 h-full flex flex-col shadow-md hover:shadow-lg transition-all cursor-pointer no-underline text-inherit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.location.href = `/ideas/${highlight.id}`;
+                      }}
+                    >
+                      <div className="flex items-center mb-2">
+                        <Avatar className="h-8 w-8 mr-2">
                           <AvatarImage src={highlight.submitter?.avatarUrl || undefined} alt={highlight.submitter?.displayName || 'User'} />
                           <AvatarFallback>{highlight.submitter?.displayName?.[0] || 'U'}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="text-sm font-medium">{highlight.submitter?.displayName || 'Anonymous'}</div>
+                          <div className="text-xs font-medium">{highlight.submitter?.displayName || 'Anonymous'}</div>
                           <div className="text-xs text-gray-500">{highlight.submitter?.department || 'Unassigned'}</div>
                         </div>
                       </div>
-                      <div className="mb-3 flex-grow">
-                        <h3 className="text-sm font-semibold mb-1">{highlight.title}</h3>
+                      <div className="mb-2 flex-grow">
+                        <h3 className="text-base font-bold mb-1 hover:text-primary">{highlight.title}</h3>
                         <p className="text-xs text-gray-500 line-clamp-3">{highlight.description}</p>
                       </div>
                       <div className="flex justify-between items-center mt-auto">
@@ -391,7 +399,7 @@ export default function AnalyticsPage() {
                           {highlight.status.replace('-', ' ')}
                         </span>
                       </div>
-                    </div>
+                    </a>
                   ))
                 ) : (
                   <div className="col-span-3 text-center py-6">
@@ -509,7 +517,7 @@ export default function AnalyticsPage() {
                   <Calendar
                     mode="single"
                     selected={dateFilter || undefined}
-                    onSelect={(date: Date | null) => setDateFilter(date)}
+                    onSelect={setDateFilter}
                     initialFocus
                   />
                   {dateFilter && (
@@ -541,16 +549,27 @@ export default function AnalyticsPage() {
             ) : filteredSubmissions.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredSubmissions.map((submission: any) => (
-                  <div key={submission.id} className="border rounded-lg p-4 flex flex-col h-full">
+                  <a 
+                    href={`/ideas/${submission.id}`}
+                    key={submission.id} 
+                    className="border border-gray-200 rounded-lg p-4 h-full flex flex-col shadow-md hover:shadow-lg transition-all cursor-pointer no-underline text-inherit"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.href = `/ideas/${submission.id}`;
+                    }}
+                  >
                     <div className="flex items-center mb-2">
                       <Avatar className="h-8 w-8 mr-2">
                         <AvatarImage src={submission.submitter?.avatarUrl || undefined} />
                         <AvatarFallback>{submission.submitter?.displayName?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
-                      <div className="text-sm">{submission.submitter?.displayName || 'Anonymous'}</div>
+                      <div>
+                        <div className="text-xs font-medium">{submission.submitter?.displayName || 'Anonymous'}</div>
+                        <div className="text-xs text-gray-500">{submission.submitter?.department || 'Unassigned'}</div>
+                      </div>
                     </div>
                     
-                    <h4 className="text-sm font-semibold mb-1">{submission.title}</h4>
+                    <h4 className="text-base font-bold mb-1 hover:text-primary">{submission.title}</h4>
                     <p className="text-xs text-gray-500 mb-3 line-clamp-2 flex-grow">{submission.description}</p>
                     
                     <div className="flex justify-between mt-auto">
@@ -567,7 +586,7 @@ export default function AnalyticsPage() {
                         {new Date(submission.createdAt).toLocaleDateString()}
                       </div>
                     )}
-                  </div>
+                  </a>
                 ))}
               </div>
             ) : (
