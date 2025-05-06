@@ -10,17 +10,21 @@ export interface IdeaWithUser extends Idea {
   submitter: {
     id: number;
     displayName: string;
+    username?: string;
     department?: string;
     avatarUrl?: string;
   } | null;
   assignedTo?: {
     id: number;
     displayName: string;
+    username?: string;
     department?: string;
     avatarUrl?: string;
   } | null;
   // Explicitly define mediaUrls to match schema type
   mediaUrls: Array<{type: string; url: string}> | null;
+  // Add vote count field for display
+  voteCount?: number;
   // Note: These fields are already in the schema, here for clarity
   // impact: string | null;
   // adminNotes: string | null;

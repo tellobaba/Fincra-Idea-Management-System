@@ -48,10 +48,10 @@ import {
   Archive,
   MessageSquare,
   TrendingUp,
-  File,
-  Image,
-  Video,
-  Music,
+  FileIcon as File,
+  ImageIcon as Image,
+  VideoIcon as Video,
+  Music as Music,
   Tag
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -661,11 +661,11 @@ export default function AdminSubmissionsPage() {
               )}
 
               {/* Attachments */}
-              {(selectedIdea?.attachments?.length > 0 || selectedIdea?.attachmentUrl || selectedIdea?.mediaUrls?.length > 0) && (
+              {(selectedIdea?.attachments?.length || selectedIdea?.attachmentUrl || selectedIdea?.mediaUrls?.length) ? (
                 <div className="pt-4">
                   <h3 className="text-sm font-medium mb-2">Attachments & Media</h3>
                   <div className="flex flex-wrap gap-3">
-                    {selectedIdea.attachmentUrl && (
+                    {selectedIdea?.attachmentUrl && (
                       <a 
                         href={selectedIdea.attachmentUrl} 
                         target="_blank" 
@@ -677,7 +677,7 @@ export default function AdminSubmissionsPage() {
                       </a>
                     )}
                     
-                    {selectedIdea.attachments && selectedIdea.attachments.map((url, index) => (
+                    {selectedIdea?.attachments?.map((url, index) => (
                       <a 
                         key={index}
                         href={url} 
@@ -690,7 +690,7 @@ export default function AdminSubmissionsPage() {
                       </a>
                     ))}
                     
-                    {selectedIdea.mediaUrls && selectedIdea.mediaUrls.map((media, index) => (
+                    {selectedIdea?.mediaUrls?.map((media, index) => (
                       <a 
                         key={index}
                         href={media.url} 
@@ -712,7 +712,7 @@ export default function AdminSubmissionsPage() {
                     ))}
                   </div>
                 </div>
-              )}
+              ): null}
 
               {/* Comments section */}
               <div className="pt-2">
@@ -926,71 +926,156 @@ export default function AdminSubmissionsPage() {
       <Dialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign Roles</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-primary" />
+              Assign Roles
+            </DialogTitle>
             <DialogDescription>
               Assign roles for "{selectedIdea?.title}"
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label>Reviewer</Label>
-              <Select 
-                value={assignedRoles.reviewer}
-                onValueChange={(value) => setAssignedRoles({...assignedRoles, reviewer: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a reviewer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {users?.map(user => (
-                    <SelectItem key={`reviewer-${user.id}`} value={String(user.id)}>
-                      {user.displayName || user.username}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Reviewer assignment section */}
+            <div className="space-y-3 p-4 border rounded-lg bg-gray-50">
+              <h3 className="font-medium">Reviewer</h3>
+              <p className="text-sm text-muted-foreground">Responsible for reviewing the submission and providing feedback.</p>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label>Assignment Method</Label>
+                  <Select 
+                    value="existing" 
+                    onValueChange={() => {}}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="existing">Select existing user</SelectItem>
+                      <SelectItem value="email" disabled>Invite by email (Coming soon)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Select User</Label>
+                  <Select 
+                    value={assignedRoles.reviewer}
+                    onValueChange={(value) => setAssignedRoles({...assignedRoles, reviewer: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a reviewer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {users?.map((user: any) => (
+                        <SelectItem key={`reviewer-${user.id}`} value={String(user.id)}>
+                          {user.displayName || user.username || 'Unknown'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label>Transformer</Label>
-              <Select 
-                value={assignedRoles.transformer}
-                onValueChange={(value) => setAssignedRoles({...assignedRoles, transformer: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a transformer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {users?.map(user => (
-                    <SelectItem key={`transformer-${user.id}`} value={String(user.id)}>
-                      {user.displayName || user.username}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            
+            {/* Transformer assignment section */}
+            <div className="space-y-3 p-4 border rounded-lg bg-gray-50">
+              <h3 className="font-medium">Transformer</h3>
+              <p className="text-sm text-muted-foreground">Responsible for transforming the idea into a viable solution.</p>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label>Assignment Method</Label>
+                  <Select 
+                    value="existing" 
+                    onValueChange={() => {}}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="existing">Select existing user</SelectItem>
+                      <SelectItem value="email" disabled>Invite by email (Coming soon)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Select User</Label>
+                  <Select 
+                    value={assignedRoles.transformer}
+                    onValueChange={(value) => setAssignedRoles({...assignedRoles, transformer: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a transformer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {users?.map((user: any) => (
+                        <SelectItem key={`transformer-${user.id}`} value={String(user.id)}>
+                          {user.displayName || user.username || 'Unknown'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label>Implementer</Label>
-              <Select 
-                value={assignedRoles.implementer}
-                onValueChange={(value) => setAssignedRoles({...assignedRoles, implementer: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an implementer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {users?.map(user => (
-                    <SelectItem key={`implementer-${user.id}`} value={String(user.id)}>
-                      {user.displayName || user.username}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            
+            {/* Implementer assignment section */}
+            <div className="space-y-3 p-4 border rounded-lg bg-gray-50">
+              <h3 className="font-medium">Implementer</h3>
+              <p className="text-sm text-muted-foreground">Responsible for implementing the final solution.</p>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label>Assignment Method</Label>
+                  <Select 
+                    value="existing" 
+                    onValueChange={() => {}}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="existing">Select existing user</SelectItem>
+                      <SelectItem value="email" disabled>Invite by email (Coming soon)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Select User</Label>
+                  <Select 
+                    value={assignedRoles.implementer}
+                    onValueChange={(value) => setAssignedRoles({...assignedRoles, implementer: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an implementer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {users?.map((user: any) => (
+                        <SelectItem key={`implementer-${user.id}`} value={String(user.id)}>
+                          {user.displayName || user.username || 'Unknown'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-100 p-3 rounded-md text-blue-700 text-sm flex items-start gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="font-medium">Notification will be sent</p>
+                <p>Assigned users will receive a notification when you save these assignments.</p>
+              </div>
             </div>
           </div>
 
