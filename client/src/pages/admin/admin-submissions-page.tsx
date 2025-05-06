@@ -261,13 +261,6 @@ export default function AdminSubmissionsPage() {
       implementer: ""
     });
     
-    // Reset assignment methods to default
-    setAssignRoleMethods({
-      reviewer: "existing",
-      transformer: "existing",
-      implementer: "existing"
-    });
-    
     // Reset email inputs
     setReviewerEmail("");
     setTransformerEmail("");
@@ -300,7 +293,7 @@ export default function AdminSubmissionsPage() {
     
     // Handle existing user assignments
     Object.entries(assignedRoles).forEach(([role, userId]) => {
-      if (userId && assignRoleMethods[role as keyof typeof assignRoleMethods] === "existing") {
+      if (userId && userId !== "none") {
         assignRoleMutation.mutate({
           ideaId: selectedIdea.id,
           roleName: role,
@@ -310,27 +303,51 @@ export default function AdminSubmissionsPage() {
     });
     
     // Handle email invitations
-    if (assignRoleMethods.reviewer === "email" && reviewerEmail) {
-      // In a real implementation, this would send an invitation email and create a pending assignment
+    if (reviewerEmail) {
+      // Send invitation email and create pending assignment
+      assignRoleMutation.mutate({
+        ideaId: selectedIdea.id,
+        roleName: "reviewer",
+        userId: "email:" + reviewerEmail // Special format to indicate email assignment
+      });
+      
       toast({
         title: "Email Invitation",
         description: `Invitation sent to ${reviewerEmail} for reviewer role`,
       });
     }
     
-    if (assignRoleMethods.transformer === "email" && transformerEmail) {
+    if (transformerEmail) {
+      assignRoleMutation.mutate({
+        ideaId: selectedIdea.id,
+        roleName: "transformer",
+        userId: "email:" + transformerEmail
+      });
+      
       toast({
         title: "Email Invitation",
         description: `Invitation sent to ${transformerEmail} for transformer role`,
       });
     }
     
-    if (assignRoleMethods.implementer === "email" && implementerEmail) {
+    if (implementerEmail) {
+      assignRoleMutation.mutate({
+        ideaId: selectedIdea.id,
+        roleName: "implementer",
+        userId: "email:" + implementerEmail
+      });
+      
       toast({
         title: "Email Invitation",
         description: `Invitation sent to ${implementerEmail} for implementer role`,
       });
     }
+    
+    // Reload idea data to reflect changes
+    setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: [`/api/ideas/${selectedIdea.id}`] });
+      refetch();
+    }, 500);
     
     // Close the dialog
     setIsRoleDialogOpen(false);
@@ -884,15 +901,59 @@ export default function AdminSubmissionsPage() {
                 <div className="space-y-3">
                   <div className="border p-3 rounded-md">
                     <h4 className="text-xs font-medium text-gray-500">REVIEWER</h4>
-                    <p className="text-sm mt-1 font-medium">Not Assigned</p>
+                    {selectedIdea?.reviewerInfo ? (
+                      <div className="flex items-center mt-1">
+                        <Avatar className="h-5 w-5 mr-2">
+                          <AvatarImage src={selectedIdea.reviewerInfo.avatarUrl} />
+                          <AvatarFallback>
+                            {selectedIdea.reviewerInfo.displayName?.charAt(0) || selectedIdea.reviewerInfo.email?.charAt(0) || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">
+                          {selectedIdea.reviewerInfo.displayName || selectedIdea.reviewerInfo.email || `User ${selectedIdea.reviewerInfo.id}`}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-sm mt-1 text-gray-500">Not Assigned</p>
+                    )}
                   </div>
+                  
                   <div className="border p-3 rounded-md">
                     <h4 className="text-xs font-medium text-gray-500">TRANSFORMER</h4>
-                    <p className="text-sm mt-1 font-medium">Not Assigned</p>
+                    {selectedIdea?.transformerInfo ? (
+                      <div className="flex items-center mt-1">
+                        <Avatar className="h-5 w-5 mr-2">
+                          <AvatarImage src={selectedIdea.transformerInfo.avatarUrl} />
+                          <AvatarFallback>
+                            {selectedIdea.transformerInfo.displayName?.charAt(0) || selectedIdea.transformerInfo.email?.charAt(0) || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">
+                          {selectedIdea.transformerInfo.displayName || selectedIdea.transformerInfo.email || `User ${selectedIdea.transformerInfo.id}`}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-sm mt-1 text-gray-500">Not Assigned</p>
+                    )}
                   </div>
+                  
                   <div className="border p-3 rounded-md">
                     <h4 className="text-xs font-medium text-gray-500">IMPLEMENTER</h4>
-                    <p className="text-sm mt-1 font-medium">Not Assigned</p>
+                    {selectedIdea?.implementerInfo ? (
+                      <div className="flex items-center mt-1">
+                        <Avatar className="h-5 w-5 mr-2">
+                          <AvatarImage src={selectedIdea.implementerInfo.avatarUrl} />
+                          <AvatarFallback>
+                            {selectedIdea.implementerInfo.displayName?.charAt(0) || selectedIdea.implementerInfo.email?.charAt(0) || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">
+                          {selectedIdea.implementerInfo.displayName || selectedIdea.implementerInfo.email || `User ${selectedIdea.implementerInfo.id}`}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-sm mt-1 text-gray-500">Not Assigned</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -999,7 +1060,7 @@ export default function AdminSubmissionsPage() {
 
       {/* Assign Roles Dialog */}
       <Dialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5 text-primary" />
@@ -1019,55 +1080,37 @@ export default function AdminSubmissionsPage() {
               </div>
               <p className="text-xs text-muted-foreground">Reviews the submission and provides feedback.</p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 mt-1">
-                <div className="sm:col-span-2">
-                  <Label className="text-xs">Method</Label>
+              <div className="grid grid-cols-2 gap-3 mt-1">
+                <div className="col-span-1">
+                  <Label className="text-xs">Select User</Label>
                   <Select 
-                    value={assignRoleMethods.reviewer} 
-                    onValueChange={(value) => setAssignRoleMethods({...assignRoleMethods, reviewer: value})}
+                    value={assignedRoles.reviewer}
+                    onValueChange={(value) => setAssignedRoles({...assignedRoles, reviewer: value})}
                   >
                     <SelectTrigger className="h-8">
-                      <SelectValue placeholder="Method" />
+                      <SelectValue placeholder="Select a user" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="existing">Existing user</SelectItem>
-                      <SelectItem value="email">Invite by email</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                      {users?.map((user: any) => (
+                        <SelectItem key={`reviewer-${user.id}`} value={String(user.id)}>
+                          {user.displayName || user.username || 'Unknown'}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 
-                {assignRoleMethods.reviewer === "existing" ? (
-                  <div className="sm:col-span-4">
-                    <Label className="text-xs">Select User</Label>
-                    <Select 
-                      value={assignedRoles.reviewer}
-                      onValueChange={(value) => setAssignedRoles({...assignedRoles, reviewer: value})}
-                    >
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Select a reviewer" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {users?.map((user: any) => (
-                          <SelectItem key={`reviewer-${user.id}`} value={String(user.id)}>
-                            {user.displayName || user.username || 'Unknown'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : (
-                  <div className="sm:col-span-4">
-                    <Label className="text-xs">Reviewer Email</Label>
-                    <Input 
-                      type="email" 
-                      className="h-8" 
-                      placeholder="Email address" 
-                      value={reviewerEmail}
-                      onChange={(e) => setReviewerEmail(e.target.value)}
-                    />
-                  </div>
-                )}
+                <div className="col-span-1">
+                  <Label className="text-xs">Or Enter Email</Label>
+                  <Input 
+                    type="email" 
+                    className="h-8" 
+                    placeholder="Email address" 
+                    value={reviewerEmail}
+                    onChange={(e) => setReviewerEmail(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
             
@@ -1076,55 +1119,37 @@ export default function AdminSubmissionsPage() {
               <h3 className="font-medium">Transformer</h3>
               <p className="text-xs text-muted-foreground">Transforms the idea into a viable solution.</p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 mt-1">
-                <div className="sm:col-span-2">
-                  <Label className="text-xs">Method</Label>
+              <div className="grid grid-cols-2 gap-3 mt-1">
+                <div className="col-span-1">
+                  <Label className="text-xs">Select User</Label>
                   <Select 
-                    value={assignRoleMethods.transformer} 
-                    onValueChange={(value) => setAssignRoleMethods({...assignRoleMethods, transformer: value})}
+                    value={assignedRoles.transformer}
+                    onValueChange={(value) => setAssignedRoles({...assignedRoles, transformer: value})}
                   >
                     <SelectTrigger className="h-8">
-                      <SelectValue placeholder="Method" />
+                      <SelectValue placeholder="Select a user" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="existing">Existing user</SelectItem>
-                      <SelectItem value="email">Invite by email</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                      {users?.map((user: any) => (
+                        <SelectItem key={`transformer-${user.id}`} value={String(user.id)}>
+                          {user.displayName || user.username || 'Unknown'}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 
-                {assignRoleMethods.transformer === "existing" ? (
-                  <div className="sm:col-span-4">
-                    <Label className="text-xs">Select User</Label>
-                    <Select 
-                      value={assignedRoles.transformer}
-                      onValueChange={(value) => setAssignedRoles({...assignedRoles, transformer: value})}
-                    >
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Select a transformer" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {users?.map((user: any) => (
-                          <SelectItem key={`transformer-${user.id}`} value={String(user.id)}>
-                            {user.displayName || user.username || 'Unknown'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : (
-                  <div className="sm:col-span-4">
-                    <Label className="text-xs">Transformer Email</Label>
-                    <Input 
-                      type="email" 
-                      className="h-8" 
-                      placeholder="Email address" 
-                      value={transformerEmail}
-                      onChange={(e) => setTransformerEmail(e.target.value)}
-                    />
-                  </div>
-                )}
+                <div className="col-span-1">
+                  <Label className="text-xs">Or Enter Email</Label>
+                  <Input 
+                    type="email" 
+                    className="h-8" 
+                    placeholder="Email address" 
+                    value={transformerEmail}
+                    onChange={(e) => setTransformerEmail(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
             
@@ -1133,55 +1158,37 @@ export default function AdminSubmissionsPage() {
               <h3 className="font-medium">Implementer</h3>
               <p className="text-xs text-muted-foreground">Implements the final solution.</p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 mt-1">
-                <div className="sm:col-span-2">
-                  <Label className="text-xs">Method</Label>
+              <div className="grid grid-cols-2 gap-3 mt-1">
+                <div className="col-span-1">
+                  <Label className="text-xs">Select User</Label>
                   <Select 
-                    value={assignRoleMethods.implementer} 
-                    onValueChange={(value) => setAssignRoleMethods({...assignRoleMethods, implementer: value})}
+                    value={assignedRoles.implementer}
+                    onValueChange={(value) => setAssignedRoles({...assignedRoles, implementer: value})}
                   >
                     <SelectTrigger className="h-8">
-                      <SelectValue placeholder="Method" />
+                      <SelectValue placeholder="Select a user" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="existing">Existing user</SelectItem>
-                      <SelectItem value="email">Invite by email</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                      {users?.map((user: any) => (
+                        <SelectItem key={`implementer-${user.id}`} value={String(user.id)}>
+                          {user.displayName || user.username || 'Unknown'}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 
-                {assignRoleMethods.implementer === "existing" ? (
-                  <div className="sm:col-span-4">
-                    <Label className="text-xs">Select User</Label>
-                    <Select 
-                      value={assignedRoles.implementer}
-                      onValueChange={(value) => setAssignedRoles({...assignedRoles, implementer: value})}
-                    >
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Select an implementer" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {users?.map((user: any) => (
-                          <SelectItem key={`implementer-${user.id}`} value={String(user.id)}>
-                            {user.displayName || user.username || 'Unknown'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : (
-                  <div className="sm:col-span-4">
-                    <Label className="text-xs">Implementer Email</Label>
-                    <Input 
-                      type="email" 
-                      className="h-8" 
-                      placeholder="Email address" 
-                      value={implementerEmail}
-                      onChange={(e) => setImplementerEmail(e.target.value)}
-                    />
-                  </div>
-                )}
+                <div className="col-span-1">
+                  <Label className="text-xs">Or Enter Email</Label>
+                  <Input 
+                    type="email" 
+                    className="h-8" 
+                    placeholder="Email address" 
+                    value={implementerEmail}
+                    onChange={(e) => setImplementerEmail(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
             
@@ -1190,8 +1197,8 @@ export default function AdminSubmissionsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p className="font-medium">Notification will be sent</p>
-                <p>Assigned users will receive a notification when you save these assignments.</p>
+                <p className="font-medium">Role Assignment</p>
+                <p>You can either select an existing user from the dropdown or invite a new user by email.</p>
               </div>
             </div>
           </div>

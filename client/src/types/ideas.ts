@@ -14,6 +14,8 @@ export interface IdeaWithUser extends Idea {
     department?: string;
     avatarUrl?: string;
   } | null;
+  
+  // Person assigned to the idea
   assignedTo?: {
     id: number;
     displayName: string;
@@ -21,6 +23,32 @@ export interface IdeaWithUser extends Idea {
     department?: string;
     avatarUrl?: string;
   } | null;
+  
+  // Role-specific assignments
+  reviewerInfo?: {
+    id: number;
+    displayName?: string;
+    email?: string;
+    avatarUrl?: string;
+    department?: string;
+  } | null;
+  
+  transformerInfo?: {
+    id: number;
+    displayName?: string;
+    email?: string;
+    avatarUrl?: string;
+    department?: string;
+  } | null;
+  
+  implementerInfo?: {
+    id: number;
+    displayName?: string;
+    email?: string;
+    avatarUrl?: string;
+    department?: string;
+  } | null;
+  
   // Explicitly define mediaUrls to match schema type
   mediaUrls: Array<{type: string; url: string}> | null;
   // Add vote count field for display
