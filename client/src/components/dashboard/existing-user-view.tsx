@@ -270,10 +270,10 @@ export function ExistingUserView() {
       {/* Call-to-action cards section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Got Ideas? */}
-        <div className="bg-green-50 dark:bg-green-950 rounded-lg p-4 border border-green-100 dark:border-green-900 flex flex-col justify-between h-full">
+        <div className="bg-[#f0faf0] dark:bg-green-950 rounded-lg p-4 border border-[#e0f0e0] dark:border-green-900 flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold mb-1 text-center">Got Ideas?</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+            <p className="text-[#475f56] dark:text-gray-400 text-sm mb-2">
               Got a spark of innovation? Share your ideas to help Fincra move faster and smarter.
             </p>
           </div>
@@ -289,10 +289,10 @@ export function ExistingUserView() {
         </div>
 
         {/* Challenge */}
-        <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 border border-blue-100 dark:border-blue-900 flex flex-col justify-between h-full">
+        <div className="bg-[#f0f5ff] dark:bg-blue-950 rounded-lg p-4 border border-[#e0ebff] dark:border-blue-900 flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold mb-1 text-center">Challenge</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+            <p className="text-[#47556f] dark:text-gray-400 text-sm mb-2">
               Have a big question or a tough problem we should solve together?
             </p>
           </div>
@@ -308,10 +308,10 @@ export function ExistingUserView() {
         </div>
 
         {/* Pain points? */}
-        <div className="bg-red-50 dark:bg-red-950 rounded-lg p-4 border border-red-100 dark:border-red-900 flex flex-col justify-between h-full">
+        <div className="bg-[#fff5f5] dark:bg-red-950 rounded-lg p-4 border border-[#ffe0e0] dark:border-red-900 flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold mb-1 text-center">Pain points?</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+            <p className="text-[#6f4747] dark:text-gray-400 text-sm mb-2">
               Spot something that's slowing us down? Share what's blocking progress.
             </p>
           </div>
@@ -328,7 +328,7 @@ export function ExistingUserView() {
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Overview</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Overview</h1>
         {isLoading && (
           <div className="flex items-center text-blue-600">
             <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -345,7 +345,7 @@ export function ExistingUserView() {
         {/* Activity section */}
         <Card className="md:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-medium">Activity</CardTitle>
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -379,7 +379,7 @@ export function ExistingUserView() {
         {/* Top Voted */}
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-medium">Top Voted</CardTitle>
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Top Voted</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -416,7 +416,7 @@ export function ExistingUserView() {
       <div className="mb-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-medium">Challenges</CardTitle>
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Challenges</CardTitle>
           </CardHeader>
           <CardContent>
             {/* Empty state when no challenges are available */}
