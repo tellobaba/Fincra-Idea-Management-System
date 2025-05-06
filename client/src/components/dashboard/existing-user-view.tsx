@@ -272,8 +272,8 @@ export function ExistingUserView() {
         {/* Got Ideas? */}
         <div className="bg-[#f0faf0] dark:bg-green-900/20 rounded-lg p-4 border border-[#e0f0e0] dark:border-green-900/30 flex flex-col justify-between h-full">
           <div>
-            <h3 className="text-lg font-semibold mb-1 text-center">Got Ideas?</h3>
-            <p className="text-[#475f56] dark:text-gray-400 text-sm mb-2">
+            <h3 className="text-lg font-bold text-black dark:text-white mb-1 text-center">Got Ideas?</h3>
+            <p className="text-black dark:text-gray-300 text-sm mb-2">
               Got a spark of innovation? Share your ideas to help Fincra move faster and smarter.
             </p>
           </div>
@@ -291,8 +291,8 @@ export function ExistingUserView() {
         {/* Challenge */}
         <div className="bg-[#f0f5ff] dark:bg-blue-900/20 rounded-lg p-4 border border-[#e0ebff] dark:border-blue-900/30 flex flex-col justify-between h-full">
           <div>
-            <h3 className="text-lg font-semibold mb-1 text-center">Challenge</h3>
-            <p className="text-[#47556f] dark:text-gray-400 text-sm mb-2">
+            <h3 className="text-lg font-bold text-black dark:text-white mb-1 text-center">Challenge</h3>
+            <p className="text-black dark:text-gray-300 text-sm mb-2">
               Have a big question or a tough problem we should solve together?
             </p>
           </div>
@@ -310,8 +310,8 @@ export function ExistingUserView() {
         {/* Pain points? */}
         <div className="bg-[#fff5f5] dark:bg-red-900/20 rounded-lg p-4 border border-[#ffe0e0] dark:border-red-900/30 flex flex-col justify-between h-full">
           <div>
-            <h3 className="text-lg font-semibold mb-1 text-center">Pain points?</h3>
-            <p className="text-[#6f4747] dark:text-gray-400 text-sm mb-2">
+            <h3 className="text-lg font-bold text-black dark:text-white mb-1 text-center">Pain points?</h3>
+            <p className="text-black dark:text-gray-300 text-sm mb-2">
               Spot something that's slowing us down? Share what's blocking progress.
             </p>
           </div>
@@ -438,32 +438,32 @@ export function ExistingUserView() {
                   <div key={challenge.id} 
                     className={`rounded-xl p-5 border shadow-sm ${challenge.bgColor} ${challenge.borderColor}`} 
                   >
-                    <h3 className={`font-semibold text-base mb-2 ${challenge.accentColor}`}>{challenge.title}</h3>
+                    <h3 className="font-semibold text-base mb-2 text-black dark:text-white">{challenge.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-3">{challenge.description}</p>
                     
                     {/* Challenge details */}
                     <div className="space-y-3 mb-4 text-sm">
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500 dark:text-gray-400 flex items-center">⏱️ Timeline</span>
-                        <span className="font-medium">
+                        <span className="font-medium text-black dark:text-white">
                           {challenge.startDate.toLocaleDateString()} - {challenge.endDate.toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500 dark:text-gray-400 flex items-center">🏆 Reward</span>
-                        <span className={`font-medium ${challenge.accentColor}`}>{challenge.reward}</span>
+                        <span className="font-medium text-black dark:text-white">{challenge.reward}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500 dark:text-gray-400 flex items-center">👥 Participants</span>
-                        <span className="font-medium">{challenge.participants}</span>
+                        <span className="font-medium text-black dark:text-white">{challenge.participants}</span>
                       </div>
                     </div>
                     
                     {/* Time remaining indicator */}
                     <div className="mt-3 mb-5">
                       <div className="flex justify-between text-xs mb-1">
-                        <span className="font-medium">Time remaining</span>
-                        <span className="font-bold">{challenge.remainingDays} days</span>
+                        <span className="font-medium text-black dark:text-white">Time remaining</span>
+                        <span className="font-bold text-black dark:text-white">{challenge.remainingDays} days</span>
                       </div>
                       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-md font-medium h-2.5">
                         <div 
