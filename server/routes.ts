@@ -1872,7 +1872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // API endpoint for fetching recent highlights (random mix of all categories) for the analytics page
-  app.get("/api/ideas/recent-highlights", async (_req, res) => {
+  app.get("/api/highlights/random", async (_req, res) => {
     try {
       console.log('Fetching recent highlights');
       // Get a mix of recent submissions from all categories
@@ -1883,20 +1883,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Ensure we have ideas from each category if possible
-      const ideasByCategory = {
+      const ideasByCategory: Record<string, any[]> = {
         opportunity: [],
         challenge: [],
         'pain-point': []
       };
       
       allIdeas.forEach(idea => {
-        if (ideasByCategory[idea.category]) {
+        if (idea.category && ideasByCategory[idea.category]) {
           ideasByCategory[idea.category].push(idea);
         }
       });
       
       // Randomly sample from each category (or take all available if less than 1)
-      const getRandomSample = (array, count) => {
+      const getRandomSample = (array: any[], count: number) => {
         if (array.length <= count) return array;
         const shuffled = [...array].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, count);
@@ -1904,22 +1904,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Aim for 1 submission of each type if available
       const idealSamples = [
-        ...getRandomSample(ideasByCategory.opportunity, 1),
-        ...getRandomSample(ideasByCategory.challenge, 1),
-        ...getRandomSample(ideasByCategory['pain-point'], 1)
+        ...getRandomSample(ideasByCategory['opportunity'] || [], 1),
+        ...getRandomSample(ideasByCategory['challenge'] || [], 1),
+        ...getRandomSample(ideasByCategory['pain-point'] || [], 1)
       ];
       
       // If we don't have 3 items, add random ones from the overall pool
-      let result = idealSamples;
-      if (result.length < 3) {
+      let result = idealSamples.filter(Boolean); // Filter out any undefined values
+      if (result.length < 3 && allIdeas.length > 0) {
         const remainingCount = 3 - result.length;
-        const remainingItems = allIdeas.filter(idea => !result.some(r => r.id === idea.id));
+        const remainingItems = allIdeas.filter(idea => !result.some(r => r && r.id === idea.id));
         result = [...result, ...getRandomSample(remainingItems, remainingCount)];
+      }
+      
+      console.log('Results to process:', JSON.stringify(result));
+      
+      if (result.length === 0) {
+        return res.json([]);
       }
       
       // Add user info to each result
       const highlightsWithUsers = await Promise.all(
         result.slice(0, 3).map(async (idea) => {
+          console.log('Processing idea:', JSON.stringify(idea));
+          if (!idea || !idea.submittedById) {
+            return {
+              id: 0,
+              title: 'No Submission Available',
+              description: 'No recent submissions to display',
+              category: 'opportunity',
+              status: 'submitted',
+              createdAt: new Date(),
+              submitter: null
+            };
+          }
+          
           const submitter = await dbStorage.getUser(idea.submittedById);
           return {
             ...idea,
