@@ -25,7 +25,7 @@ export interface IdeaWithUser extends Idea {
   } | null;
   
   // Role-specific assignments
-  reviewerInfo?: {
+  reviewer?: {
     id: number;
     displayName?: string;
     email?: string;
@@ -33,7 +33,7 @@ export interface IdeaWithUser extends Idea {
     department?: string;
   } | null;
   
-  transformerInfo?: {
+  transformer?: {
     id: number;
     displayName?: string;
     email?: string;
@@ -41,7 +41,7 @@ export interface IdeaWithUser extends Idea {
     department?: string;
   } | null;
   
-  implementerInfo?: {
+  implementer?: {
     id: number;
     displayName?: string;
     email?: string;

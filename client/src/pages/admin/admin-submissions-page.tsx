@@ -547,7 +547,10 @@ export default function AdminSubmissionsPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => handleAssignRoles(idea)}
+                              onClick={() => {
+                                console.log('Assign roles button clicked', idea.id);
+                                handleAssignRoles(idea);
+                              }}
                               title="Assign roles"
                               className="text-primary hover:text-primary/80 hover:bg-primary/10"
                             >
