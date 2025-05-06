@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/dashboard/sidebar";
@@ -8,13 +8,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { CATEGORY_CONFIG } from "@/types/ideas";
-import { Loader2, CheckIcon, MessageSquare, UserPlus, X } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Loader2, CheckIcon, MessageSquare, UserPlus, X, ChevronDown, ChevronRight, Eye } from "lucide-react";
+import { IdeaDetailRow } from "./admin/idea-detail-row";
 
 import {
   Table,
@@ -33,6 +34,8 @@ export default function AdminPage() {
   const [assignIdea, setAssignIdea] = useState<number | null>(null);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("reviewer");
+  const [expandedIdea, setExpandedIdea] = useState<number | null>(null);
+  const [detailView, setDetailView] = useState<any>(null);
   
   // Fetch ideas for review
   const { data: ideasForReview, isLoading } = useQuery<IdeaWithUser[]>({
@@ -108,6 +111,31 @@ export default function AdminPage() {
     }
   };
   
+  // Function to fetch idea details
+  const fetchIdeaDetails = async (ideaId: number) => {
+    if (expandedIdea === ideaId) {
+      // Toggle off if already expanded
+      setExpandedIdea(null);
+      setDetailView(null);
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/ideas/${ideaId}`);
+      if (!response.ok) throw new Error('Failed to fetch idea details');
+      
+      const data = await response.json();
+      setDetailView(data);
+      setExpandedIdea(ideaId);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch idea details",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Handle role assignment submission
   const handleRoleAssignment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,6 +160,10 @@ export default function AdminPage() {
         description: `Successfully assigned ${role} role to ${email}`
       });
       queryClient.invalidateQueries({ queryKey: ["/api/ideas/review"] });
+      if (expandedIdea === assignIdea) {
+        // Refresh detail view if this idea is expanded
+        fetchIdeaDetails(assignIdea);
+      }
       setAssignModalOpen(false);
       setEmail("");
       setRole("reviewer");
@@ -142,6 +174,134 @@ export default function AdminPage() {
         variant: "destructive"
       });
     });
+  };
+
+  // Generate rows for the table - idea rows and detail rows
+  const renderTableRows = () => {
+    if (!ideasForReview) return null;
+    
+    const rows: React.ReactNode[] = [];
+    
+    ideasForReview.forEach((idea) => {
+      // Main idea row
+      rows.push(
+        <TableRow 
+          key={`idea-${idea.id}`}
+          className="cursor-pointer hover:bg-muted/50"
+          onClick={() => fetchIdeaDetails(idea.id)}
+        >
+          <TableCell onClick={(e) => e.stopPropagation()}>
+            <Checkbox 
+              checked={selectedIdeas.includes(idea.id)} 
+              onCheckedChange={() => toggleSelection(idea.id)}
+              aria-label={`Select idea ${idea.title}`}
+            />
+          </TableCell>
+          <TableCell className="font-medium flex items-center gap-2">
+            {expandedIdea === idea.id ? 
+              <ChevronDown className="h-4 w-4 text-muted-foreground" /> : 
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            }
+            {idea.title}
+          </TableCell>
+          <TableCell>
+            <Badge 
+              variant="outline" 
+              className={CATEGORY_CONFIG[idea.category as keyof typeof CATEGORY_CONFIG]?.color}
+            >
+              {CATEGORY_CONFIG[idea.category as keyof typeof CATEGORY_CONFIG]?.label}
+            </Badge>
+          </TableCell>
+          <TableCell>
+            <div className="flex items-center">
+              <Avatar className="h-8 w-8 mr-3">
+                <AvatarImage src={idea.submitter?.avatarUrl} alt={idea.submitter?.displayName} />
+                <AvatarFallback>{idea.submitter?.displayName.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="text-sm font-medium">
+                {idea.submitter?.displayName}
+              </div>
+            </div>
+          </TableCell>
+          <TableCell className="text-muted-foreground">
+            {formatDate(idea.createdAt)}
+          </TableCell>
+          <TableCell>
+            <Badge 
+              variant="outline" 
+              className={getSlaStatus(idea.createdAt).color}
+            >
+              {getSlaStatus(idea.createdAt).label}
+            </Badge>
+          </TableCell>
+          <TableCell onClick={(e) => e.stopPropagation()}>
+            <div className="flex space-x-2">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                title="Approve"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateStatusMutation.mutate({ id: idea.id, status: "in-review" });
+                }}
+                disabled={updateStatusMutation.isPending}
+              >
+                <CheckIcon className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-muted-foreground hover:text-foreground"
+                title="Request comment"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-muted-foreground hover:text-foreground"
+                title="Assign user"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setAssignIdea(idea.id);
+                  setAssignModalOpen(true);
+                }}
+              >
+                <UserPlus className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-muted-foreground hover:text-foreground"
+                title="View details"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fetchIdeaDetails(idea.id);
+                }}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      );
+      
+      // Add detail row if expanded
+      if (expandedIdea === idea.id && detailView) {
+        rows.push(
+          <IdeaDetailRow 
+            key={`detail-${idea.id}`} 
+            detailView={detailView} 
+            formatDate={formatDate} 
+          />
+        );
+      }
+    });
+    
+    return rows;
   };
 
   return (
@@ -203,86 +363,7 @@ export default function AdminPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {ideasForReview?.map((idea) => (
-                      <TableRow key={idea.id}>
-                        <TableCell>
-                          <Checkbox 
-                            checked={selectedIdeas.includes(idea.id)} 
-                            onCheckedChange={() => toggleSelection(idea.id)}
-                            aria-label={`Select idea ${idea.title}`}
-                          />
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {idea.title}
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant="outline" 
-                            className={CATEGORY_CONFIG[idea.category as keyof typeof CATEGORY_CONFIG]?.color}
-                          >
-                            {CATEGORY_CONFIG[idea.category as keyof typeof CATEGORY_CONFIG]?.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <Avatar className="h-8 w-8 mr-3">
-                              <AvatarImage src={idea.submitter?.avatarUrl} alt={idea.submitter?.displayName} />
-                              <AvatarFallback>{idea.submitter?.displayName.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div className="text-sm font-medium">
-                              {idea.submitter?.displayName}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatDate(idea.createdAt)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant="outline" 
-                            className={getSlaStatus(idea.createdAt).color}
-                          >
-                            {getSlaStatus(idea.createdAt).label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              className="text-primary hover:text-primary/80 hover:bg-primary/10"
-                              title="Approve"
-                              onClick={() => updateStatusMutation.mutate({ id: idea.id, status: "in-review" })}
-                              disabled={updateStatusMutation.isPending}
-                            >
-                              <CheckIcon className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              className="text-muted-foreground hover:text-foreground"
-                              title="Request comment"
-                            >
-                              <MessageSquare className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              className="text-muted-foreground hover:text-foreground"
-                              title="Assign user"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setAssignIdea(idea.id);
-                                setAssignModalOpen(true);
-                              }}
-                            >
-                              <UserPlus className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {renderTableRows()}
                   </TableBody>
                 </Table>
               </div>
