@@ -422,10 +422,10 @@ export function ExistingUserView() {
             {/* Empty state when no challenges are available */}
             {challengesData.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-500 mb-3">No challenges available at the moment.</p>
+                <p className="text-muted-foreground mb-3">No challenges available at the moment.</p>
                 <button
                   onClick={handlePostChallenge}
-                  className="inline-flex items-center px-4 py-2 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50"
+                  className="inline-flex items-center px-4 py-2 border border-blue-200 dark:border-blue-800 text-sm font-medium rounded-md text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950"
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
                   Create a Challenge
@@ -477,7 +477,7 @@ export function ExistingUserView() {
                     <div className="mt-4 text-center">
                       <button
                         onClick={() => handleTakeChallenge(challenge.id)}
-                        className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                        className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white dark:bg-gray-800 hover:bg-opacity-50 dark:hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
                       >
                         <Sparkles className="mr-2 h-4 w-4" />
                         Take Challenge
