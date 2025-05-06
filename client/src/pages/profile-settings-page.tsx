@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Loader2, User, Settings, Key } from "lucide-react";
+import { Loader2, User, Settings, Key, Moon, Sun } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,6 +59,7 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 export default function ProfileSettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { theme } = useTheme();
   
   // Profile form
   const profileForm = useForm<ProfileFormValues>({
@@ -366,6 +369,29 @@ export default function ProfileSettingsPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
+                    {/* Theme Toggle */}
+                    <div className="flex flex-col space-y-2">
+                      <h3 className="text-md font-medium">Theme</h3>
+                      <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center">
+                            {theme === "light" ? (
+                              <Sun className="h-5 w-5 mr-2 text-amber-500" />
+                            ) : (
+                              <Moon className="h-5 w-5 mr-2 text-blue-400" />
+                            )}
+                            <span className="font-medium">
+                              {theme === "light" ? "Light" : "Dark Blue"} Mode
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Set the theme for the application interface.
+                          </p>
+                        </div>
+                        <ThemeToggle showLabel={false} />
+                      </div>
+                    </div>
+                    
                     <div className="p-4 rounded-md bg-muted">
                       <p className="text-sm text-muted-foreground">
                         Additional application preferences will be available in future updates.
