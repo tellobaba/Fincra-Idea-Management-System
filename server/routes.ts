@@ -957,7 +957,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Build response with full role information
-      const response = {
+      // Define the response type with all the expected fields
+      interface DetailResponse extends Idea {
+        submitter: { id: number; displayName: string; department: string | null; avatarUrl: string | null; } | null;
+        assignedTo: { id: number; displayName: string; department: string | null; avatarUrl: string | null; } | null;
+        comments: Comment[];
+        isFollowed: boolean;
+        reviewer?: { id: number; displayName?: string; email?: string; department?: string | null; avatarUrl?: string | null; } | null;
+        transformer?: { id: number; displayName?: string; email?: string; department?: string | null; avatarUrl?: string | null; } | null;
+        implementer?: { id: number; displayName?: string; email?: string; department?: string | null; avatarUrl?: string | null; } | null;
+      }
+      
+      const response: DetailResponse = {
         ...idea,
         submitter: submitter ? {
           id: submitter.id,
@@ -979,7 +990,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (idea.reviewerId) {
         const reviewer = await dbStorage.getUser(idea.reviewerId);
         if (reviewer) {
-          response.reviewerInfo = {
+          response.reviewer = {
             id: reviewer.id,
             displayName: reviewer.displayName,
             email: reviewer.username, // Using username as email
@@ -988,7 +999,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         }
       } else if (idea.reviewerEmail) {
-        response.reviewerInfo = {
+        response.reviewer = {
           id: 0, // Placeholder ID
           email: idea.reviewerEmail,
           displayName: 'Pending: ' + idea.reviewerEmail
@@ -999,7 +1010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (idea.transformerId) {
         const transformer = await dbStorage.getUser(idea.transformerId);
         if (transformer) {
-          response.transformerInfo = {
+          response.transformer = {
             id: transformer.id,
             displayName: transformer.displayName,
             email: transformer.username,
@@ -1008,7 +1019,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         }
       } else if (idea.transformerEmail) {
-        response.transformerInfo = {
+        response.transformer = {
           id: 0,
           email: idea.transformerEmail,
           displayName: 'Pending: ' + idea.transformerEmail
@@ -1019,7 +1030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (idea.implementerId) {
         const implementer = await dbStorage.getUser(idea.implementerId);
         if (implementer) {
-          response.implementerInfo = {
+          response.implementer = {
             id: implementer.id,
             displayName: implementer.displayName,
             email: implementer.username,
@@ -1028,7 +1039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         }
       } else if (idea.implementerEmail) {
-        response.implementerInfo = {
+        response.implementer = {
           id: 0,
           email: idea.implementerEmail,
           displayName: 'Pending: ' + idea.implementerEmail
@@ -1492,7 +1503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (refreshedIdea?.reviewerId) {
         const reviewer = await dbStorage.getUser(refreshedIdea.reviewerId);
         if (reviewer) {
-          response.reviewerInfo = {
+          response.reviewer = {
             id: reviewer.id,
             displayName: reviewer.displayName,
             email: reviewer.username, // Using username as email
@@ -1501,7 +1512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         }
       } else if (refreshedIdea?.reviewerEmail) {
-        response.reviewerInfo = {
+        response.reviewer = {
           id: 0, // Placeholder ID
           email: refreshedIdea.reviewerEmail,
           displayName: 'Pending: ' + refreshedIdea.reviewerEmail

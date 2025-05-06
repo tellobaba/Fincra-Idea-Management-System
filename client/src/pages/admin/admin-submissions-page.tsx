@@ -898,16 +898,16 @@ export default function AdminSubmissionsPage() {
                 <div className="space-y-3">
                   <div className="border p-3 rounded-md">
                     <h4 className="text-xs font-medium text-gray-500">REVIEWER</h4>
-                    {selectedIdea?.reviewerInfo ? (
+                    {selectedIdea?.reviewer ? (
                       <div className="flex items-center mt-1">
                         <Avatar className="h-5 w-5 mr-2">
-                          <AvatarImage src={selectedIdea.reviewerInfo.avatarUrl} />
+                          <AvatarImage src={selectedIdea.reviewer.avatarUrl} />
                           <AvatarFallback>
-                            {selectedIdea.reviewerInfo.displayName?.charAt(0) || selectedIdea.reviewerInfo.email?.charAt(0) || '?'}
+                            {selectedIdea.reviewer.displayName?.charAt(0) || selectedIdea.reviewer.email?.charAt(0) || '?'}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm font-medium">
-                          {selectedIdea.reviewerInfo.displayName || selectedIdea.reviewerInfo.email || `User ${selectedIdea.reviewerInfo.id}`}
+                          {selectedIdea.reviewer.displayName || selectedIdea.reviewer.email || `User ${selectedIdea.reviewer.id}`}
                         </span>
                       </div>
                     ) : (
@@ -917,16 +917,16 @@ export default function AdminSubmissionsPage() {
                   
                   <div className="border p-3 rounded-md">
                     <h4 className="text-xs font-medium text-gray-500">TRANSFORMER</h4>
-                    {selectedIdea?.transformerInfo ? (
+                    {selectedIdea?.transformer ? (
                       <div className="flex items-center mt-1">
                         <Avatar className="h-5 w-5 mr-2">
-                          <AvatarImage src={selectedIdea.transformerInfo.avatarUrl} />
+                          <AvatarImage src={selectedIdea.transformer.avatarUrl} />
                           <AvatarFallback>
-                            {selectedIdea.transformerInfo.displayName?.charAt(0) || selectedIdea.transformerInfo.email?.charAt(0) || '?'}
+                            {selectedIdea.transformer.displayName?.charAt(0) || selectedIdea.transformer.email?.charAt(0) || '?'}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm font-medium">
-                          {selectedIdea.transformerInfo.displayName || selectedIdea.transformerInfo.email || `User ${selectedIdea.transformerInfo.id}`}
+                          {selectedIdea.transformer.displayName || selectedIdea.transformer.email || `User ${selectedIdea.transformer.id}`}
                         </span>
                       </div>
                     ) : (
@@ -936,16 +936,16 @@ export default function AdminSubmissionsPage() {
                   
                   <div className="border p-3 rounded-md">
                     <h4 className="text-xs font-medium text-gray-500">IMPLEMENTER</h4>
-                    {selectedIdea?.implementerInfo ? (
+                    {selectedIdea?.implementer ? (
                       <div className="flex items-center mt-1">
                         <Avatar className="h-5 w-5 mr-2">
-                          <AvatarImage src={selectedIdea.implementerInfo.avatarUrl} />
+                          <AvatarImage src={selectedIdea.implementer.avatarUrl} />
                           <AvatarFallback>
-                            {selectedIdea.implementerInfo.displayName?.charAt(0) || selectedIdea.implementerInfo.email?.charAt(0) || '?'}
+                            {selectedIdea.implementer.displayName?.charAt(0) || selectedIdea.implementer.email?.charAt(0) || '?'}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm font-medium">
-                          {selectedIdea.implementerInfo.displayName || selectedIdea.implementerInfo.email || `User ${selectedIdea.implementerInfo.id}`}
+                          {selectedIdea.implementer.displayName || selectedIdea.implementer.email || `User ${selectedIdea.implementer.id}`}
                         </span>
                       </div>
                     ) : (
