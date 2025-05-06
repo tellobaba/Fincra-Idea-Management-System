@@ -345,7 +345,7 @@ export function ExistingUserView() {
         {/* Activity section */}
         <Card className="md:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-bold text-gray-800 dark:text-white">Activity</CardTitle>
+            <CardTitle>Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -379,7 +379,7 @@ export function ExistingUserView() {
         {/* Top Voted */}
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-bold text-gray-800 dark:text-white">Top Voted</CardTitle>
+            <CardTitle>Top Voted</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -416,7 +416,7 @@ export function ExistingUserView() {
       <div className="mb-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-bold text-gray-800 dark:text-white">Challenges</CardTitle>
+            <CardTitle>Challenges</CardTitle>
           </CardHeader>
           <CardContent>
             {/* Empty state when no challenges are available */}
