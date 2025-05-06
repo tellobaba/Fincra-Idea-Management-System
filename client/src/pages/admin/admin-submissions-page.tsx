@@ -46,7 +46,13 @@ import {
   Check,
   X,
   Archive,
-  MessageSquare
+  MessageSquare,
+  TrendingUp,
+  File,
+  Image,
+  Video,
+  Music,
+  Tag
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -528,12 +534,17 @@ export default function AdminSubmissionsPage() {
         </Card>
       </div>
 
-      {/* View Idea Dialog */}
+      {/* View Idea Dialog - Detailed Submission Information */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl">{selectedIdea?.title}</DialogTitle>
-            <div className="flex gap-2 mt-2">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader className="border-b pb-4">
+            <DialogTitle className="text-xl font-bold flex items-center gap-3">
+              <div className="bg-primary/10 p-2 rounded-full">
+                <Eye className="h-5 w-5 text-primary" />
+              </div>
+              {selectedIdea?.title}
+            </DialogTitle>
+            <div className="flex flex-wrap gap-2 mt-2">
               {selectedIdea?.category && (
                 <Badge variant="outline" className={getCategoryConfig(selectedIdea.category).color}>
                   {getCategoryConfig(selectedIdea.category).label}
@@ -544,99 +555,307 @@ export default function AdminSubmissionsPage() {
                   {getStatusConfig(selectedIdea.status).label}
                 </Badge>
               )}
+              {selectedIdea?.priority && (
+                <Badge variant="outline" className={`${selectedIdea.priority === 'high' ? 'bg-red-100 text-red-800 border-red-200' : 
+                  selectedIdea.priority === 'medium' ? 'bg-orange-100 text-orange-800 border-orange-200' : 
+                  'bg-blue-100 text-blue-800 border-blue-200'}`}>
+                  {selectedIdea.priority.charAt(0).toUpperCase() + selectedIdea.priority.slice(1)} Priority
+                </Badge>
+              )}
+              {selectedIdea?.voteCount && selectedIdea.voteCount > 0 && (
+                <Badge variant="outline" className="bg-indigo-100 text-indigo-800 border-indigo-200">
+                  {selectedIdea.voteCount} {selectedIdea.voteCount === 1 ? 'Vote' : 'Votes'}
+                </Badge>
+              )}
             </div>
           </DialogHeader>
 
-          <div className="space-y-6 mt-4">
-            <div>
-              <h3 className="text-sm font-semibold">Description</h3>
-              <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">{selectedIdea?.description}</p>
-            </div>
-
-            {selectedIdea?.impact && (
-              <div>
-                <h3 className="text-sm font-semibold">Impact</h3>
-                <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">{selectedIdea.impact}</p>
-              </div>
-            )}
-
-            {selectedIdea?.adminNotes && (
-              <div>
-                <h3 className="text-sm font-semibold">Admin Notes</h3>
-                <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">{selectedIdea.adminNotes}</p>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <h3 className="text-sm font-semibold">Submitted By</h3>
-                <div className="flex items-center mt-1">
-                  <Avatar className="h-6 w-6 mr-2">
-                    <AvatarImage src={selectedIdea?.submitter?.avatarUrl} />
-                    <AvatarFallback>
-                      {selectedIdea?.submitter?.displayName ? selectedIdea.submitter.displayName.charAt(0) : 
-                       (selectedIdea?.submitter?.username ? selectedIdea.submitter.username.charAt(0) : '?')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm">
-                    {selectedIdea?.submitter?.displayName || selectedIdea?.submitter?.username || `User ${selectedIdea?.submitter?.id}` || 'Unknown'}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            {/* Left column: Main content */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-gray-50 rounded-lg p-4 border">
+                <h3 className="font-medium mb-2 flex items-center gap-2">
+                  <span className="bg-primary/10 p-1 rounded-md">
+                    <Search className="h-4 w-4 text-primary" />
                   </span>
+                  Description
+                </h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{selectedIdea?.description}</p>
+              </div>
+
+              {selectedIdea?.impact && (
+                <div className="bg-gray-50 rounded-lg p-4 border">
+                  <h3 className="font-medium mb-2 flex items-center gap-2">
+                    <span className="bg-green-100 p-1 rounded-md">
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                    </span>
+                    Impact
+                  </h3>
+                  <p className="text-gray-700 whitespace-pre-wrap">{selectedIdea.impact}</p>
                 </div>
+              )}
+
+              {selectedIdea?.adminNotes && (
+                <div className="bg-gray-50 rounded-lg p-4 border">
+                  <h3 className="font-medium mb-2 flex items-center gap-2">
+                    <span className="bg-yellow-100 p-1 rounded-md">
+                      <Edit className="h-4 w-4 text-yellow-600" />
+                    </span>
+                    Admin Notes
+                  </h3>
+                  <p className="text-gray-700 whitespace-pre-wrap">{selectedIdea.adminNotes}</p>
+                </div>
+              )}
+
+              {/* Additional fields */}
+              {selectedIdea?.inspiration && (
+                <div className="bg-gray-50 rounded-lg p-4 border">
+                  <h3 className="font-medium mb-2">Inspiration/Context</h3>
+                  <p className="text-gray-700 whitespace-pre-wrap">{selectedIdea.inspiration}</p>
+                </div>
+              )}
+
+              {selectedIdea?.similarSolutions && (
+                <div className="bg-gray-50 rounded-lg p-4 border">
+                  <h3 className="font-medium mb-2">Similar Solutions</h3>
+                  <p className="text-gray-700 whitespace-pre-wrap">{selectedIdea.similarSolutions}</p>
+                </div>
+              )}
+              
+              {/* Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {selectedIdea?.impactScore !== undefined && selectedIdea.impactScore !== null && (
+                  <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 text-center">
+                    <h4 className="text-xs font-semibold text-purple-700 mb-1">IMPACT SCORE</h4>
+                    <p className="text-2xl font-bold text-purple-900">{selectedIdea.impactScore}</p>
+                  </div>
+                )}
+                
+                {selectedIdea?.costSaved !== undefined && selectedIdea.costSaved !== null && (
+                  <div className="bg-green-50 border border-green-100 rounded-lg p-3 text-center">
+                    <h4 className="text-xs font-semibold text-green-700 mb-1">COST SAVED</h4>
+                    <p className="text-2xl font-bold text-green-900">${selectedIdea.costSaved.toLocaleString()}</p>
+                  </div>
+                )}
+                
+                {selectedIdea?.revenueGenerated !== undefined && selectedIdea.revenueGenerated !== null && (
+                  <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
+                    <h4 className="text-xs font-semibold text-blue-700 mb-1">REVENUE GENERATED</h4>
+                    <p className="text-2xl font-bold text-blue-900">${selectedIdea.revenueGenerated.toLocaleString()}</p>
+                  </div>
+                )}
               </div>
-              <div>
-                <h3 className="text-sm font-semibold">Department</h3>
-                <p className="mt-1 text-sm">{selectedIdea?.submitter?.department || "N/A"}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold">Submitted On</h3>
-                <p className="mt-1 text-sm">
-                  {selectedIdea?.createdAt ? formatDate(selectedIdea.createdAt) : "Unknown"}
-                </p>
+
+              {/* Tags */}
+              {selectedIdea?.tags && selectedIdea.tags.length > 0 && (
+                <div className="pt-4">
+                  <h3 className="text-sm font-medium mb-2">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedIdea.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Attachments */}
+              {(selectedIdea?.attachments?.length > 0 || selectedIdea?.attachmentUrl || selectedIdea?.mediaUrls?.length > 0) && (
+                <div className="pt-4">
+                  <h3 className="text-sm font-medium mb-2">Attachments & Media</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {selectedIdea.attachmentUrl && (
+                      <a 
+                        href={selectedIdea.attachmentUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm"
+                      >
+                        <File className="h-4 w-4" />
+                        Attachment
+                      </a>
+                    )}
+                    
+                    {selectedIdea.attachments && selectedIdea.attachments.map((url, index) => (
+                      <a 
+                        key={index}
+                        href={url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm"
+                      >
+                        <File className="h-4 w-4" />
+                        File {index + 1}
+                      </a>
+                    ))}
+                    
+                    {selectedIdea.mediaUrls && selectedIdea.mediaUrls.map((media, index) => (
+                      <a 
+                        key={index}
+                        href={media.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm"
+                      >
+                        {media.type.includes('image') ? (
+                          <Image className="h-4 w-4" />
+                        ) : media.type.includes('video') ? (
+                          <Video className="h-4 w-4" />
+                        ) : media.type.includes('audio') ? (
+                          <Music className="h-4 w-4" />
+                        ) : (
+                          <File className="h-4 w-4" />
+                        )}
+                        {media.type.split('/')[0].charAt(0).toUpperCase() + media.type.split('/')[0].slice(1)} {index + 1}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Comments section */}
+              <div className="pt-2">
+                <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Comments
+                </h3>
+                <div className="space-y-3">
+                  {/* Would loop through comments here if we had them in the selectedIdea */}
+                  <p className="text-sm text-muted-foreground">No comments yet</p>
+                </div>
               </div>
             </div>
+            
+            {/* Right column: Metadata and actions */}
+            <div className="space-y-6">
+              {/* Submission info card */}
+              <div className="bg-gray-50 rounded-lg p-4 border">
+                <h3 className="font-medium mb-3">Submission Information</h3>
+                
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-xs text-gray-500">SUBMITTED BY</h4>
+                    <div className="flex items-center mt-1">
+                      <Avatar className="h-6 w-6 mr-2">
+                        <AvatarImage src={selectedIdea?.submitter?.avatarUrl} />
+                        <AvatarFallback>
+                          {selectedIdea?.submitter?.displayName ? selectedIdea.submitter.displayName.charAt(0) : 
+                           (selectedIdea?.submitter?.username ? selectedIdea.submitter.username.charAt(0) : '?')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">
+                        {selectedIdea?.submitter?.displayName || selectedIdea?.submitter?.username || `User ${selectedIdea?.submitter?.id}` || 'Unknown'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{selectedIdea?.submitter?.department || "N/A"}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-xs text-gray-500">CREATED</h4>
+                    <p className="text-sm mt-1">
+                      {selectedIdea?.createdAt ? formatDate(selectedIdea.createdAt) : "Unknown"}
+                    </p>
+                  </div>
 
-            {/* Role assignments section */}
-            <div>
-              <h3 className="text-sm font-semibold">Assigned Roles</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                <div className="border p-3 rounded-md">
-                  <h4 className="text-xs font-medium text-muted-foreground">Reviewer</h4>
-                  <p className="text-sm mt-1">Not Assigned</p>
-                </div>
-                <div className="border p-3 rounded-md">
-                  <h4 className="text-xs font-medium text-muted-foreground">Transformer</h4>
-                  <p className="text-sm mt-1">Not Assigned</p>
-                </div>
-                <div className="border p-3 rounded-md">
-                  <h4 className="text-xs font-medium text-muted-foreground">Implementer</h4>
-                  <p className="text-sm mt-1">Not Assigned</p>
+                  <div>
+                    <h4 className="text-xs text-gray-500">LAST UPDATED</h4>
+                    <p className="text-sm mt-1">
+                      {selectedIdea?.updatedAt ? formatDate(selectedIdea.updatedAt) : "Unknown"}
+                    </p>
+                  </div>
+                  
+                  {selectedIdea?.category && (
+                    <div>
+                      <h4 className="text-xs text-gray-500">CATEGORY</h4>
+                      <p className="text-sm mt-1">{getCategoryConfig(selectedIdea.category).label}</p>
+                    </div>
+                  )}
+                  
+                  {selectedIdea?.department && (
+                    <div>
+                      <h4 className="text-xs text-gray-500">RELATED DEPARTMENT</h4>
+                      <p className="text-sm mt-1">{selectedIdea.department}</p>
+                    </div>
+                  )}
+                  
+                  {selectedIdea?.organizationCategory && (
+                    <div>
+                      <h4 className="text-xs text-gray-500">ORG. CATEGORY</h4>
+                      <p className="text-sm mt-1">{selectedIdea.organizationCategory}</p>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-
-            {/* Comments section would go here */}
-            <div>
-              <h3 className="text-sm font-semibold">Comments</h3>
-              <div className="mt-2">
-                <p className="text-sm text-muted-foreground">No comments yet</p>
+              
+              {/* Role assignments section */}
+              <div className="bg-gray-50 rounded-lg p-4 border">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium">Assigned Roles</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 text-primary"
+                    onClick={() => {
+                      setIsViewDialogOpen(false);
+                      handleAssignRoles(selectedIdea!);
+                    }}
+                  >
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    Assign
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="border p-3 rounded-md">
+                    <h4 className="text-xs font-medium text-gray-500">REVIEWER</h4>
+                    <p className="text-sm mt-1 font-medium">Not Assigned</p>
+                  </div>
+                  <div className="border p-3 rounded-md">
+                    <h4 className="text-xs font-medium text-gray-500">TRANSFORMER</h4>
+                    <p className="text-sm mt-1 font-medium">Not Assigned</p>
+                  </div>
+                  <div className="border p-3 rounded-md">
+                    <h4 className="text-xs font-medium text-gray-500">IMPLEMENTER</h4>
+                    <p className="text-sm mt-1 font-medium">Not Assigned</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Quick actions */}
+              <div className="space-y-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start" 
+                  onClick={() => {
+                    setIsViewDialogOpen(false);
+                    handleEditIdea(selectedIdea!);
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Status
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start" 
+                  onClick={() => {
+                    setIsViewDialogOpen(false);
+                    handleAddComment(selectedIdea!);
+                  }}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Add Comment
+                </Button>
               </div>
             </div>
           </div>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter className="mt-8 pt-4 border-t">
             <Button
               variant="outline"
               onClick={() => setIsViewDialogOpen(false)}
             >
               Close
-            </Button>
-            <Button
-              onClick={() => {
-                setIsViewDialogOpen(false);
-                handleEditIdea(selectedIdea!);
-              }}
-            >
-              Edit Status
             </Button>
           </DialogFooter>
         </DialogContent>
