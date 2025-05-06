@@ -56,17 +56,17 @@ export function ExistingUserView() {
   const getStatusBadgeClasses = (status: string) => {
     switch(status) {
       case 'in-review':
-        return 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-700 font-medium';
+        return 'bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-900 font-medium';
       case 'submitted':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700 font-medium';
+        return 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900 font-medium';
       case 'merged':
-        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 font-medium';
+        return 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-medium';
       case 'parked':
-        return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700 font-medium';
+        return 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900 font-medium';
       case 'implemented':
-        return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 font-medium';
+        return 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-900 font-medium';
       default:
-        return 'bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 font-medium';
+        return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700 font-medium';
     }
   };
   
@@ -74,13 +74,13 @@ export function ExistingUserView() {
   const getCategoryBadgeClasses = (category: string) => {
     switch(category) {
       case 'opportunity':
-        return 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700 shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-800/50';
+        return 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900';
       case 'challenge':
-        return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 shadow-sm hover:bg-blue-100 dark:hover:bg-blue-800/50';
+        return 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900';
       case 'pain-point':
-        return 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700 shadow-sm hover:bg-red-100 dark:hover:bg-red-800/50';
+        return 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900 shadow-sm hover:bg-red-100 dark:hover:bg-red-900';
       default:
-        return 'bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-600/50';
+        return 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700';
     }
   };
   
@@ -204,19 +204,19 @@ export function ExistingUserView() {
     // Determine color theme based on index
     const colorThemes = [
       {
-        bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50",
-        borderColor: "border-blue-200 dark:border-blue-700",
-        accentColor: "text-blue-600 dark:text-blue-300"
+        bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950",
+        borderColor: "border-blue-200 dark:border-blue-800",
+        accentColor: "text-blue-600 dark:text-blue-400"
       },
       {
-        bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/50 dark:to-teal-900/50",
-        borderColor: "border-emerald-200 dark:border-emerald-700",
-        accentColor: "text-emerald-600 dark:text-emerald-300"
+        bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950",
+        borderColor: "border-emerald-200 dark:border-emerald-800",
+        accentColor: "text-emerald-600 dark:text-emerald-400"
       },
       {
-        bgColor: "bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/50 dark:to-violet-900/50",
-        borderColor: "border-purple-200 dark:border-purple-700",
-        accentColor: "text-purple-600 dark:text-purple-300"
+        bgColor: "bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950",
+        borderColor: "border-purple-200 dark:border-purple-800",
+        accentColor: "text-purple-600 dark:text-purple-400"
       }
     ];
     
@@ -397,7 +397,7 @@ export function ExistingUserView() {
                       <span className={`text-xs font-medium rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
                       </span>
-                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-700"><ThumbsUp className="inline-block w-3 h-3 mr-1" /> {item.votes} Votes</span>
+                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900"><ThumbsUp className="inline-block w-3 h-3 mr-1" /> {item.votes} Votes</span>
                     </div>
                     {/* Time submitted removed as per user request */}
                   </div>
