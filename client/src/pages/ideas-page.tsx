@@ -166,7 +166,7 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-auto">
         <Header 
@@ -284,11 +284,11 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
           </div>
 
           {/* Ideas listing */}
-          <div className="bg-white rounded-md shadow-sm">
+          <div className="bg-card rounded-md shadow-sm">
             <div className="p-4 flex items-center justify-between border-b">
               <div className="flex items-center space-x-4">
                 <h2 className="text-lg font-medium">{viewMode === 'my' ? 'My' : 'All'} {pageTitle}</h2>
-                <div className="flex bg-gray-100 rounded-md p-1">
+                <div className="flex bg-muted rounded-md p-1">
                   <button 
                     className={`px-3 py-1 text-sm rounded-md transition ${viewMode === 'my' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
                     onClick={() => setViewMode('my')}
