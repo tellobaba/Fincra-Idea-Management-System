@@ -1407,12 +1407,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let user = null;
       let isEmailAssignment = false;
       let emailAddress = "";
+      let targetUserId = null;
       
       if (typeof userId === 'string' && userId.startsWith("email:")) {
         // This is an email-based assignment
         isEmailAssignment = true;
         emailAddress = userId.substring(6); // Remove the "email:" prefix
         console.log(`Processing email assignment to ${emailAddress} for role ${role}`);
+        
+        // Check if a user with this email already exists in the system
+        const existingUser = await dbStorage.getUserByUsername(emailAddress);
+        if (existingUser) {
+          // If user exists, we'll send them a notification
+          targetUserId = existingUser.id;
+        }
       } else if (!userId || isNaN(parseInt(userId))) {
         return res.status(400).json({ message: "Invalid user ID" });
       } else {
@@ -1421,6 +1429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
+        targetUserId = user.id;
       }
 
       // Process the role-specific assignment
@@ -1458,7 +1467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!updatedIdea) {
         return res.status(500).json({ message: "Failed to assign role" });
       }
-      
+
       // Create notification for the idea owner about the assignment
       try {
         const admin = req.user!;
@@ -1476,10 +1485,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           actorId: admin.id
         });
         
-        // Notify the assignee (if it's a user in the system)
-        if (!isEmailAssignment && user && parseInt(userId) !== idea.submittedById) {
+        // Notify the assignee if they're in the system and it's not the idea owner
+        if (targetUserId && targetUserId !== idea.submittedById) {
           await dbStorage.createNotification({
-            userId: parseInt(userId),
+            userId: targetUserId,
             title: `You've been assigned as ${roleDisplayName}`,
             message: `${admin.displayName} assigned you as ${roleDisplayName} for the idea: "${idea.title}"`,
             type: "assignment",
