@@ -548,9 +548,24 @@ export default function AdminSubmissionsPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => {
-                                console.log('Assign roles button clicked', idea.id);
-                                handleAssignRoles(idea);
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Assign roles button clicked', idea.id, idea);
+                                // Force select the idea first
+                                setSelectedIdea(idea);
+                                // Then open the dialog
+                                setTimeout(() => {
+                                  setAssignedRoles({
+                                    reviewer: idea.reviewerId ? String(idea.reviewerId) : "",
+                                    transformer: idea.transformerId ? String(idea.transformerId) : "",
+                                    implementer: idea.implementerId ? String(idea.implementerId) : ""
+                                  });
+                                  setReviewerEmail(idea.reviewerEmail || "");
+                                  setTransformerEmail(idea.transformerEmail || "");
+                                  setImplementerEmail(idea.implementerEmail || "");
+                                  setIsRoleDialogOpen(true);
+                                }, 100);
                               }}
                               title="Assign roles"
                               className="text-primary hover:text-primary/80 hover:bg-primary/10"
