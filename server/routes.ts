@@ -1497,7 +1497,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const refreshedIdea = await dbStorage.getIdea(id);
       
       // Build response with full role information
-      const response = { ...refreshedIdea };
+      // Define the response type with all the expected fields
+      interface RoleAssignmentResponse extends Idea {
+        reviewer?: { id: number; displayName?: string; email?: string; department?: string | null; avatarUrl?: string | null; } | null;
+        transformer?: { id: number; displayName?: string; email?: string; department?: string | null; avatarUrl?: string | null; } | null;
+        implementer?: { id: number; displayName?: string; email?: string; department?: string | null; avatarUrl?: string | null; } | null;
+      }
+      
+      const response: RoleAssignmentResponse = { ...refreshedIdea };
       
       // Add reviewer info
       if (refreshedIdea?.reviewerId) {
@@ -1523,7 +1530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (refreshedIdea?.transformerId) {
         const transformer = await dbStorage.getUser(refreshedIdea.transformerId);
         if (transformer) {
-          response.transformerInfo = {
+          response.transformer = {
             id: transformer.id,
             displayName: transformer.displayName,
             email: transformer.username,
@@ -1532,7 +1539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         }
       } else if (refreshedIdea?.transformerEmail) {
-        response.transformerInfo = {
+        response.transformer = {
           id: 0,
           email: refreshedIdea.transformerEmail,
           displayName: 'Pending: ' + refreshedIdea.transformerEmail
@@ -1543,7 +1550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (refreshedIdea?.implementerId) {
         const implementer = await dbStorage.getUser(refreshedIdea.implementerId);
         if (implementer) {
-          response.implementerInfo = {
+          response.implementer = {
             id: implementer.id,
             displayName: implementer.displayName,
             email: implementer.username,
@@ -1552,7 +1559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         }
       } else if (refreshedIdea?.implementerEmail) {
-        response.implementerInfo = {
+        response.implementer = {
           id: 0,
           email: refreshedIdea.implementerEmail,
           displayName: 'Pending: ' + refreshedIdea.implementerEmail
