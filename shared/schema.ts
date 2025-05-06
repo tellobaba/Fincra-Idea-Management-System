@@ -24,6 +24,15 @@ export const ideas = pgTable("ideas", {
   votes: integer("votes").default(0).notNull(),
   submittedById: integer("submitted_by_id").notNull(),
   assignedToId: integer("assigned_to_id"),
+  
+  // New role specific assignments
+  reviewerId: integer("reviewer_id"),
+  reviewerEmail: text("reviewer_email"),
+  transformerId: integer("transformer_id"),
+  transformerEmail: text("transformer_email"),
+  implementerId: integer("implementer_id"),
+  implementerEmail: text("implementer_email"),
+  
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   impactScore: integer("impact_score"),

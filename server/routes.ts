@@ -956,7 +956,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      res.json({
+      // Build response with full role information
+      const response = {
         ...idea,
         submitter: submitter ? {
           id: submitter.id,
@@ -972,7 +973,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } : null,
         comments: commentsWithUsers,
         isFollowed: isFollowed,
-      });
+      };
+      
+      // Add reviewer info
+      if (idea.reviewerId) {
+        const reviewer = await dbStorage.getUser(idea.reviewerId);
+        if (reviewer) {
+          response.reviewerInfo = {
+            id: reviewer.id,
+            displayName: reviewer.displayName,
+            email: reviewer.username, // Using username as email
+            department: reviewer.department,
+            avatarUrl: reviewer.avatarUrl
+          };
+        }
+      } else if (idea.reviewerEmail) {
+        response.reviewerInfo = {
+          id: 0, // Placeholder ID
+          email: idea.reviewerEmail,
+          displayName: 'Pending: ' + idea.reviewerEmail
+        };
+      }
+      
+      // Add transformer info
+      if (idea.transformerId) {
+        const transformer = await dbStorage.getUser(idea.transformerId);
+        if (transformer) {
+          response.transformerInfo = {
+            id: transformer.id,
+            displayName: transformer.displayName,
+            email: transformer.username,
+            department: transformer.department,
+            avatarUrl: transformer.avatarUrl
+          };
+        }
+      } else if (idea.transformerEmail) {
+        response.transformerInfo = {
+          id: 0,
+          email: idea.transformerEmail,
+          displayName: 'Pending: ' + idea.transformerEmail
+        };
+      }
+      
+      // Add implementer info
+      if (idea.implementerId) {
+        const implementer = await dbStorage.getUser(idea.implementerId);
+        if (implementer) {
+          response.implementerInfo = {
+            id: implementer.id,
+            displayName: implementer.displayName,
+            email: implementer.username,
+            department: implementer.department,
+            avatarUrl: implementer.avatarUrl
+          };
+        }
+      } else if (idea.implementerEmail) {
+        response.implementerInfo = {
+          id: 0,
+          email: idea.implementerEmail,
+          displayName: 'Pending: ' + idea.implementerEmail
+        };
+      }
+
+      res.json(response);
     } catch (error) {
       console.error('Error fetching idea details:', error);
       res.status(500).json({ message: "Failed to fetch idea", error: error instanceof Error ? error.message : String(error) });
@@ -1313,18 +1376,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Old leaderboard endpoint removed to avoid duplication
   // We now use the improved implementation below
 
-  // Admin endpoint to assign reviewer/implementer
+  // Admin endpoint to assign roles (reviewer/transformer/implementer)
   app.post("/api/ideas/:id/assign", checkAdminRole, async (req, res) => {
     try {
-      const { userId } = req.body;
+      const { userId, role } = req.body;
       const id = parseInt(req.params.id);
       
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid ID format" });
-      }
-      
-      if (!userId || isNaN(parseInt(userId))) {
-        return res.status(400).json({ message: "Invalid user ID" });
       }
       
       const idea = await dbStorage.getIdea(id);
@@ -1332,40 +1391,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!idea) {
         return res.status(404).json({ message: "Idea not found" });
       }
+
+      // Handle email-based assignments
+      let user = null;
+      let isEmailAssignment = false;
+      let emailAddress = "";
       
-      const user = await dbStorage.getUser(parseInt(userId));
+      if (typeof userId === 'string' && userId.startsWith("email:")) {
+        // This is an email-based assignment
+        isEmailAssignment = true;
+        emailAddress = userId.substring(6); // Remove the "email:" prefix
+        console.log(`Processing email assignment to ${emailAddress} for role ${role}`);
+      } else if (!userId || isNaN(parseInt(userId))) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      } else {
+        // Regular user assignment
+        user = await dbStorage.getUser(parseInt(userId));
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+      }
+
+      // Process the role-specific assignment
+      let updatedIdea;
+      const roleFieldMap: Record<string, string> = {
+        'reviewer': 'reviewerId',
+        'transformer': 'transformerId',
+        'implementer': 'implementerId'
+      };
       
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      if (!role || !roleFieldMap[role]) {
+        return res.status(400).json({ message: "Invalid role specified" });
+      }
+
+      const updateData: any = {};
+      
+      if (isEmailAssignment) {
+        // Create a placeholder in the database or send invitation
+        // For now, just store the email in the DB and show notification
+        const emailFieldMap: Record<string, string> = {
+          'reviewer': 'reviewerEmail',
+          'transformer': 'transformerEmail',
+          'implementer': 'implementerEmail'
+        };
+        
+        updateData[emailFieldMap[role]] = emailAddress;
+        console.log(`Setting ${emailFieldMap[role]} to ${emailAddress}`);
+      } else {
+        // Regular user assignment
+        updateData[roleFieldMap[role]] = parseInt(userId);
       }
       
-      const updatedIdea = await dbStorage.assignIdea(id, parseInt(userId));
+      updatedIdea = await dbStorage.updateIdea(id, updateData);
       
       if (!updatedIdea) {
-        return res.status(500).json({ message: "Failed to assign idea" });
+        return res.status(500).json({ message: "Failed to assign role" });
       }
       
       // Create notification for the idea owner about the assignment
       try {
         const admin = req.user!;
+        const roleDisplayName = role.charAt(0).toUpperCase() + role.slice(1);
+        const assigneeName = isEmailAssignment ? emailAddress : (user?.displayName || 'Unknown');
         
         // Notify the idea owner
         await dbStorage.createNotification({
           userId: idea.submittedById,
-          title: "Your idea has been assigned",
-          message: `${admin.displayName} assigned your idea "${idea.title}" to ${user.displayName}`,
+          title: `${roleDisplayName} assigned to your idea`,
+          message: `${admin.displayName} assigned ${assigneeName} as ${roleDisplayName} for your idea "${idea.title}"`,
           type: "assignment",
           relatedItemId: idea.id,
           relatedItemType: "idea",
           actorId: admin.id
         });
         
-        // Notify the assignee
-        if (parseInt(userId) !== idea.submittedById) {
+        // Notify the assignee (if it's a user in the system)
+        if (!isEmailAssignment && user && parseInt(userId) !== idea.submittedById) {
           await dbStorage.createNotification({
             userId: parseInt(userId),
-            title: "Idea assigned to you",
-            message: `${admin.displayName} assigned an idea to you: "${idea.title}"`,
+            title: `You've been assigned as ${roleDisplayName}`,
+            message: `${admin.displayName} assigned you as ${roleDisplayName} for the idea: "${idea.title}"`,
             type: "assignment",
             relatedItemId: idea.id,
             relatedItemType: "idea",
@@ -1377,22 +1482,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the main operation if notification creation fails
       }
       
-      // Attach user info
-      const assignedTo = updatedIdea.assignedToId ? await dbStorage.getUser(updatedIdea.assignedToId) : null;
+      // Get the updated idea with all role information
+      const refreshedIdea = await dbStorage.getIdea(id);
       
-      res.json({
-        ...updatedIdea,
-        assignedTo: assignedTo ? {
-          id: assignedTo.id,
-          displayName: assignedTo.displayName,
-          department: assignedTo.department,
-          avatarUrl: assignedTo.avatarUrl,
-          role: assignedTo.role,
-        } : null,
-      });
+      // Build response with full role information
+      const response = { ...refreshedIdea };
+      
+      // Add reviewer info
+      if (refreshedIdea?.reviewerId) {
+        const reviewer = await dbStorage.getUser(refreshedIdea.reviewerId);
+        if (reviewer) {
+          response.reviewerInfo = {
+            id: reviewer.id,
+            displayName: reviewer.displayName,
+            email: reviewer.username, // Using username as email
+            department: reviewer.department,
+            avatarUrl: reviewer.avatarUrl
+          };
+        }
+      } else if (refreshedIdea?.reviewerEmail) {
+        response.reviewerInfo = {
+          id: 0, // Placeholder ID
+          email: refreshedIdea.reviewerEmail,
+          displayName: 'Pending: ' + refreshedIdea.reviewerEmail
+        };
+      }
+      
+      // Add transformer info
+      if (refreshedIdea?.transformerId) {
+        const transformer = await dbStorage.getUser(refreshedIdea.transformerId);
+        if (transformer) {
+          response.transformerInfo = {
+            id: transformer.id,
+            displayName: transformer.displayName,
+            email: transformer.username,
+            department: transformer.department,
+            avatarUrl: transformer.avatarUrl
+          };
+        }
+      } else if (refreshedIdea?.transformerEmail) {
+        response.transformerInfo = {
+          id: 0,
+          email: refreshedIdea.transformerEmail,
+          displayName: 'Pending: ' + refreshedIdea.transformerEmail
+        };
+      }
+      
+      // Add implementer info
+      if (refreshedIdea?.implementerId) {
+        const implementer = await dbStorage.getUser(refreshedIdea.implementerId);
+        if (implementer) {
+          response.implementerInfo = {
+            id: implementer.id,
+            displayName: implementer.displayName,
+            email: implementer.username,
+            department: implementer.department,
+            avatarUrl: implementer.avatarUrl
+          };
+        }
+      } else if (refreshedIdea?.implementerEmail) {
+        response.implementerInfo = {
+          id: 0,
+          email: refreshedIdea.implementerEmail,
+          displayName: 'Pending: ' + refreshedIdea.implementerEmail
+        };
+      }
+      
+      res.json(response);
     } catch (error) {
-      console.error('Error assigning idea:', error);
-      res.status(500).json({ message: "Failed to assign idea" });
+      console.error('Error assigning role:', error);
+      res.status(500).json({ message: "Failed to assign role" });
     }
   });
 
