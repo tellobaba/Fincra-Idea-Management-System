@@ -369,7 +369,7 @@ export function ExistingUserView() {
                 ))
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-gray-500 text-sm">No recent activity to show</p>
+                  <p className="text-muted-foreground text-sm">No recent activity to show</p>
                 </div>
               )}
             </div>
@@ -397,14 +397,14 @@ export function ExistingUserView() {
                       <span className={`text-xs font-medium rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
                       </span>
-                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-100"><ThumbsUp className="inline-block w-3 h-3 mr-1" /> {item.votes} Votes</span>
+                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900"><ThumbsUp className="inline-block w-3 h-3 mr-1" /> {item.votes} Votes</span>
                     </div>
                     {/* Time submitted removed as per user request */}
                   </div>
                 ))
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-gray-500 text-sm">No voted ideas available</p>
+                  <p className="text-muted-foreground text-sm">No voted ideas available</p>
                 </div>
               )}
             </div>
@@ -439,22 +439,22 @@ export function ExistingUserView() {
                     className={`rounded-xl p-5 border shadow-sm ${challenge.bgColor} ${challenge.borderColor}`} 
                   >
                     <h3 className={`font-semibold text-base mb-2 ${challenge.accentColor}`}>{challenge.title}</h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">{challenge.description}</p>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-3">{challenge.description}</p>
                     
                     {/* Challenge details */}
                     <div className="space-y-3 mb-4 text-sm">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500 flex items-center">⏱️ Timeline</span>
+                        <span className="text-muted-foreground flex items-center">⏱️ Timeline</span>
                         <span className="font-medium">
                           {challenge.startDate.toLocaleDateString()} - {challenge.endDate.toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500 flex items-center">🏆 Reward</span>
+                        <span className="text-muted-foreground flex items-center">🏆 Reward</span>
                         <span className={`font-medium ${challenge.accentColor}`}>{challenge.reward}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500 flex items-center">👥 Participants</span>
+                        <span className="text-muted-foreground flex items-center">👥 Participants</span>
                         <span className="font-medium">{challenge.participants}</span>
                       </div>
                     </div>
@@ -465,7 +465,7 @@ export function ExistingUserView() {
                         <span className="font-medium">Time remaining</span>
                         <span className="font-bold">{challenge.remainingDays} days</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-md font-medium h-2.5">
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-md font-medium h-2.5">
                         <div 
                           className={`h-2.5 rounded-md font-medium ${challenge.accentColor.replace('text', 'bg')}`} 
                           style={{ width: `${Math.min(100, (challenge.remainingDays / 15) * 100)}%` }}
