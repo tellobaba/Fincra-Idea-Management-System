@@ -246,19 +246,20 @@ export default function AdminSubmissionsPage() {
 
   // Handle assign roles
   const handleAssignRoles = (idea: IdeaWithUser) => {
+    console.log('Handling assign roles for idea:', idea);
     setSelectedIdea(idea);
     
-    // Reset role selections and email inputs
+    // Set role selections based on existing assignments
     setAssignedRoles({
-      reviewer: "",
-      transformer: "",
-      implementer: ""
+      reviewer: idea.reviewerId ? String(idea.reviewerId) : "",
+      transformer: idea.transformerId ? String(idea.transformerId) : "",
+      implementer: idea.implementerId ? String(idea.implementerId) : ""
     });
     
     // Reset email inputs
-    setReviewerEmail("");
-    setTransformerEmail("");
-    setImplementerEmail("");
+    setReviewerEmail(idea.reviewerEmail || "");
+    setTransformerEmail(idea.transformerEmail || "");
+    setImplementerEmail(idea.implementerEmail || "");
     
     setIsRoleDialogOpen(true);
   };
