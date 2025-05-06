@@ -93,12 +93,6 @@ export default function AdminSubmissionsPage() {
     implementer: ""
   });
   
-  const [assignRoleMethods, setAssignRoleMethods] = useState({
-    reviewer: "existing",
-    transformer: "existing",
-    implementer: "existing"
-  });
-  
   // Email inputs for direct assignment
   const [reviewerEmail, setReviewerEmail] = useState("");
   const [transformerEmail, setTransformerEmail] = useState("");
