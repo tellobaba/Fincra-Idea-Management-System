@@ -270,17 +270,17 @@ export function ExistingUserView() {
       {/* Call-to-action cards section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Got Ideas? */}
-        <div className="bg-green-50 rounded-lg p-4 border border-green-100 flex flex-col justify-between h-full">
+        <div className="bg-green-50 dark:bg-green-950 rounded-lg p-4 border border-green-100 dark:border-green-900 flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold mb-1 text-center">Got Ideas?</h3>
-            <p className="text-gray-600 text-sm mb-2">
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
               Got a spark of innovation? Share your ideas to help Fincra move faster and smarter.
             </p>
           </div>
           <div className="text-center">
             <button
               onClick={handleSubmitIdea}
-              className="inline-flex items-center px-3 py-1.5 border border-green-200 text-sm font-medium rounded-md text-green-600 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              className="inline-flex items-center px-3 py-1.5 border border-green-200 dark:border-green-800 text-sm font-medium rounded-md text-green-600 dark:text-green-400 bg-white dark:bg-gray-800 hover:bg-green-50 dark:hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Submit an Idea
@@ -289,17 +289,17 @@ export function ExistingUserView() {
         </div>
 
         {/* Challenge */}
-        <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 flex flex-col justify-between h-full">
+        <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 border border-blue-100 dark:border-blue-900 flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold mb-1 text-center">Challenge</h3>
-            <p className="text-gray-600 text-sm mb-2">
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
               Have a big question or a tough problem we should solve together?
             </p>
           </div>
           <div className="text-center">
             <button
               onClick={handlePostChallenge}
-              className="inline-flex items-center px-3 py-1.5 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-3 py-1.5 border border-blue-200 dark:border-blue-800 text-sm font-medium rounded-md text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <Sparkles className="mr-2 h-4 w-4" />
               Post a Challenge
@@ -308,17 +308,17 @@ export function ExistingUserView() {
         </div>
 
         {/* Pain points? */}
-        <div className="bg-red-50 rounded-lg p-4 border border-red-100 flex flex-col justify-between h-full">
+        <div className="bg-red-50 dark:bg-red-950 rounded-lg p-4 border border-red-100 dark:border-red-900 flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold mb-1 text-center">Pain points?</h3>
-            <p className="text-gray-600 text-sm mb-2">
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
               Spot something that's slowing us down? Share what's blocking progress.
             </p>
           </div>
           <div className="text-center">
             <button
               onClick={handleRecordPainPoint}
-              className="inline-flex items-center px-3 py-1.5 border border-red-200 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="inline-flex items-center px-3 py-1.5 border border-red-200 dark:border-red-800 text-sm font-medium rounded-md text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               <AlertTriangle className="mr-2 h-4 w-4" />
               Record Pain point
@@ -363,7 +363,7 @@ export function ExistingUserView() {
                       <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
                       </span>
-                      <span className="text-xs font-medium bg-gray-50 px-2 py-1 rounded-md text-gray-500">{item.date}</span>
+                      <span className="text-xs font-medium bg-muted px-2 py-1 rounded-md text-muted-foreground">{item.date}</span>
                     </div>
                   </div>
                 ))
