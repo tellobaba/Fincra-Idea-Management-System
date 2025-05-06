@@ -17,6 +17,24 @@ interface ChartData {
 export function ExistingUserView() {
   const [activeTab, setActiveTab] = useState("ideas");
   
+  // Force black text on all header elements in light mode
+  useEffect(() => {
+    const forceBlackText = () => {
+      const cardTitles = document.querySelectorAll('.card-title, h3, .text-lg');
+      cardTitles.forEach(element => {
+        if (element instanceof HTMLElement) {
+          element.style.color = 'black';
+        }
+      });
+    };
+    
+    forceBlackText();
+    const observer = new MutationObserver(forceBlackText);
+    observer.observe(document.body, { childList: true, subtree: true });
+    
+    return () => observer.disconnect();
+  }, []);
+  
   // Fetch real data from API endpoints
   const { data: topIdeas = [], isLoading: topIdeasLoading } = useQuery<IdeaWithUser[]>({
     queryKey: ["/api/ideas/top"],
