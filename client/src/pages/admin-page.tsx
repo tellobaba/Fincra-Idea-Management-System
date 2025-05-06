@@ -13,6 +13,23 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { CATEGORY_CONFIG } from "@/types/ideas";
 import { Loader2, CheckIcon, MessageSquare, UserPlus } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -264,10 +281,46 @@ export default function AdminPage() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                console.log('Assign roles button clicked', idea.id);
                                 
-                                // Redirect to admin submissions page with the idea ID to show roles dialog
-                                window.location.href = `/admin/submissions?assign=${idea.id}`;
+                                // Prompt for email and role
+                                const email = prompt("Enter email address for assignment:");
+                                if (!email) return;
+                                
+                                const roleOptions = "Select role (type 1, 2, or 3):\n1. Reviewer\n2. Transformer\n3. Implementer";
+                                const roleSelection = prompt(roleOptions);
+                                if (!roleSelection) return;
+                                
+                                let role = "";
+                                switch(roleSelection) {
+                                  case "1": role = "reviewer"; break;
+                                  case "2": role = "transformer"; break;
+                                  case "3": role = "implementer"; break;
+                                  default: 
+                                    toast({
+                                      title: "Invalid selection",
+                                      description: "Please select 1, 2, or 3 for the role",
+                                      variant: "destructive"
+                                    });
+                                    return;
+                                }
+                                
+                                // Call API to assign role
+                                apiRequest("POST", `/api/ideas/${idea.id}/assign`, {
+                                  role,
+                                  userId: 'email:' + email // Special format to indicate email assignment
+                                }).then(() => {
+                                  toast({
+                                    title: "Role assigned",
+                                    description: `Successfully assigned ${role} role to ${email}`
+                                  });
+                                  queryClient.invalidateQueries({ queryKey: ["/api/ideas/review"] });
+                                }).catch((error) => {
+                                  toast({
+                                    title: "Assignment failed",
+                                    description: error instanceof Error ? error.message : "Failed to assign role",
+                                    variant: "destructive"
+                                  });
+                                });
                               }}
                             >
                               <UserPlus className="h-4 w-4" />
