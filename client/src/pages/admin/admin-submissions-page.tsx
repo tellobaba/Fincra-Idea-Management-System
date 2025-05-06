@@ -460,40 +460,61 @@ export default function AdminSubmissionsPage() {
                           // TODO: Implement vote count display when data is available
                           idea.voteCount || 0
                         }</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleViewIdea(idea)}>
-                                <Eye className="h-4 w-4 mr-2" /> View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleEditIdea(idea)}>
-                                <Edit className="h-4 w-4 mr-2" /> Update Status
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleAssignRoles(idea)}>
-                                <UserPlus className="h-4 w-4 mr-2" /> Assign Roles
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleAddComment(idea)}>
-                                <MessageSquare className="h-4 w-4 mr-2" /> Add Comment
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => 
-                                  updateIdeaMutation.mutate({ 
-                                    id: idea.id, 
-                                    status: idea.status === "parked" ? "submitted" : "parked"
-                                  })
-                                }
-                              >
-                                <Archive className="h-4 w-4 mr-2" />
-                                {idea.status === "parked" ? "Unarchive" : "Archive"}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                        <TableCell>
+                          <div className="flex items-center justify-end space-x-2">
+                            {/* Direct action buttons */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleViewIdea(idea)}
+                              title="View details"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditIdea(idea)}
+                              title="Update status"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleAssignRoles(idea)}
+                              title="Assign roles"
+                              className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                            >
+                              <UserPlus className="h-4 w-4" />
+                            </Button>
+                            
+                            {/* More actions dropdown */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleAddComment(idea)}>
+                                  <MessageSquare className="h-4 w-4 mr-2" /> Add Comment
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  onClick={() => 
+                                    updateIdeaMutation.mutate({ 
+                                      id: idea.id, 
+                                      status: idea.status === "parked" ? "submitted" : "parked"
+                                    })
+                                  }
+                                >
+                                  <Archive className="h-4 w-4 mr-2" />
+                                  {idea.status === "parked" ? "Unarchive" : "Archive"}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
