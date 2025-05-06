@@ -1871,6 +1871,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // API endpoint for fetching recent highlights (random mix of all categories) for the analytics page
+  app.get("/api/ideas/recent-highlights", async (_req, res) => {
+    try {
+      console.log('Fetching recent highlights');
+      // Get a mix of recent submissions from all categories
+      const allIdeas = await dbStorage.getIdeas({ 
+        sortBy: "createdAt", 
+        sortDirection: "desc",
+        limit: 30 // Fetch more than needed to ensure random distribution
+      });
+      
+      // Ensure we have ideas from each category if possible
+      const ideasByCategory = {
+        opportunity: [],
+        challenge: [],
+        'pain-point': []
+      };
+      
+      allIdeas.forEach(idea => {
+        if (ideasByCategory[idea.category]) {
+          ideasByCategory[idea.category].push(idea);
+        }
+      });
+      
+      // Randomly sample from each category (or take all available if less than 1)
+      const getRandomSample = (array, count) => {
+        if (array.length <= count) return array;
+        const shuffled = [...array].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+      };
+      
+      // Aim for 1 submission of each type if available
+      const idealSamples = [
+        ...getRandomSample(ideasByCategory.opportunity, 1),
+        ...getRandomSample(ideasByCategory.challenge, 1),
+        ...getRandomSample(ideasByCategory['pain-point'], 1)
+      ];
+      
+      // If we don't have 3 items, add random ones from the overall pool
+      let result = idealSamples;
+      if (result.length < 3) {
+        const remainingCount = 3 - result.length;
+        const remainingItems = allIdeas.filter(idea => !result.some(r => r.id === idea.id));
+        result = [...result, ...getRandomSample(remainingItems, remainingCount)];
+      }
+      
+      // Add user info to each result
+      const highlightsWithUsers = await Promise.all(
+        result.slice(0, 3).map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      console.log(`Returning ${highlightsWithUsers.length} highlights`);
+      res.json(highlightsWithUsers);
+    } catch (error) {
+      console.error("Error fetching recent highlights:", error);
+      res.status(500).json({ error: "Failed to fetch recent highlights" });
+    }
+  });
+  
   // Get leaderboard data (top contributors)
   app.get("/api/leaderboard", async (req, res) => {
     try {

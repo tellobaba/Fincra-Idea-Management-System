@@ -5,6 +5,15 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, ChevronRightIcon, ExternalLinkIcon } from "lucide-react";
+import { format } from "date-fns";
 import { useState, useEffect } from "react";
 
 interface ChartData {
@@ -16,6 +25,10 @@ interface ChartData {
 export default function AnalyticsPage() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAllSubmissions, setShowAllSubmissions] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<Date | null>(null);
 
   // Fetch real data from API endpoints
   const { data: idealVolume = [
