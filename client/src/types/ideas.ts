@@ -120,28 +120,28 @@ export interface SubmitCommentForm {
 
 // Status labels and colors for UI
 export const STATUS_CONFIG: Record<Status, { label: string; color: string }> = {
-  'submitted': { label: 'Submitted', color: 'blue' },
-  'in-review': { label: 'In Review', color: 'amber' },
-  'merged': { label: 'Merged', color: 'purple' },
-  'parked': { label: 'Parked', color: 'gray' },
-  'implemented': { label: 'Implemented', color: 'green' },
+  'submitted': { label: 'Submitted', color: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' },
+  'in-review': { label: 'In Review', color: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' },
+  'merged': { label: 'Merged', color: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' },
+  'parked': { label: 'Parked', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' },
+  'implemented': { label: 'Implemented', color: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300' },
 };
 
 // Category labels and colors for UI
 export const CATEGORY_CONFIG: Record<Category, { label: string; color: string; icon: string }> = {
   'pain-point': { 
     label: 'Pain-point', 
-    color: 'bg-red-100 text-red-800',
+    color: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
     icon: 'exclamation-circle'
   },
   'opportunity': { 
     label: 'Opportunity', 
-    color: 'bg-blue-100 text-blue-800',
+    color: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300',
     icon: 'lightbulb'
   },
   'challenge': { 
     label: 'Challenge', 
-    color: 'bg-amber-100 text-amber-800',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
     icon: 'flag'
   },
 };
@@ -150,7 +150,7 @@ export const CATEGORY_CONFIG: Record<Category, { label: string; color: string; i
 export function getCategoryConfig(category: string) {
   return CATEGORY_CONFIG[category as Category] || {
     label: category,
-    color: 'bg-gray-100 text-gray-800',
+    color: 'bg-muted text-muted-foreground',
     icon: 'help-circle'
   };
 }
@@ -158,6 +158,6 @@ export function getCategoryConfig(category: string) {
 export function getStatusConfig(status: string) {
   return STATUS_CONFIG[status as Status] || {
     label: status,
-    color: 'gray'
+    color: 'bg-muted text-muted-foreground'
   };
 }
