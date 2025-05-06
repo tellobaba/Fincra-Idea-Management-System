@@ -394,7 +394,10 @@ export function ExistingUserView() {
                     </div>
                     <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-100"><ThumbsUp className="inline-block w-3 h-3 mr-1" /> {item.votes} Votes</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-100"><ThumbsUp className="inline-block w-3 h-3 mr-1" /> {item.votes} Votes</span>
+                        <span className="text-[10px] text-gray-500">Submitted {item.date}</span>
+                      </div>
                       <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
                       </span>
