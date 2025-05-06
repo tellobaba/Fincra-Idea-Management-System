@@ -280,7 +280,7 @@ export function ExistingUserView() {
           <div className="text-center">
             <button
               onClick={handleSubmitIdea}
-              className="inline-flex items-center px-4 py-2 border border-green-200 dark:border-green-800/50 text-sm font-medium rounded-md text-green-600 dark:text-green-300 bg-white dark:bg-gray-800/80 hover:bg-green-50 dark:hover:bg-green-900/20 focus:outline-none"
+              className="inline-flex items-center px-4 py-2 border-none text-sm font-medium rounded-md text-white dark:text-green-50 bg-green-600 dark:bg-green-700/90 hover:bg-green-700 dark:hover:bg-green-600 focus:outline-none"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Submit an Idea
@@ -299,7 +299,7 @@ export function ExistingUserView() {
           <div className="text-center">
             <button
               onClick={handlePostChallenge}
-              className="inline-flex items-center px-4 py-2 border border-blue-200 dark:border-blue-800/50 text-sm font-medium rounded-md text-blue-600 dark:text-blue-300 bg-white dark:bg-gray-800/80 hover:bg-blue-50 dark:hover:bg-blue-900/20 focus:outline-none"
+              className="inline-flex items-center px-4 py-2 border-none text-sm font-medium rounded-md text-white dark:text-blue-50 bg-blue-600 dark:bg-blue-700/90 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none"
             >
               <Sparkles className="mr-2 h-4 w-4" />
               Post a Challenge
@@ -318,7 +318,7 @@ export function ExistingUserView() {
           <div className="text-center">
             <button
               onClick={handleRecordPainPoint}
-              className="inline-flex items-center px-4 py-2 border border-red-200 dark:border-red-800/50 text-sm font-medium rounded-md text-red-600 dark:text-red-300 bg-white dark:bg-gray-800/80 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none"
+              className="inline-flex items-center px-4 py-2 border-none text-sm font-medium rounded-md text-white dark:text-red-50 bg-red-600 dark:bg-red-700/90 hover:bg-red-700 dark:hover:bg-red-600 focus:outline-none"
             >
               <AlertTriangle className="mr-2 h-4 w-4" />
               Record Pain point
@@ -345,7 +345,7 @@ export function ExistingUserView() {
         {/* Activity section */}
         <Card className="md:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Activity</CardTitle>
+            <CardTitle className="text-lg font-bold text-gray-800 dark:text-white">Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -379,7 +379,7 @@ export function ExistingUserView() {
         {/* Top Voted */}
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Top Voted</CardTitle>
+            <CardTitle className="text-lg font-bold text-gray-800 dark:text-white">Top Voted</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -416,7 +416,7 @@ export function ExistingUserView() {
       <div className="mb-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Challenges</CardTitle>
+            <CardTitle className="text-lg font-bold text-gray-800 dark:text-white">Challenges</CardTitle>
           </CardHeader>
           <CardContent>
             {/* Empty state when no challenges are available */}
@@ -425,7 +425,7 @@ export function ExistingUserView() {
                 <p className="text-gray-500 dark:text-gray-400 mb-3">No challenges available at the moment.</p>
                 <button
                   onClick={handlePostChallenge}
-                  className="inline-flex items-center px-4 py-2 border border-blue-200 dark:border-blue-800/50 text-sm font-medium rounded-md text-blue-600 dark:text-blue-300 bg-white dark:bg-gray-800/80 hover:bg-blue-50 dark:hover:bg-blue-900/20 focus:outline-none"
+                  className="inline-flex items-center px-4 py-2 border-none text-sm font-medium rounded-md text-white dark:text-blue-50 bg-blue-600 dark:bg-blue-700/90 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none"
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
                   Create a Challenge
@@ -477,7 +477,7 @@ export function ExistingUserView() {
                     <div className="mt-4 text-center">
                       <button
                         onClick={() => handleTakeChallenge(challenge.id)}
-                        className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white dark:bg-gray-800/80 hover:bg-opacity-50 dark:hover:bg-opacity-80 focus:outline-none`}
+                        className="w-full inline-flex justify-center items-center px-4 py-2 border-none text-sm font-medium rounded-lg text-white bg-blue-600 dark:bg-blue-700/90 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none"
                       >
                         <Sparkles className="mr-2 h-4 w-4" />
                         Take Challenge
