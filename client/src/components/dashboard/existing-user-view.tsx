@@ -358,7 +358,7 @@ export function ExistingUserView() {
                         {getCategoryName(item.category)}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
                       <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
@@ -369,7 +369,7 @@ export function ExistingUserView() {
                 ))
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-muted-foreground text-sm">No recent activity to show</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">No recent activity to show</p>
                 </div>
               )}
             </div>
@@ -392,7 +392,7 @@ export function ExistingUserView() {
                         {getCategoryName(item.category)}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
                     <div className="flex items-center gap-1 mt-2">
                       <span className={`text-xs font-medium rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
@@ -404,7 +404,7 @@ export function ExistingUserView() {
                 ))
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-muted-foreground text-sm">No voted ideas available</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">No voted ideas available</p>
                 </div>
               )}
             </div>
@@ -422,7 +422,7 @@ export function ExistingUserView() {
             {/* Empty state when no challenges are available */}
             {challengesData.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-muted-foreground mb-3">No challenges available at the moment.</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-3">No challenges available at the moment.</p>
                 <button
                   onClick={handlePostChallenge}
                   className="inline-flex items-center px-4 py-2 border border-blue-200 dark:border-blue-800 text-sm font-medium rounded-md text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950"
@@ -439,22 +439,22 @@ export function ExistingUserView() {
                     className={`rounded-xl p-5 border shadow-sm ${challenge.bgColor} ${challenge.borderColor}`} 
                   >
                     <h3 className={`font-semibold text-base mb-2 ${challenge.accentColor}`}>{challenge.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-3">{challenge.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-3">{challenge.description}</p>
                     
                     {/* Challenge details */}
                     <div className="space-y-3 mb-4 text-sm">
                       <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground flex items-center">⏱️ Timeline</span>
+                        <span className="text-gray-500 dark:text-gray-400 flex items-center">⏱️ Timeline</span>
                         <span className="font-medium">
                           {challenge.startDate.toLocaleDateString()} - {challenge.endDate.toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground flex items-center">🏆 Reward</span>
+                        <span className="text-gray-500 dark:text-gray-400 flex items-center">🏆 Reward</span>
                         <span className={`font-medium ${challenge.accentColor}`}>{challenge.reward}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground flex items-center">👥 Participants</span>
+                        <span className="text-gray-500 dark:text-gray-400 flex items-center">👥 Participants</span>
                         <span className="font-medium">{challenge.participants}</span>
                       </div>
                     </div>
