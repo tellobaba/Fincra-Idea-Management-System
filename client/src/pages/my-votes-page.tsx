@@ -62,7 +62,7 @@ export default function MyVotesPage() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gray-50">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-auto">
         <Header 
@@ -79,11 +79,11 @@ export default function MyVotesPage() {
               <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold">You've voted on {votedIdeas.length} ideas</h2>
-                  <p className="text-muted-foreground mt-1">
+                  <p className="text-gray-500 mt-1">
                     Your votes help the team prioritize the most important ideas.
                   </p>
                 </div>
-                <div className="flex items-center bg-primary/10 text-primary px-4 py-2 rounded-lg">
+                <div className="flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-lg">
                   <ThumbsUp className="h-5 w-5 mr-2" />
                   <span className="font-medium">{votedIdeas.length} total votes</span>
                 </div>
@@ -99,7 +99,7 @@ export default function MyVotesPage() {
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-muted-foreground uppercase bg-muted">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
                       <th className="px-6 py-3">Title</th>
                       <th className="px-6 py-3">Category</th>
@@ -124,12 +124,12 @@ export default function MyVotesPage() {
                       </tr>
                     ) : (
                       votedIdeas.map((idea: any) => (
-                        <tr key={idea.id} className="bg-card border-b border-border hover:bg-muted">
+                        <tr key={idea.id} className="bg-white border-b hover:bg-gray-50">
                           <td className="px-6 py-4 font-medium">
-                            <Link href={`/ideas/${idea.id}`} className="text-primary hover:underline">
+                            <Link href={`/ideas/${idea.id}`} className="text-blue-600 hover:underline">
                               {getCategoryIcon(idea.category)} {idea.title}
                             </Link>
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-xs text-gray-500 mt-1">
                               {idea.description && idea.description.length > 90 
                                 ? `${idea.description.substring(0, 90)}...` 
                                 : idea.description}
@@ -137,10 +137,10 @@ export default function MyVotesPage() {
                           </td>
                           <td className="px-6 py-4">
                             <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                              idea.category === 'opportunity' ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300' :
-                              idea.category === 'challenge' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' :
-                              idea.category === 'pain-point' ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300' :
-                              'bg-muted text-muted-foreground'
+                              idea.category === 'opportunity' ? 'bg-green-100 text-green-800' :
+                              idea.category === 'challenge' ? 'bg-blue-100 text-blue-800' :
+                              idea.category === 'pain-point' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
                             }`}>
                               {idea.category === 'opportunity' ? 'Idea' :
                                idea.category === 'challenge' ? 'Challenge' :
@@ -150,10 +150,10 @@ export default function MyVotesPage() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center">
-                              <div className="h-8 w-8 rounded-full bg-muted mr-2 flex-shrink-0"></div>
+                              <div className="h-8 w-8 rounded-full bg-gray-200 mr-2 flex-shrink-0"></div>
                               <div>
                                 <div className="font-medium">{idea.submitter?.displayName || 'Anonymous'}</div>
-                                <div className="text-xs text-muted-foreground">{idea.submitter?.department || 'N/A'}</div>
+                                <div className="text-xs text-gray-500">{idea.submitter?.department || 'N/A'}</div>
                               </div>
                             </div>
                           </td>
@@ -162,7 +162,7 @@ export default function MyVotesPage() {
                               <span className="mr-2">{idea.votes || 0}</span>
                               <button 
                                 onClick={() => handleRemoveVote(idea.id)}
-                                className="text-primary hover:text-destructive"
+                                className="text-blue-600 hover:text-red-600"
                               >
                                 <ThumbsUp className="h-4 w-4 fill-current" />
                               </button>
@@ -170,11 +170,11 @@ export default function MyVotesPage() {
                           </td>
                           <td className="px-6 py-4">
                             <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                              idea.status === 'implemented' ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300' :
-                              idea.status === 'in-review' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' :
-                              idea.status === 'merged' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' :
-                              idea.status === 'parked' ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300' :
-                              'bg-muted text-muted-foreground'
+                              idea.status === 'implemented' ? 'bg-green-100 text-green-800' :
+                              idea.status === 'in-review' ? 'bg-blue-100 text-blue-800' :
+                              idea.status === 'merged' ? 'bg-purple-100 text-purple-800' :
+                              idea.status === 'parked' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
                             }`}>
                               {idea.status || 'submitted'}
                             </span>

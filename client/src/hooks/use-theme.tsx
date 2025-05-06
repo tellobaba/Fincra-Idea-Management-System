@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark";
 
@@ -25,20 +25,24 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = "light",
-  storageKey = "fincra-ideas-theme",
+  storageKey = "ui-theme",
   ...props
 }: ThemeProviderProps) {
-  // Force light mode by default
-  const [theme, setTheme] = useState<Theme>("light");
-  
-  useEffect(() => {
-    localStorage.setItem(storageKey, "light");
-  }, []);
+  const [theme, setTheme] = useState<Theme>(
+    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  );
 
   useEffect(() => {
     const root = window.document.documentElement;
+    
+    // Remove both classes first
     root.classList.remove("light", "dark");
+    
+    // Add the current theme class
     root.classList.add(theme);
+    
+    // Update data-theme attribute for any components that use it
+    root.setAttribute("data-theme", theme);
   }, [theme]);
 
   const value = {

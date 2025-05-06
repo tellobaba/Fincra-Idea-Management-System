@@ -56,17 +56,17 @@ export function ExistingUserView() {
   const getStatusBadgeClasses = (status: string) => {
     switch(status) {
       case 'in-review':
-        return 'bg-orange-100 dark:bg-orange-900/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-900/20 font-medium';
+        return 'bg-orange-100 text-orange-700 border border-orange-200 font-medium';
       case 'submitted':
-        return 'bg-green-100 dark:bg-green-900/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/20 font-medium';
+        return 'bg-green-100 text-green-700 border border-green-200 font-medium';
       case 'merged':
-        return 'bg-blue-100 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/20 font-medium';
+        return 'bg-blue-100 text-blue-700 border border-blue-200 font-medium';
       case 'parked':
-        return 'bg-red-100 dark:bg-red-900/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/20 font-medium';
+        return 'bg-red-100 text-red-700 border border-red-200 font-medium';
       case 'implemented':
-        return 'bg-purple-100 dark:bg-purple-900/10 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-900/20 font-medium';
+        return 'bg-purple-100 text-purple-700 border border-purple-200 font-medium';
       default:
-        return 'bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700/20 font-medium';
+        return 'bg-gray-100 text-gray-700 border border-gray-200 font-medium';
     }
   };
   
@@ -74,13 +74,13 @@ export function ExistingUserView() {
   const getCategoryBadgeClasses = (category: string) => {
     switch(category) {
       case 'opportunity':
-        return 'bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/20 shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/20';
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm hover:bg-emerald-100';
       case 'challenge':
-        return 'bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/20 shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/20';
+        return 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm hover:bg-blue-100';
       case 'pain-point':
-        return 'bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/20 shadow-sm hover:bg-red-100 dark:hover:bg-red-900/20';
+        return 'bg-red-50 text-red-700 border border-red-200 shadow-sm hover:bg-red-100';
       default:
-        return 'bg-gray-50 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700/20 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700/20';
+        return 'bg-gray-50 text-gray-700 border border-gray-200 shadow-sm hover:bg-gray-100';
     }
   };
   
@@ -204,19 +204,19 @@ export function ExistingUserView() {
     // Determine color theme based on index
     const colorThemes = [
       {
-        bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10",
-        borderColor: "border-blue-200 dark:border-blue-900/20",
-        accentColor: "text-blue-600 dark:text-blue-400"
+        bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50",
+        borderColor: "border-blue-200",
+        accentColor: "text-blue-600"
       },
       {
-        bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10",
-        borderColor: "border-emerald-200 dark:border-emerald-900/20",
-        accentColor: "text-emerald-600 dark:text-emerald-400"
+        bgColor: "bg-gradient-to-r from-emerald-50 to-teal-50",
+        borderColor: "border-emerald-200",
+        accentColor: "text-emerald-600"
       },
       {
-        bgColor: "bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/10 dark:to-violet-900/10",
-        borderColor: "border-purple-200 dark:border-purple-900/20",
-        accentColor: "text-purple-600 dark:text-purple-400"
+        bgColor: "bg-gradient-to-r from-purple-50 to-violet-50",
+        borderColor: "border-purple-200",
+        accentColor: "text-purple-600"
       }
     ];
     
@@ -270,17 +270,17 @@ export function ExistingUserView() {
       {/* Call-to-action cards section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Got Ideas? */}
-        <div className="bg-[#f0faf0] dark:bg-green-900/20 rounded-lg p-4 border border-[#e0f0e0] dark:border-green-900/30 flex flex-col justify-between h-full">
+        <div className="bg-green-50 rounded-lg p-4 border border-green-100 flex flex-col justify-between h-full">
           <div>
-            <h3 className="text-lg font-bold text-black dark:text-white mb-1 text-center">Got Ideas?</h3>
-            <p className="text-black dark:text-gray-300 text-sm mb-2">
+            <h3 className="text-lg font-semibold mb-1 text-center">Got Ideas?</h3>
+            <p className="text-gray-600 text-sm mb-2">
               Got a spark of innovation? Share your ideas to help Fincra move faster and smarter.
             </p>
           </div>
           <div className="text-center">
             <button
               onClick={handleSubmitIdea}
-              className="inline-flex items-center px-4 py-2 border-none text-sm font-medium rounded-md text-white dark:text-green-50 bg-green-600 dark:bg-green-700/90 hover:bg-green-700 dark:hover:bg-green-600 focus:outline-none"
+              className="inline-flex items-center px-3 py-1.5 border border-green-200 text-sm font-medium rounded-md text-green-600 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Submit an Idea
@@ -289,17 +289,17 @@ export function ExistingUserView() {
         </div>
 
         {/* Challenge */}
-        <div className="bg-[#f0f5ff] dark:bg-blue-900/20 rounded-lg p-4 border border-[#e0ebff] dark:border-blue-900/30 flex flex-col justify-between h-full">
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 flex flex-col justify-between h-full">
           <div>
-            <h3 className="text-lg font-bold text-black dark:text-white mb-1 text-center">Challenge</h3>
-            <p className="text-black dark:text-gray-300 text-sm mb-2">
+            <h3 className="text-lg font-semibold mb-1 text-center">Challenge</h3>
+            <p className="text-gray-600 text-sm mb-2">
               Have a big question or a tough problem we should solve together?
             </p>
           </div>
           <div className="text-center">
             <button
               onClick={handlePostChallenge}
-              className="inline-flex items-center px-4 py-2 border-none text-sm font-medium rounded-md text-white dark:text-blue-50 bg-blue-600 dark:bg-blue-700/90 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none"
+              className="inline-flex items-center px-3 py-1.5 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <Sparkles className="mr-2 h-4 w-4" />
               Post a Challenge
@@ -308,17 +308,17 @@ export function ExistingUserView() {
         </div>
 
         {/* Pain points? */}
-        <div className="bg-[#fff5f5] dark:bg-red-900/20 rounded-lg p-4 border border-[#ffe0e0] dark:border-red-900/30 flex flex-col justify-between h-full">
+        <div className="bg-red-50 rounded-lg p-4 border border-red-100 flex flex-col justify-between h-full">
           <div>
-            <h3 className="text-lg font-bold text-black dark:text-white mb-1 text-center">Pain points?</h3>
-            <p className="text-black dark:text-gray-300 text-sm mb-2">
+            <h3 className="text-lg font-semibold mb-1 text-center">Pain points?</h3>
+            <p className="text-gray-600 text-sm mb-2">
               Spot something that's slowing us down? Share what's blocking progress.
             </p>
           </div>
           <div className="text-center">
             <button
               onClick={handleRecordPainPoint}
-              className="inline-flex items-center px-4 py-2 border-none text-sm font-medium rounded-md text-white dark:text-red-50 bg-red-600 dark:bg-red-700/90 hover:bg-red-700 dark:hover:bg-red-600 focus:outline-none"
+              className="inline-flex items-center px-3 py-1.5 border border-red-200 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               <AlertTriangle className="mr-2 h-4 w-4" />
               Record Pain point
@@ -328,7 +328,7 @@ export function ExistingUserView() {
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Overview</h1>
+        <h1 className="text-2xl font-bold">Overview</h1>
         {isLoading && (
           <div className="flex items-center text-blue-600">
             <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -345,31 +345,31 @@ export function ExistingUserView() {
         {/* Activity section */}
         <Card className="md:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="!text-black dark:!text-white font-bold" style={{color: "black"}}>Activity</CardTitle>
+            <CardTitle className="text-lg font-medium">Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               {activityData.length > 0 ? (
                 activityData.map((item: ActivityItem) => (
-                  <div key={item.id} className="border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0">
+                  <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-medium text-sm">{item.title}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${getCategoryBadgeClasses(item.category)}`}>
                         {getCategoryName(item.category)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
+                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
                       <span className={`text-xs rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
                       </span>
-                      <span className="text-xs font-medium bg-muted dark:bg-gray-700 px-2 py-1 rounded-md text-muted-foreground dark:text-gray-300">{item.date}</span>
+                      <span className="text-xs font-medium bg-gray-50 px-2 py-1 rounded-md text-gray-500">{item.date}</span>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">No recent activity to show</p>
+                  <p className="text-gray-500 text-sm">No recent activity to show</p>
                 </div>
               )}
             </div>
@@ -379,32 +379,32 @@ export function ExistingUserView() {
         {/* Top Voted */}
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="!text-black dark:!text-white font-bold" style={{color: "black"}}>Top Voted</CardTitle>
+            <CardTitle className="text-lg font-medium">Top Voted</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               {topVotedData.length > 0 ? (
                 topVotedData.map((item) => (
-                  <div key={item.id} className="border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0">
+                  <div key={item.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-medium text-sm">{item.title}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${getCategoryBadgeClasses(item.category)}`}>
                         {getCategoryName(item.category)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
+                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                     <div className="flex items-center gap-1 mt-2">
                       <span className={`text-xs font-medium rounded-md py-1 px-2 ${getStatusBadgeClasses(item.status)}`}>
                         {item.status}
                       </span>
-                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900"><ThumbsUp className="inline-block w-3 h-3 mr-1" /> {item.votes} Votes</span>
+                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-100"><ThumbsUp className="inline-block w-3 h-3 mr-1" /> {item.votes} Votes</span>
                     </div>
                     {/* Time submitted removed as per user request */}
                   </div>
                 ))
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">No voted ideas available</p>
+                  <p className="text-gray-500 text-sm">No voted ideas available</p>
                 </div>
               )}
             </div>
@@ -416,16 +416,16 @@ export function ExistingUserView() {
       <div className="mb-6">
         <Card>
           <CardHeader>
-            <CardTitle className="!text-black dark:!text-white font-bold" style={{color: "black"}}>Challenges</CardTitle>
+            <CardTitle className="text-lg font-medium">Challenges</CardTitle>
           </CardHeader>
           <CardContent>
             {/* Empty state when no challenges are available */}
             {challengesData.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400 mb-3">No challenges available at the moment.</p>
+                <p className="text-gray-500 mb-3">No challenges available at the moment.</p>
                 <button
                   onClick={handlePostChallenge}
-                  className="inline-flex items-center px-4 py-2 border-none text-sm font-medium rounded-md text-white dark:text-blue-50 bg-blue-600 dark:bg-blue-700/90 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none"
+                  className="inline-flex items-center px-4 py-2 border border-blue-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50"
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
                   Create a Challenge
@@ -438,34 +438,34 @@ export function ExistingUserView() {
                   <div key={challenge.id} 
                     className={`rounded-xl p-5 border shadow-sm ${challenge.bgColor} ${challenge.borderColor}`} 
                   >
-                    <h3 className="font-semibold text-base mb-2 text-black dark:text-white">{challenge.title}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-3">{challenge.description}</p>
+                    <h3 className={`font-semibold text-base mb-2 ${challenge.accentColor}`}>{challenge.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">{challenge.description}</p>
                     
                     {/* Challenge details */}
                     <div className="space-y-3 mb-4 text-sm">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500 dark:text-gray-400 flex items-center">⏱️ Timeline</span>
-                        <span className="font-medium text-black dark:text-white">
+                        <span className="text-gray-500 flex items-center">⏱️ Timeline</span>
+                        <span className="font-medium">
                           {challenge.startDate.toLocaleDateString()} - {challenge.endDate.toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500 dark:text-gray-400 flex items-center">🏆 Reward</span>
-                        <span className="font-medium text-black dark:text-white">{challenge.reward}</span>
+                        <span className="text-gray-500 flex items-center">🏆 Reward</span>
+                        <span className={`font-medium ${challenge.accentColor}`}>{challenge.reward}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500 dark:text-gray-400 flex items-center">👥 Participants</span>
-                        <span className="font-medium text-black dark:text-white">{challenge.participants}</span>
+                        <span className="text-gray-500 flex items-center">👥 Participants</span>
+                        <span className="font-medium">{challenge.participants}</span>
                       </div>
                     </div>
                     
                     {/* Time remaining indicator */}
                     <div className="mt-3 mb-5">
                       <div className="flex justify-between text-xs mb-1">
-                        <span className="font-medium text-black dark:text-white">Time remaining</span>
-                        <span className="font-bold text-black dark:text-white">{challenge.remainingDays} days</span>
+                        <span className="font-medium">Time remaining</span>
+                        <span className="font-bold">{challenge.remainingDays} days</span>
                       </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-md font-medium h-2.5">
+                      <div className="w-full bg-gray-200 rounded-md font-medium h-2.5">
                         <div 
                           className={`h-2.5 rounded-md font-medium ${challenge.accentColor.replace('text', 'bg')}`} 
                           style={{ width: `${Math.min(100, (challenge.remainingDays / 15) * 100)}%` }}
@@ -477,7 +477,7 @@ export function ExistingUserView() {
                     <div className="mt-4 text-center">
                       <button
                         onClick={() => handleTakeChallenge(challenge.id)}
-                        className="w-full inline-flex justify-center items-center px-4 py-2 border-none text-sm font-medium rounded-lg text-white bg-blue-600 dark:bg-blue-700/90 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none"
+                        className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
                       >
                         <Sparkles className="mr-2 h-4 w-4" />
                         Take Challenge

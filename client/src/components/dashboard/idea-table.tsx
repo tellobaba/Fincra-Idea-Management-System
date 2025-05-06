@@ -48,11 +48,11 @@ export function IdeaTable({
     const diffDays = Math.ceil((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
     
     if (diffDays > 3) {
-      return { label: 'Overdue', color: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300' };
+      return { label: 'Overdue', color: 'bg-red-100 text-red-800' };
     } else if (diffDays >= 2) {
-      return { label: '1 day left', color: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' };
+      return { label: '1 day left', color: 'bg-amber-100 text-amber-800' };
     } else {
-      return { label: `${3 - diffDays} days left`, color: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300' };
+      return { label: `${3 - diffDays} days left`, color: 'bg-green-100 text-green-800' };
     }
   };
 
@@ -82,22 +82,22 @@ export function IdeaTable({
               Array(3).fill(0).map((_, index) => (
                 <TableRow key={`skeleton-${index}`}>
                   <TableCell>
-                    <div className="w-full h-4 bg-muted rounded animate-pulse"></div>
+                    <div className="w-full h-4 bg-slate-200 rounded animate-pulse"></div>
                   </TableCell>
-                  {showCategory && <TableCell><div className="w-20 h-4 bg-muted rounded animate-pulse"></div></TableCell>}
+                  {showCategory && <TableCell><div className="w-20 h-4 bg-slate-200 rounded animate-pulse"></div></TableCell>}
                   {showSubmittedBy && (
                     <TableCell>
                       <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-muted animate-pulse mr-3"></div>
-                        <div className="w-24 h-4 bg-muted rounded animate-pulse"></div>
+                        <div className="h-8 w-8 rounded-full bg-slate-200 animate-pulse mr-3"></div>
+                        <div className="w-24 h-4 bg-slate-200 rounded animate-pulse"></div>
                       </div>
                     </TableCell>
                   )}
-                  {showSubmittedDate && <TableCell><div className="w-24 h-4 bg-muted rounded animate-pulse"></div></TableCell>}
-                  {showVotes && <TableCell><div className="w-8 h-4 bg-muted rounded animate-pulse"></div></TableCell>}
-                  {showStatus && <TableCell><div className="w-20 h-4 bg-muted rounded animate-pulse"></div></TableCell>}
-                  {showSla && <TableCell><div className="w-20 h-4 bg-muted rounded animate-pulse"></div></TableCell>}
-                  <TableCell><div className="w-12 h-4 bg-muted rounded animate-pulse"></div></TableCell>
+                  {showSubmittedDate && <TableCell><div className="w-24 h-4 bg-slate-200 rounded animate-pulse"></div></TableCell>}
+                  {showVotes && <TableCell><div className="w-8 h-4 bg-slate-200 rounded animate-pulse"></div></TableCell>}
+                  {showStatus && <TableCell><div className="w-20 h-4 bg-slate-200 rounded animate-pulse"></div></TableCell>}
+                  {showSla && <TableCell><div className="w-20 h-4 bg-slate-200 rounded animate-pulse"></div></TableCell>}
+                  <TableCell><div className="w-12 h-4 bg-slate-200 rounded animate-pulse"></div></TableCell>
                 </TableRow>
               ))
             ) : ideas.length === 0 ? (

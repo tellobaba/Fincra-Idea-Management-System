@@ -48,7 +48,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="h-screen flex overflow-hidden bg-background">
+    <div className="h-screen flex overflow-hidden bg-white">
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">

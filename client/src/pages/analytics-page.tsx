@@ -95,7 +95,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header 
@@ -137,8 +137,8 @@ export default function AnalyticsPage() {
                     
                     return (
                       <div key={index} className="flex items-center">
-                        <div className="w-24 flex-shrink-0 text-sm font-medium text-foreground">{item.name}</div>
-                        <div className="flex-grow h-8 bg-muted rounded overflow-hidden relative">
+                        <div className="w-24 flex-shrink-0 text-sm font-medium text-gray-700">{item.name}</div>
+                        <div className="flex-grow h-8 bg-gray-100 rounded overflow-hidden relative">
                           <div 
                             className="h-full rounded" 
                             style={{
@@ -165,7 +165,7 @@ export default function AnalyticsPage() {
                     return (
                       <div key={index} className="flex items-center">
                         <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: color }}></div>
-                        <div className="text-xs text-muted-foreground">{item.name}: {item.value}</div>
+                        <div className="text-xs text-gray-500">{item.name}: {item.value}</div>
                       </div>
                     );
                   })}
@@ -189,7 +189,7 @@ export default function AnalyticsPage() {
                       }))}
                       margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
                       <XAxis 
                         dataKey="name" 
                         stroke="#888" 
@@ -210,9 +210,8 @@ export default function AnalyticsPage() {
                         formatter={(value: number) => [`${value} submissions`, 'Total']}
                         labelFormatter={(label) => `Date: ${label}`}
                         contentStyle={{
-                          backgroundColor: "var(--card)",
-                          color: "var(--foreground)",
-                          border: "1px solid var(--border)",
+                          backgroundColor: "white",
+                          border: "1px solid #ddd",
                           borderRadius: "6px",
                           padding: "8px",
                           fontSize: "12px",
@@ -252,7 +251,7 @@ export default function AnalyticsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {contributorsData.length > 0 ? (
                   contributorsData.map((contributor: any, index: number) => (
-                    <div key={index} className="border border-border rounded-lg p-4">
+                    <div key={index} className="border border-gray-100 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center">
                           <Avatar className="h-10 w-10 mr-3">
@@ -261,12 +260,12 @@ export default function AnalyticsPage() {
                           </Avatar>
                           <div>
                             <div className="text-sm font-medium">{contributor.name}</div>
-                            <div className="text-xs text-muted-foreground">{contributor.department}</div>
+                            <div className="text-xs text-gray-500">{contributor.department}</div>
                           </div>
                         </div>
                         <div className="text-lg font-semibold text-indigo-600">{contributor.value}</div>
                       </div>
-                      <div className="flex justify-between mt-2 text-xs text-muted-foreground border-t border-border pt-2">
+                      <div className="flex justify-between mt-2 text-xs text-gray-500 border-t pt-2">
                         <span>Ideas: {contributor.ideas}</span>
                         <span>Challenges: {contributor.challenges}</span>
                         <span>Pain Points: {contributor.painPoints}</span>
@@ -275,7 +274,7 @@ export default function AnalyticsPage() {
                   ))
                 ) : (
                   <div className="col-span-3 text-center py-6">
-                    <p className="text-muted-foreground text-sm">No contributor data available</p>
+                    <p className="text-gray-500 text-sm">No contributor data available</p>
                   </div>
                 )}
               </div>
