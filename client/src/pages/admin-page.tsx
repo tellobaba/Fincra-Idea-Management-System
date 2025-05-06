@@ -142,8 +142,8 @@ export default function AdminPage() {
               
               <div className="flex space-x-2">
                 <Button 
-                  variant="success" 
-                  className="bg-success hover:bg-success/90 text-white"
+                  variant="outline" 
+                  className="bg-green-600 hover:bg-green-700 text-white"
                   onClick={handleApproveSelected}
                   disabled={selectedIdeas.length === 0 || updateStatusMutation.isPending}
                 >
@@ -261,6 +261,14 @@ export default function AdminPage() {
                               size="icon"
                               className="text-muted-foreground hover:text-foreground"
                               title="Assign user"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Assign roles button clicked', idea.id);
+                                
+                                // Redirect to admin submissions page with the idea ID to show roles dialog
+                                window.location.href = `/admin/submissions?assign=${idea.id}`;
+                              }}
                             >
                               <UserPlus className="h-4 w-4" />
                             </Button>

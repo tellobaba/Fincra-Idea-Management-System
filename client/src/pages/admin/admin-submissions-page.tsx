@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +66,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function AdminSubmissionsPage() {
+  // Check URL parameters for assign request
+  const searchParams = new URLSearchParams(window.location.search);
+  const assignIdeaId = searchParams.get('assign');
   const { toast } = useToast();
   // State for filtering and pagination
   const [searchQuery, setSearchQuery] = useState("");
@@ -197,6 +200,23 @@ export default function AdminSubmissionsPage() {
       });
     },
   });
+
+  // Effect to handle the assign query parameter
+  useEffect(() => {
+    // If there's an assignIdeaId in the URL and we have ideas loaded
+    if (assignIdeaId && ideas) {
+      const ideaToAssign = ideas.find(idea => idea.id === parseInt(assignIdeaId));
+      if (ideaToAssign) {
+        // Process the idea assignment
+        handleAssignRoles(ideaToAssign);
+        
+        // Remove the query parameter from URL to prevent reopening on refresh
+        const url = new URL(window.location.href);
+        url.searchParams.delete('assign');
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
+  }, [assignIdeaId, ideas]);
 
   // Filter ideas based on search query and filters
   const filteredIdeas = ideas?.filter(idea => {
