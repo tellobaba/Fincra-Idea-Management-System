@@ -290,13 +290,13 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
                 <h2 className="text-lg font-medium">{viewMode === 'my' ? 'My' : 'All'} {pageTitle}</h2>
                 <div className="flex bg-muted rounded-md p-1">
                   <button 
-                    className={`px-3 py-1 text-sm rounded-md transition ${viewMode === 'my' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                    className={`px-3 py-1 text-sm rounded-md transition ${viewMode === 'my' ? 'bg-card shadow-sm' : 'hover:bg-muted/80'}`}
                     onClick={() => setViewMode('my')}
                   >
                     My {pageTitle}
                   </button>
                   <button 
-                    className={`px-3 py-1 text-sm rounded-md transition ${viewMode === 'all' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                    className={`px-3 py-1 text-sm rounded-md transition ${viewMode === 'all' ? 'bg-card shadow-sm' : 'hover:bg-muted/80'}`}
                     onClick={() => setViewMode('all')}
                   >
                     All {pageTitle}
@@ -330,7 +330,7 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
             {/* Ideas table */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                <thead className="text-xs text-muted-foreground uppercase bg-muted">
                   <tr>
                     <th className="px-6 py-3">Title</th>
                     <th className="px-6 py-3">Submitted By</th>
@@ -354,12 +354,12 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
                     </tr>
                   ) : (
                     ideas.map((idea: any) => (
-                      <tr key={idea.id} className="bg-white border-b hover:bg-gray-50">
+                      <tr key={idea.id} className="bg-card border-b hover:bg-muted/50">
                         <td className="px-6 py-4 font-medium">
                           <Link href={`/ideas/${idea.id}`} className="text-blue-600 hover:underline">
                             {getCategoryIcon(idea.category)} {idea.title}
                           </Link>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             {idea.description && idea.description.length > 90 
                               ? `${idea.description.substring(0, 90)}...` 
                               : idea.description}
@@ -367,10 +367,10 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className="h-8 w-8 rounded-full bg-gray-200 mr-2 flex-shrink-0"></div>
+                            <div className="h-8 w-8 rounded-full bg-muted mr-2 flex-shrink-0"></div>
                             <div>
                               <div className="font-medium">{idea.submitter?.displayName || 'Anonymous'}</div>
-                              <div className="text-xs text-gray-500">{idea.submitter?.department || 'N/A'}</div>
+                              <div className="text-xs text-muted-foreground">{idea.submitter?.department || 'N/A'}</div>
                             </div>
                           </div>
                         </td>
@@ -379,7 +379,7 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
                             <span className="mr-2">{idea.votes || 0}</span>
                             <button 
                               onClick={() => handleVote(idea.id)}
-                              className="text-gray-500 hover:text-blue-600"
+                              className="text-muted-foreground hover:text-primary"
                             >
                               <ThumbsUp className="h-4 w-4" />
                             </button>
