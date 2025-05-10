@@ -417,8 +417,16 @@ export function ExistingUserView() {
       {/* Second row with Challenges section */}
       <div className="mb-6">
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-medium">Challenges</CardTitle>
+            {challengesData.length > 6 && (
+              <button 
+                onClick={() => setShowAllChallenges(true)}
+                className="text-blue-600 text-sm font-medium flex items-center hover:underline"
+              >
+                See All <ChevronRight className="h-4 w-4 ml-1" />
+              </button>
+            )}
           </CardHeader>
           <CardContent>
             {/* Empty state when no challenges are available */}
@@ -434,11 +442,12 @@ export function ExistingUserView() {
                 </button>
               </div>
             ) : (
-              /* Challenges grid */
+              /* Challenges grid - limited to 6 */
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {challengesData.map((challenge) => (
+                {challengesData.slice(0, 6).map((challenge) => (
                   <div key={challenge.id} 
-                    className={`rounded-xl p-5 border shadow-sm ${challenge.bgColor} ${challenge.borderColor}`} 
+                    className={`rounded-xl p-5 border shadow-md ${challenge.bgColor} ${challenge.borderColor} hover:shadow-lg transition-shadow duration-200 cursor-pointer`} 
+                    onClick={() => handleTakeChallenge(challenge.id)}
                   >
                     <h3 className={`font-semibold text-base mb-2 ${challenge.accentColor}`}>{challenge.title}</h3>
                     <p className="text-sm text-gray-600 mb-3 line-clamp-3">{challenge.description}</p>
@@ -478,7 +487,10 @@ export function ExistingUserView() {
                     {/* Challenge button */}
                     <div className="mt-4 text-center">
                       <button
-                        onClick={() => handleTakeChallenge(challenge.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTakeChallenge(challenge.id);
+                        }}
                         className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
                       >
                         <Sparkles className="mr-2 h-4 w-4" />
@@ -492,6 +504,80 @@ export function ExistingUserView() {
           </CardContent>
         </Card>
       </div>
+
+      {/* "See All Challenges" Dialog */}
+      <Dialog open={showAllChallenges} onOpenChange={setShowAllChallenges}>
+        <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">All Challenges</DialogTitle>
+            <DialogDescription>
+              Browse and participate in all available challenges
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            {challengesData.map((challenge) => (
+              <div key={challenge.id} 
+                className={`rounded-xl p-5 border shadow-md ${challenge.bgColor} ${challenge.borderColor} hover:shadow-lg transition-shadow duration-200 cursor-pointer`} 
+                onClick={() => {
+                  setShowAllChallenges(false);
+                  handleTakeChallenge(challenge.id);
+                }}
+              >
+                <h3 className={`font-semibold text-base mb-2 ${challenge.accentColor}`}>{challenge.title}</h3>
+                <p className="text-sm text-gray-600 mb-3 line-clamp-3">{challenge.description}</p>
+                
+                {/* Challenge details */}
+                <div className="space-y-3 mb-4 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500 flex items-center">⏱️ Timeline</span>
+                    <span className="font-medium">
+                      {challenge.startDate.toLocaleDateString()} - {challenge.endDate.toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500 flex items-center">🏆 Reward</span>
+                    <span className={`font-medium ${challenge.accentColor}`}>{challenge.reward}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500 flex items-center">👥 Participants</span>
+                    <span className="font-medium">{challenge.participants}</span>
+                  </div>
+                </div>
+                
+                {/* Time remaining indicator */}
+                <div className="mt-3 mb-5">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="font-medium">Time remaining</span>
+                    <span className="font-bold">{challenge.remainingDays} days</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-md font-medium h-2.5">
+                    <div 
+                      className={`h-2.5 rounded-md font-medium ${challenge.accentColor.replace('text', 'bg')}`} 
+                      style={{ width: `${Math.min(100, (challenge.remainingDays / 15) * 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                {/* Challenge button */}
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAllChallenges(false);
+                      handleTakeChallenge(challenge.id);
+                    }}
+                    className={`w-full inline-flex justify-center items-center px-4 py-2 border ${challenge.borderColor} text-sm font-medium rounded-lg ${challenge.accentColor} bg-white hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Take Challenge
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
