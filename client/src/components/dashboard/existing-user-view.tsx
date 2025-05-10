@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, LineChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { PieChart, PlusCircle, Sparkles, AlertTriangle, ThumbsUp } from "lucide-react";
+import { PieChart, PlusCircle, Sparkles, AlertTriangle, ThumbsUp, ChevronRight } from "lucide-react";
 import { IdeaTable } from "./idea-table";
 import { useQuery } from "@tanstack/react-query";
 import { IdeaWithUser } from "@/types/ideas";
 import { useLocation } from "wouter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface ChartData {
   name: string;
@@ -16,6 +17,7 @@ interface ChartData {
 
 export function ExistingUserView() {
   const [activeTab, setActiveTab] = useState("ideas");
+  const [showAllChallenges, setShowAllChallenges] = useState(false);
   
   // Fetch real data from API endpoints
   const { data: topIdeas = [], isLoading: topIdeasLoading } = useQuery<IdeaWithUser[]>({
