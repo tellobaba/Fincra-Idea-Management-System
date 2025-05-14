@@ -36,6 +36,7 @@ interface SubmitIdeaFormProps {
     organizationCategory?: string;
     inspiration?: string;
     similarSolutions?: string;
+    workstream?: string;
     tags: string[];
   }) => void;
   onCancel?: () => void;
@@ -47,6 +48,7 @@ interface SubmitIdeaFormProps {
     organizationCategory?: string;
     inspiration?: string;
     similarSolutions?: string;
+    workstream?: string;
     tags?: string[];
   };
 }
@@ -58,6 +60,7 @@ const formSchema = z.object({
   category: z.enum(["pain-point", "opportunity", "challenge"] as const),
   impact: z.string().optional(),
   organizationCategory: z.string().optional(),
+  workstream: z.string().optional(),
   inspiration: z.string().optional(),
   similarSolutions: z.string().optional(),
   tags: z.string(), // Keep as string in the form
@@ -274,6 +277,36 @@ export function SubmitIdeaForm({
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="workstream"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Workstream</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select workstream" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Payments">Payments</SelectItem>
+                    <SelectItem value="Engineering">Engineering</SelectItem>
+                    <SelectItem value="Operations">Operations</SelectItem>
+                    <SelectItem value="Marketing">Marketing</SelectItem>
+                    <SelectItem value="Finance">Finance</SelectItem>
+                    <SelectItem value="Sales">Sales</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
           <FormField
             control={form.control}
             name="inspiration"
