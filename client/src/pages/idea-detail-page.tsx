@@ -413,6 +413,50 @@ export default function IdeaDetailPage() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Display Impact and Relevance */}
+                  {idea.impact && (
+                    <div className="border-t pt-4 mt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Impact and Relevance</h4>
+                      <div className="prose max-w-none text-foreground">
+                        {idea.impact.split('\n').map((paragraph: string, i: number) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Display Organization Category (Workstream) */}
+                  {idea.organizationCategory && (
+                    <div className="border-t pt-4 mt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Workstream</h4>
+                      <p>{idea.organizationCategory}</p>
+                    </div>
+                  )}
+
+                  {/* Display Inspiration */}
+                  {idea.inspiration && (
+                    <div className="border-t pt-4 mt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Inspiration or Source</h4>
+                      <div className="prose max-w-none text-foreground">
+                        {idea.inspiration.split('\n').map((paragraph: string, i: number) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Display Similar Solutions */}
+                  {idea.similarSolutions && (
+                    <div className="border-t pt-4 mt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Similar Solutions or Prior Attempts</h4>
+                      <div className="prose max-w-none text-foreground">
+                        {idea.similarSolutions.split('\n').map((paragraph: string, i: number) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
                 

@@ -346,6 +346,54 @@ export default function ChallengeDetailPage() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Display Success Criteria / Impact */}
+                  {challenge.impact && (
+                    <div className="border-t pt-4 mt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Success Criteria</h4>
+                      <div className="prose max-w-none text-foreground">
+                        {challenge.impact.split('\n').map((paragraph: string, i: number) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Display Timeframe (stored in adminNotes field) */}
+                  {challenge.adminNotes && (
+                    <div className="border-t pt-4 mt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Timeframe</h4>
+                      <div className="prose max-w-none text-foreground">
+                        {challenge.adminNotes.split('\n').map((paragraph: string, i: number) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Display Reward (stored in inspiration field) */}
+                  {challenge.inspiration && (
+                    <div className="border-t pt-4 mt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Reward</h4>
+                      <div className="prose max-w-none text-foreground">
+                        {challenge.inspiration.split('\n').map((paragraph: string, i: number) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Display Similar Solutions or Prior Attempts */}
+                  {challenge.similarSolutions && (
+                    <div className="border-t pt-4 mt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Similar Solutions or Prior Attempts</h4>
+                      <div className="prose max-w-none text-foreground">
+                        {challenge.similarSolutions.split('\n').map((paragraph: string, i: number) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
