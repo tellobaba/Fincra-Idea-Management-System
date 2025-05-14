@@ -33,8 +33,8 @@ interface IdeaSubmitFormProps {
     inspiration?: string;
     similarSolutions?: string;
     tags: string[];
-    files?: FileList;
-    voiceNote?: File;
+    files?: File[]; // Changed from FileList to File[] to match submit-idea-page
+    category?: string;
   }) => void;
   onCancel?: () => void;
   initialData?: {
@@ -68,7 +68,7 @@ export function IdeaSubmitForm({
   initialData = {},
 }: IdeaSubmitFormProps) {
   const [isSaving, setIsSaving] = useState(false);
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [voiceNote, setVoiceNote] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -95,28 +95,31 @@ export function IdeaSubmitForm({
       const transformedValues = {
         ...values,
         tags: values.tags ? values.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [],
-        // Use the correct field name 'media' for file uploads
-        files: files || undefined,
-        // Add voice note to media if available
-        voiceNote: voiceNote || undefined,
+        // Add files if available
+        files: files.length > 0 ? files : undefined,
+        // Add category for idea
+        category: 'opportunity'
       };
       
       // Log submission details for debugging
       console.log('Submitting idea with form values:', transformedValues);
       
       // Log file details if present
-      if (files) {
+      if (files.length > 0) {
         console.log(`Submitting ${files.length} file(s):`, 
-          Array.from(files).map(f => ({ name: f.name, type: f.type, size: f.size })));
+          files.map(f => ({ name: f.name, type: f.type, size: f.size })));
       }
       
-      // Log voice note details if present
+      // Add voice note to files if available
       if (voiceNote) {
-        console.log('Submitting voice note:', { 
+        console.log('Adding voice recording to submission:', { 
           name: voiceNote.name, 
           type: voiceNote.type, 
           size: voiceNote.size 
         });
+        // Add voice note to the files array
+        const filesWithVoice = [...(transformedValues.files || []), voiceNote];
+        transformedValues.files = filesWithVoice;
       }
       
       await onSubmit(transformedValues);
@@ -130,7 +133,12 @@ export function IdeaSubmitForm({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFiles(e.target.files);
+      // Convert FileList to array and add to existing files
+      const newFiles = Array.from(e.target.files);
+      setFiles(prevFiles => [...prevFiles, ...newFiles]);
+      
+      // Reset input value so selecting the same file again triggers the event
+      e.target.value = '';
     }
   };
 

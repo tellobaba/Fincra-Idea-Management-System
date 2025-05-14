@@ -23,33 +23,41 @@ export default function SubmitIdeaPage() {
       inspiration?: string;
       similarSolutions?: string;
       tags: string[];
-      files?: FileList;
-      voiceNote?: File;
+      category?: string;
+      files?: File[];
     }) => {
-      // Create a properly structured JSON object that matches expected schema fields
-      const requestData = {
-        title: formData.title,
-        description: formData.description,
-        category: 'opportunity', // Set category explicitly
-        department: formData.workstream, // Map workstream to department
-        status: 'submitted', // default status
-        priority: 'medium', // default priority
-        impact: formData.impact || '',
-        inspiration: formData.inspiration || '',
-        similarSolutions: formData.similarSolutions || '',
-        tags: formData.tags || [],
-        attachments: [] // empty array as we're not handling attachments currently
-      };
+      // Create FormData object to handle both text data and files
+      const formDataObj = new FormData();
       
-      console.log('Submitting idea with data:', requestData);
+      // Add all form fields to FormData
+      formDataObj.append('title', formData.title);
+      formDataObj.append('description', formData.description);
+      formDataObj.append('category', formData.category || 'opportunity');
+      formDataObj.append('workstream', formData.workstream || '');
+      formDataObj.append('department', formData.workstream || ''); // Map workstream to department
+      formDataObj.append('status', 'submitted');
+      formDataObj.append('priority', 'medium');
+      formDataObj.append('impact', formData.impact || '');
+      formDataObj.append('inspiration', formData.inspiration || '');
+      formDataObj.append('similarSolutions', formData.similarSolutions || '');
       
-      // Use fetch with JSON data
+      // Handle tags - convert array to JSON string
+      formDataObj.append('tags', JSON.stringify(formData.tags || []));
+      
+      // Add files if provided
+      if (formData.files && formData.files.length > 0) {
+        formData.files.forEach(file => {
+          formDataObj.append('files', file);
+        });
+        console.log(`Adding ${formData.files.length} files to submission`);
+      }
+      
+      console.log('Submitting idea with FormData'); 
+      
+      // Use fetch with FormData (no Content-Type header as it's set automatically with boundary)
       const response = await fetch('/api/ideas', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData),
+        body: formDataObj,
         credentials: 'include'
       });
 
