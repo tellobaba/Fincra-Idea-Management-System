@@ -1,5 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
@@ -71,6 +72,7 @@ export function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Local Strategy
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
@@ -100,6 +102,55 @@ export function setupAuth(app: Express) {
         return done(err);
       }
     }),
+  );
+  
+  // Google OAuth Strategy
+  passport.use(
+    new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      callbackURL: "/api/auth/google/callback",
+      scope: ["profile", "email"]
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        console.log(`Google login attempt for ${profile.emails?.[0]?.value || "unknown email"}`);
+        
+        // Get user email from Google profile
+        const email = profile.emails?.[0]?.value;
+        if (!email) {
+          return done(new Error("No email found in Google profile"));
+        }
+        
+        // Check if user already exists
+        let user = await dbStorage.getUserByUsername(email);
+        
+        if (!user) {
+          // Create new user if they don't exist
+          console.log(`Creating new user for ${email} from Google login`);
+          
+          // Get profile data
+          const displayName = profile.displayName || `${profile.name?.givenName || ""} ${profile.name?.familyName || ""}`.trim();
+          const avatarUrl = profile.photos?.[0]?.value || `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`;
+          
+          user = await dbStorage.createUser({
+            username: email,
+            // Create a secure random password since they're using OAuth
+            password: await hashPassword(randomBytes(32).toString("hex")),
+            displayName: displayName || email.split("@")[0],
+            department: undefined,
+            role: "user",
+            avatarUrl
+          });
+        }
+        
+        console.log(`Google login successful for ${email}`);
+        return done(null, user);
+      } catch (err) {
+        console.error("Google auth error:", err);
+        return done(err as Error);
+      }
+    })
   );
 
   passport.serializeUser((user, done) => done(null, user.id));
@@ -175,6 +226,18 @@ export function setupAuth(app: Express) {
       res.sendStatus(200);
     });
   });
+
+  // Google OAuth routes
+  app.get('/api/auth/google', 
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+  );
+
+  app.get('/api/auth/google/callback', 
+    passport.authenticate('google', { 
+      failureRedirect: '/auth',
+      successRedirect: '/'
+    })
+  );
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
