@@ -457,6 +457,18 @@ export default function IdeaDetailPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* Display Workstream */}
+                  {idea.workstream && (
+                    <div className="border-t pt-4 mt-4 border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">Workstream</h4>
+                      <div className="prose max-w-none text-foreground">
+                        {idea.workstream.split('\n').map((paragraph: string, i: number) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
                 

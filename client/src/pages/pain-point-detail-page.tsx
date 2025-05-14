@@ -323,6 +323,18 @@ export default function PainPointDetailPage() {
                         </div>
                       </div>
                     )}
+
+                    {/* Display Workstream */}
+                    {painPoint.workstream && (
+                      <div className="pt-4 mt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">Workstream</h3>
+                        <div className="prose max-w-none">
+                          {painPoint.workstream.split('\n').map((paragraph: string, i: number) => (
+                            <p key={i}>{paragraph}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
