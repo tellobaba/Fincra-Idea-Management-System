@@ -279,6 +279,50 @@ export default function PainPointDetailPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* Display Impact and Relevance */}
+                    {painPoint.impact && (
+                      <div className="pt-4 mt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">Impact and Relevance</h3>
+                        <div className="prose max-w-none">
+                          {painPoint.impact.split('\n').map((paragraph: string, i: number) => (
+                            <p key={i}>{paragraph}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Display Organization Category (Workstream) */}
+                    {painPoint.organizationCategory && (
+                      <div className="pt-4 mt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">Workstream</h3>
+                        <p>{painPoint.organizationCategory}</p>
+                      </div>
+                    )}
+
+                    {/* Display Inspiration or Source */}
+                    {painPoint.inspiration && (
+                      <div className="pt-4 mt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">Inspiration or Source</h3>
+                        <div className="prose max-w-none">
+                          {painPoint.inspiration.split('\n').map((paragraph: string, i: number) => (
+                            <p key={i}>{paragraph}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Display Similar Solutions or Prior Attempts */}
+                    {painPoint.similarSolutions && (
+                      <div className="pt-4 mt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">Similar Solutions or Prior Attempts</h3>
+                        <div className="prose max-w-none">
+                          {painPoint.similarSolutions.split('\n').map((paragraph: string, i: number) => (
+                            <p key={i}>{paragraph}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
