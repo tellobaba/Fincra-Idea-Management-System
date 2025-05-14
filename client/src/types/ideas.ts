@@ -73,6 +73,7 @@ export interface IdeaDetailResponse extends Omit<IdeaWithUser, 'mediaUrls'> {
   comments: CommentWithUser[];
   mediaUrls?: Array<{type: string; url: string}> | null;
   isFollowed?: boolean;
+  workstream?: string | null;
 }
 
 export interface LeaderboardEntry {
