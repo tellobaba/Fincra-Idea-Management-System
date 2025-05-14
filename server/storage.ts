@@ -159,6 +159,63 @@ export class DatabaseStorage implements IStorage {
     return await query;
   }
   
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      // Begin a transaction to ensure all related records are deleted
+      return await db.transaction(async (tx) => {
+        // Delete user votes
+        await tx.delete(userVotes).where(eq(userVotes.userId, id));
+        
+        // Delete user follows
+        await tx.delete(follows).where(eq(follows.userId, id));
+        
+        // Delete notifications related to the user
+        await tx.delete(notifications).where(eq(notifications.userId, id));
+        
+        // Delete comments made by the user
+        await tx.delete(comments).where(eq(comments.userId, id));
+        
+        // Get user's ideas
+        const userIdeas = await tx.select({ id: ideas.id })
+          .from(ideas)
+          .where(eq(ideas.submittedById, id));
+        
+        // Delete comments on user's ideas
+        for (const idea of userIdeas) {
+          await tx.delete(comments).where(eq(comments.ideaId, idea.id));
+          
+          // Delete votes on user's ideas
+          await tx.delete(userVotes).where(eq(userVotes.ideaId, idea.id));
+          
+          // Delete follows on user's ideas
+          await tx.delete(follows)
+            .where(and(
+              eq(follows.itemId, idea.id),
+              eq(follows.itemType, 'idea')
+            ));
+        }
+        
+        // Delete user's ideas
+        await tx.delete(ideas).where(eq(ideas.submittedById, id));
+        
+        // Finally, delete the user
+        const result = await tx.delete(users).where(eq(users.id, id));
+        
+        return result.rowCount > 0;
+      });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      return false;
+    }
+  }
+  
+  async getUserSubmissions(userId: number): Promise<Idea[]> {
+    return await db.select()
+      .from(ideas)
+      .where(eq(ideas.submittedById, userId))
+      .orderBy(desc(ideas.createdAt));
+  }
+  
   // Idea operations
   async createIdea(insertIdea: InsertIdea): Promise<Idea> {
     const now = new Date();

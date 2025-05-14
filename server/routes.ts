@@ -2330,6 +2330,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user submissions
+  app.get("/api/admin/users/:id/submissions", checkAdminRole, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const user = await dbStorage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const submissions = await dbStorage.getUserSubmissions(userId);
+      
+      res.json(submissions);
+    } catch (error) {
+      console.error('Error fetching user submissions:', error);
+      res.status(500).json({ message: "Failed to fetch user submissions" });
+    }
+  });
+  
+  // Delete user (admin only)
+  app.delete("/api/admin/users/:id", checkAdminRole, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Don't allow deleting the current user
+      if (req.user.id === userId) {
+        return res.status(403).json({ message: "Cannot delete your own account" });
+      }
+      
+      // Check if user exists
+      const user = await dbStorage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const success = await dbStorage.deleteUser(userId);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Failed to delete user" });
+      }
+      
+      res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
