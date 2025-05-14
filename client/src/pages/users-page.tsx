@@ -70,11 +70,13 @@ function UserSubmissionsDialog({
   onClose,
   userId,
   userName,
+  setIsUserDetailOpen,
 }: {
   isOpen: boolean;
   onClose: () => void;
   userId: number;
   userName: string;
+  setIsUserDetailOpen: (isOpen: boolean) => void;
 }) {
   const { toast } = useToast();
   
@@ -184,7 +186,23 @@ function UserSubmissionsDialog({
           </div>
         )}
         
-        <DialogFooter>
+        <DialogFooter className="flex justify-between items-center space-x-2">
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={() => {
+              onClose();
+              // Add a small delay before showing the user details dialog
+              setTimeout(() => {
+                setIsUserDetailOpen(true);
+              }, 100);
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to User Details
+          </Button>
           <Button onClick={onClose}>Close</Button>
         </DialogFooter>
       </DialogContent>
@@ -513,6 +531,7 @@ export default function UsersPage() {
           onClose={() => setIsSubmissionsDialogOpen(false)}
           userId={selectedUser.id}
           userName={selectedUser.displayName || selectedUser.username}
+          setIsUserDetailOpen={setIsUserDetailOpen}
         />
       )}
       
