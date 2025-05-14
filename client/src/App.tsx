@@ -29,6 +29,7 @@ import AnalyticsPage from "@/pages/analytics-page";
 import SearchResultsPage from "@/pages/search-results-page";
 import SearchPage from "@/pages/search-page";
 import ProfileSettingsPage from "@/pages/profile-settings-page";
+import UsersPage from "@/pages/users-page";
 
 // Lazy loaded admin routes to improve initial loading performance
 import { lazy, Suspense } from "react";
@@ -97,6 +98,7 @@ function Router() {
       <ProtectedRoute path="/submit/pain-point" component={SubmitPainPointPage} />
       <ProtectedRoute path="/search" component={SearchPage} />
       <ProtectedRoute path="/search/results" component={SearchResultsPage} />
+      <AdminRoute path="/users" component={UsersPage} />
       <Route component={NotFound} />
     </Switch>
   );
