@@ -16,6 +16,8 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   getUsers(role?: string): Promise<User[]>;
+  deleteUser(id: number): Promise<boolean>;
+  getUserSubmissions(userId: number): Promise<Idea[]>;
   
   // Idea operations
   createIdea(idea: InsertIdea): Promise<Idea>;
