@@ -1054,15 +1054,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new idea with file upload
-  app.post("/api/ideas", async (req, res) => {
+  app.post("/api/ideas", upload.array('files', 5), async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      // Temporary disabled file upload handling
+      // Process uploaded files
       const mediaUrls: { type: string; url: string }[] = [];
-      console.log('Creating idea without media');
+      
+      // Check if files were uploaded
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        console.log(`Processing ${req.files.length} uploaded files`);
+        
+        // Process each file and add to mediaUrls
+        for (const file of req.files) {
+          // Determine file type (image, audio, etc)
+          let type = 'unknown';
+          
+          if (file.mimetype.startsWith('image/')) {
+            type = 'image';
+          } else if (file.mimetype.startsWith('audio/') || 
+                   file.originalname.match(/\.(mp3|wav|ogg|webm)$/i)) {
+            type = 'audio';
+          } else if (file.mimetype.startsWith('video/') || 
+                   file.originalname.match(/\.(mp4|webm|mov)$/i)) {
+            type = 'video';
+          }
+          
+          // Add to mediaUrls
+          mediaUrls.push({
+            type,
+            url: `/uploads/${file.filename}`
+          });
+          
+          console.log(`Added file to mediaUrls: ${file.filename} (${type})`);
+        }
+      } else {
+        console.log('Creating idea without media files');
+      }
       
       // Validate request body
       // Parse request body properly, considering both form data and JSON

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Category, getCategoryConfig } from "@/types/ideas";
 import { Link } from "wouter";
-import { Bold, Italic, List, Link as LinkIcon, Upload } from "lucide-react";
+import { Bold, Italic, List, Link as LinkIcon, Upload, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -76,6 +76,8 @@ export function SubmitIdeaForm({
   initialData = {},
 }: SubmitIdeaFormProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Use FormValues for the form
   const form = useForm<FormValues>({
@@ -83,24 +85,62 @@ export function SubmitIdeaForm({
     defaultValues: {
       title: initialData.title || "",
       description: initialData.description || "",
-      impact: "",
-      organizationCategory: "",
-      inspiration: "",
-      similarSolutions: "",
+      impact: initialData.impact || "",
+      organizationCategory: initialData.organizationCategory || "",
+      inspiration: initialData.inspiration || "",
+      similarSolutions: initialData.similarSolutions || "",
+      workstream: initialData.workstream || "",
       category: initialData.category || initialCategory || "opportunity",
       tags: initialData.tags ? initialData.tags.join(", ") : "",  // this is converted to array by the schema transform
     },
   });
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      // Convert FileList to array and add to selectedFiles
+      const newFiles = Array.from(e.target.files);
+      setSelectedFiles(prev => [...prev, ...newFiles]);
+      
+      // Reset input value so selecting the same file again triggers the event
+      e.target.value = '';
+    }
+  };
+
+  const handleFileSelect = () => {
+    // Trigger file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const onFormSubmit: SubmitHandler<FormValues> = async (values) => {
     setIsSaving(true);
     try {
-      // Transform tags string into array before submission
-      const transformedValues = {
-        ...values,
-        tags: values.tags ? values.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [],
-      };
-      await onSubmit(transformedValues);
+      // Create a FormData object to handle file uploads
+      const formData = new FormData();
+      
+      // Add all form values to formData
+      Object.entries(values).forEach(([key, value]) => {
+        if (key === 'tags') {
+          // Transform tags string into array before submission
+          const tags = value ? value.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [];
+          formData.append(key, JSON.stringify(tags));
+        } else {
+          formData.append(key, value as string);
+        }
+      });
+      
+      // Add files to formData
+      selectedFiles.forEach(file => {
+        formData.append('files', file);
+      });
+      
+      // Submit the form with formData
+      await onSubmit(Object.fromEntries(formData) as any);
     } finally {
       setIsSaving(false);
     }
@@ -369,14 +409,57 @@ export function SubmitIdeaForm({
           <div className="border-2 border-dashed border-input rounded-md px-6 py-8 flex flex-col items-center">
             <Upload className="h-8 w-8 text-muted-foreground mb-3" />
             <p className="text-muted-foreground text-sm mb-2">Drag files here or click to upload</p>
-            <p className="text-xs text-muted-foreground">Supports documents, images, or voice recordings</p>
+            <p className="text-xs text-muted-foreground">Supports images, audio, and documents (max 5 files)</p>
+            
+            {/* Hidden file input */}
+            <input 
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              multiple
+              accept="image/*,audio/*,.pdf,.doc,.docx,.txt"
+            />
+            
             <Button 
               type="button" 
               variant="outline" 
               className="mt-4"
+              onClick={handleFileSelect}
             >
               Select Files
             </Button>
+            
+            {/* Display selected files */}
+            {selectedFiles.length > 0 && (
+              <div className="w-full mt-4">
+                <p className="text-sm font-medium mb-2">Selected Files ({selectedFiles.length})</p>
+                <div className="space-y-2">
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between bg-secondary/50 p-2 rounded">
+                      <div className="flex items-center space-x-2 overflow-hidden">
+                        <div className="flex-shrink-0 w-8 h-8 bg-secondary rounded flex items-center justify-center">
+                          {file.type.startsWith('image/') ? 
+                            <img src={URL.createObjectURL(file)} alt="" className="w-8 h-8 object-cover rounded" /> : 
+                            <div className="text-xs">{file.name.split('.').pop()}</div>
+                          }
+                        </div>
+                        <span className="text-sm truncate max-w-[200px]">{file.name}</span>
+                      </div>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => removeFile(index)}
+                        className="h-8 w-8"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         
