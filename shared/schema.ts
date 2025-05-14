@@ -46,6 +46,7 @@ export const ideas = pgTable("ideas", {
   organizationCategory: text("organization_category"), // 'Organisation Health', 'Technology & Systems', 'Commercial & Strategy', 'Process', 'Cost Leadership', 'Other'
   inspiration: text("inspiration"), // Inspiration or context behind the submission
   similarSolutions: text("similar_solutions"), // Awareness of similar solutions
+  workstream: text("workstream"), // Workstream the idea belongs to
 });
 
 export const comments = pgTable("comments", {
