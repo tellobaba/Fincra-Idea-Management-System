@@ -199,8 +199,8 @@ export default function UsersPage() {
   
   // State for filtering and viewing
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [departmentFilter, setDepartmentFilter] = useState("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isUserDetailOpen, setIsUserDetailOpen] = useState(false);
   const [isSubmissionsDialogOpen, setIsSubmissionsDialogOpen] = useState(false);
@@ -238,11 +238,11 @@ export default function UsersPage() {
       matches = matches && (displayNameMatches || usernameMatches || emailMatches);
     }
     
-    if (roleFilter) {
+    if (roleFilter && roleFilter !== "all") {
       matches = matches && user.role === roleFilter;
     }
     
-    if (departmentFilter && user.department) {
+    if (departmentFilter && departmentFilter !== "all" && user.department) {
       matches = matches && user.department === departmentFilter;
     }
     
@@ -325,7 +325,7 @@ export default function UsersPage() {
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="user">Regular User</SelectItem>
                   <SelectItem value="reviewer">Reviewer</SelectItem>
                   <SelectItem value="transformer">Transformer</SelectItem>
@@ -340,9 +340,9 @@ export default function UsersPage() {
                   <SelectValue placeholder="Filter by department" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Departments</SelectItem>
+                  <SelectItem value="all">All Departments</SelectItem>
                   {departments.map((department) => (
-                    <SelectItem key={department} value={department!}>
+                    department && <SelectItem key={department} value={department}>
                       {department}
                     </SelectItem>
                   ))}
