@@ -43,7 +43,7 @@ export default function ChallengeDetailPage() {
   const { toast } = useToast();
   const [showParticipants, setShowParticipants] = useState(false);
   
-  // Fetch challenge details
+  // Fetch challenge details - we use ideas API for now as challenges use the same data structure
   const { data: challenge, isLoading } = useQuery({
     queryKey: ["/api/ideas", numericId],
     queryFn: () => apiRequest("GET", `/api/ideas/${numericId}`)

@@ -2549,7 +2549,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Challenge participation endpoints
   app.get('/api/challenges/:id/isParticipant', async (req, res) => {
     if (!req.user) {
-      return res.status(200).json({ isParticipant: false });
+      return res.status(401).json({ message: "Not authenticated" });
     }
     
     const challengeId = parseInt(req.params.id);
@@ -2557,6 +2557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const isParticipant = await dbStorage.isChallengeParticipant(userId, challengeId);
+      console.log(`Is user ${userId} participating in challenge ${challengeId}:`, isParticipant);
       return res.status(200).json({ isParticipant });
     } catch (error) {
       console.error('Error checking challenge participation:', error);
