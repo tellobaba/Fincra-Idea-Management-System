@@ -2073,6 +2073,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             title: idea.title,
             description: idea.description,
             status: idea.status,
+            category: idea.category, // Include the category field
             createdAt: idea.createdAt,
             submitter: submitter ? {
               id: submitter.id,
