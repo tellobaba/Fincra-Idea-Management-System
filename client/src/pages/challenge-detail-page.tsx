@@ -560,6 +560,125 @@ export default function ChallengeDetailPage() {
                         </Button>
                       </div>
                     )}
+                    
+                    {/* Admin section for challenge management */}
+                    {isAdmin && (
+                      <div className="border-t pt-4 mt-4 border-gray-100">
+                        <h4 className="text-sm font-medium text-gray-500 mb-4">Admin Management</h4>
+                        
+                        <Tabs defaultValue="participants" className="w-full">
+                          <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="participants" className="flex items-center">
+                              <Users className="h-4 w-4 mr-2" />
+                              Participants
+                            </TabsTrigger>
+                            <TabsTrigger value="submissions" className="flex items-center">
+                              <ClipboardList className="h-4 w-4 mr-2" />
+                              Submissions
+                            </TabsTrigger>
+                          </TabsList>
+                          
+                          <TabsContent value="participants" className="mt-4">
+                            <div className="rounded-md border">
+                              <div className="p-4 bg-slate-50 border-b">
+                                <div className="flex justify-between items-center">
+                                  <h4 className="font-medium">Challenge Participants</h4>
+                                  <p className="text-sm text-gray-500">Total: {participants.length}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="max-h-80 overflow-y-auto p-2">
+                                {isParticipantsLoading ? (
+                                  <div className="flex justify-center p-4">
+                                    <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                                  </div>
+                                ) : participants.length === 0 ? (
+                                  <div className="text-center py-6 text-gray-500">
+                                    No participants yet.
+                                  </div>
+                                ) : (
+                                  <div className="divide-y">
+                                    {participants.map((participant: any) => (
+                                      <div key={participant.id} className="flex items-center justify-between p-3">
+                                        <div className="flex items-center">
+                                          <Avatar className="h-8 w-8">
+                                            <AvatarImage src={typeof participant.avatarUrl === 'string' ? participant.avatarUrl : undefined} />
+                                            <AvatarFallback>{participant.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                          </Avatar>
+                                          <div className="ml-3">
+                                            <p className="font-medium text-sm">{participant.displayName}</p>
+                                            <p className="text-xs text-gray-500">{participant.department || 'No department'}</p>
+                                          </div>
+                                        </div>
+                                        <Badge variant="outline" className="text-xs">
+                                          {participant.role || 'Participant'}
+                                        </Badge>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </TabsContent>
+                          
+                          <TabsContent value="submissions" className="mt-4">
+                            <div className="rounded-md border">
+                              <div className="p-4 bg-slate-50 border-b">
+                                <div className="flex justify-between items-center">
+                                  <h4 className="font-medium">Challenge Submissions</h4>
+                                  <p className="text-sm text-gray-500">Total: {relatedSubmissions.length}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="max-h-80 overflow-y-auto">
+                                {isRelatedSubmissionsLoading ? (
+                                  <div className="flex justify-center p-4">
+                                    <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                                  </div>
+                                ) : relatedSubmissions.length === 0 ? (
+                                  <div className="text-center py-6 text-gray-500">
+                                    No submissions yet.
+                                  </div>
+                                ) : (
+                                  <div className="divide-y">
+                                    {relatedSubmissions.map((submission: any) => (
+                                      <div key={submission.id} className="p-3">
+                                        <div className="flex justify-between items-start mb-2">
+                                          <div>
+                                            <a 
+                                              onClick={() => navigate(`/ideas/${submission.id}`)}
+                                              className="font-medium text-blue-600 hover:underline cursor-pointer"
+                                            >
+                                              {submission.title}
+                                            </a>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              Submitted by {submission.submitter?.displayName || 'Unknown'} on {formatDate(submission.createdAt)}
+                                            </p>
+                                          </div>
+                                          <Badge 
+                                            variant="outline"
+                                            className={`capitalize ${
+                                              submission.status === 'in-review' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                                              submission.status === 'implemented' ? 'bg-green-50 text-green-700 border-green-200' :
+                                              submission.status === 'merged' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                              submission.status === 'parked' ? 'bg-red-50 text-red-700 border-red-200' :
+                                              'bg-gray-50 text-gray-700 border-gray-200'
+                                            }`}
+                                          >
+                                            {submission.status.replace('-', ' ')}
+                                          </Badge>
+                                        </div>
+                                        <p className="text-sm text-gray-600 line-clamp-2">{submission.description}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    )}
                   </CardContent>
                   
                   <CardFooter className="flex flex-col items-start border-t">

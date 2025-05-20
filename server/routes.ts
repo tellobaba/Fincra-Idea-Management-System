@@ -605,6 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         department?: string;
         priority?: string;
         search?: string;
+        relatedToId?: number;
       } = {};
       
       // For admin users with 'all=true' parameter, don't apply status filter by default
@@ -615,6 +616,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Default filter for unauthenticated users or when 'all' is not specified
         // Only show ideas with status that should be visible to regular users
         filters.status = 'submitted';
+      }
+      
+      // If relatedTo parameter is provided, get ideas related to a specific challenge
+      if (req.query.relatedTo && !isNaN(Number(req.query.relatedTo))) {
+        filters.relatedToId = Number(req.query.relatedTo);
       }
       
       // For admin dashboard with 'all=true', allow full access without filtering
