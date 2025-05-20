@@ -572,6 +572,77 @@ export default function ChallengeDetailPage() {
                       </div>
                     )}
                     
+                    {/* Display attachments if available */}
+                    {challenge.mediaUrls && Array.isArray(challenge.mediaUrls) && challenge.mediaUrls.length > 0 && (
+                      <div className="border-t pt-4 mt-4 border-gray-100">
+                        <h4 className="text-sm font-medium text-gray-500 mb-3">Attachments</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {challenge.mediaUrls.map((media: {type: string; url: string}, index: number) => {
+                            // Use absolute URLs for images
+                            const fullUrl = media.url.startsWith('http') 
+                              ? media.url 
+                              : `${window.location.origin}${media.url}`;
+                              
+                            // Determine media type from both type and URL
+                            let mediaType = media.type || 'unknown';
+                            
+                            // Special handling for images
+                            const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+                            const isImage = mediaType === 'image' || 
+                              imageExts.some(ext => media.url.toLowerCase().endsWith(ext));
+                            
+                            // Special handling for audio
+                            const audioExts = ['.mp3', '.wav', '.webm', '.ogg', '.m4a'];
+                            const isAudio = mediaType === 'audio' || 
+                              audioExts.some(ext => media.url.toLowerCase().endsWith(ext));
+                            
+                            return (
+                              <div key={index} className="border rounded-md overflow-hidden">
+                                {isImage ? (
+                                  <div className="h-auto p-2">
+                                    <img 
+                                      src={fullUrl} 
+                                      alt={`Attachment ${index + 1}`}
+                                      className="w-full object-contain max-h-48"
+                                      onLoad={() => console.log(`Image loaded successfully:`, { url: media.url, fullUrl })}
+                                      onError={(e) => {
+                                        console.error(`Error loading image:`, { url: media.url, fullUrl });
+                                        e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
+                                      }}
+                                    />
+                                    <div className="mt-2 text-xs text-center text-muted-foreground">
+                                      <a href={fullUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">View image</a>
+                                    </div>
+                                  </div>
+                                ) : isAudio ? (
+                                  <div className="p-4 bg-muted flex items-center justify-center h-48">
+                                    <div className="w-full">
+                                      <p className="text-xs text-muted-foreground mb-2">Audio Recording</p>
+                                      <audio src={fullUrl} controls className="w-full" />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="p-4 bg-muted flex items-center justify-center h-48">
+                                    <a 
+                                      href={fullUrl} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="flex flex-col items-center text-primary hover:text-primary-dark"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                      </svg>
+                                      <span>View Attachment</span>
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Admin section for challenge management */}
                     {isAdmin && (
                       <div className="border-t pt-4 mt-4 border-gray-100">
