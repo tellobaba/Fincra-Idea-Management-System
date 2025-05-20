@@ -69,11 +69,11 @@ export function CommentSection({ comments, ideaId, onAddComment }: CommentSectio
   };
 
   // Group comments by parent_id
-  const topLevelComments = comments.filter(comment => !comment.parentId);
-  const replies = comments.filter(comment => comment.parentId);
+  const topLevelComments = comments ? comments.filter(comment => !comment.parentId) : [];
+  const replies = comments ? comments.filter(comment => comment.parentId) : [];
   
   const getCommentReplies = (commentId: number) => {
-    return replies.filter(reply => reply.parentId === commentId);
+    return replies ? replies.filter(reply => reply.parentId === commentId) : [];
   };
 
   const handleReply = (commentId: number) => {
