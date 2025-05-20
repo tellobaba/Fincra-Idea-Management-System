@@ -5,9 +5,13 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Status } from "@shared/schema";
-import { Loader2, Calendar, Award, Users, ArrowLeft, CheckCircle, UserPlus } from "lucide-react";
+import { 
+  Loader2, Calendar, Award, Users, ArrowLeft, CheckCircle, UserPlus, 
+  Glasses, ClipboardList, BarChart, FileSpreadsheet, Download, User
+} from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sidebar } from "@/components/dashboard/sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Define CommentWithUser interface for proper typing
 interface CommentWithUser {
@@ -182,6 +186,17 @@ export default function ChallengeDetailPage() {
   function getInitial(name: string) {
     return name.charAt(0).toUpperCase();
   }
+  
+  // Check if user is admin or has admin-like role
+  const isAdmin = user && ['admin', 'reviewer', 'transformer', 'implementer'].includes(user.role);
+  
+  // Fetch submissions related to this challenge (for admin view)
+  const { data: relatedSubmissions = [], isLoading: isRelatedSubmissionsLoading } = useQuery({
+    queryKey: ["/api/ideas", "submissions", numericId],
+    queryFn: () => apiRequest("GET", `/api/ideas?category=idea&relatedTo=${numericId}`)
+      .then(res => res.json()),
+    enabled: !!isAdmin // Only load for admin users
+  });
   
   // Comment submission handler
   const handleAddComment = async (content: string, parentId?: number) => {
