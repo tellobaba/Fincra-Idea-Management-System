@@ -2546,6 +2546,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Challenge participation endpoints
+  app.get('/api/challenges/:id/isParticipant', async (req, res) => {
+    if (!req.user) {
+      return res.status(200).json({ isParticipant: false });
+    }
+    
+    const challengeId = parseInt(req.params.id);
+    const userId = req.user.id;
+    
+    try {
+      const isParticipant = await dbStorage.isChallengeParticipant(userId, challengeId);
+      return res.status(200).json({ isParticipant });
+    } catch (error) {
+      console.error('Error checking challenge participation:', error);
+      return res.status(500).json({ error: 'Failed to check participation status' });
+    }
+  });
+  
+  app.get('/api/challenges/:id/participants', async (req, res) => {
+    const challengeId = parseInt(req.params.id);
+    
+    try {
+      const participants = await dbStorage.getChallengeParticipants(challengeId);
+      return res.status(200).json(participants);
+    } catch (error) {
+      console.error('Error fetching challenge participants:', error);
+      return res.status(500).json({ error: 'Failed to fetch participants' });
+    }
+  });
+  
+  app.post('/api/challenges/:id/participate', async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'You must be logged in to participate in challenges' });
+    }
+    
+    const challengeId = parseInt(req.params.id);
+    const userId = req.user.id;
+    
+    try {
+      // Check if the idea exists and is a challenge
+      const idea = await dbStorage.getIdea(challengeId);
+      if (!idea) {
+        return res.status(404).json({ error: 'Challenge not found' });
+      }
+      
+      if (idea.category !== 'challenge') {
+        return res.status(400).json({ error: 'This item is not a challenge' });
+      }
+      
+      // Add user as a participant
+      const participant = await dbStorage.addChallengeParticipant(userId, challengeId);
+      
+      // Create a notification for the challenge creator
+      if (idea.submittedById !== userId) {
+        await dbStorage.createNotification({
+          userId: idea.submittedById,
+          title: 'New participant',
+          message: `${req.user.displayName} is now participating in your challenge: ${idea.title}`,
+          type: 'follow',
+          relatedItemId: challengeId,
+          relatedItemType: 'idea',
+          actorId: userId,
+          read: false
+        });
+      }
+      
+      return res.status(200).json(participant);
+    } catch (error) {
+      console.error('Error joining challenge:', error);
+      return res.status(500).json({ error: 'Failed to join challenge' });
+    }
+  });
+  
+  app.delete('/api/challenges/:id/participate', async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'You must be logged in to withdraw from challenges' });
+    }
+    
+    const challengeId = parseInt(req.params.id);
+    const userId = req.user.id;
+    
+    try {
+      const success = await dbStorage.removeChallengeParticipant(userId, challengeId);
+      if (!success) {
+        return res.status(404).json({ error: 'You are not participating in this challenge' });
+      }
+      
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      console.error('Error leaving challenge:', error);
+      return res.status(500).json({ error: 'Failed to leave challenge' });
+    }
+  });
+  
+  app.get('/api/user/participating-challenges', async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'You must be logged in to view your participating challenges' });
+    }
+    
+    const userId = req.user.id;
+    
+    try {
+      const challenges = await dbStorage.getUserParticipatingChallenges(userId);
+      return res.status(200).json(challenges);
+    } catch (error) {
+      console.error('Error fetching participating challenges:', error);
+      return res.status(500).json({ error: 'Failed to fetch participating challenges' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

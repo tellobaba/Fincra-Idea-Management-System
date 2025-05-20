@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, Tag, Plus, Loader2, ArrowLeft } from 'lucide-react';
+import { Search, Filter, Tag, Plus, Loader2, ArrowLeft, Calendar, Users, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,7 +23,8 @@ type FollowedIdeaWithUser = Idea & {
     displayName: string;
     department: string;
     avatarUrl?: string;
-  }
+  };
+  isParticipating?: boolean;
 };
 
 export default function FollowedIdeasPage() {
@@ -33,13 +34,25 @@ export default function FollowedIdeasPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState<'followed' | 'participating'>('followed');
   const [filteredIdeas, setFilteredIdeas] = useState<FollowedIdeaWithUser[]>([]);
 
   // Fetch user's followed ideas
-  const { data: followedIdeas = [], isLoading, error, refetch } = useQuery<FollowedIdeaWithUser[]>({
+  const { data: followedIdeas = [], isLoading: followedLoading, error: followedError, refetch: refetchFollowed } = useQuery<FollowedIdeaWithUser[]>({
     queryKey: ['/api/ideas/my-follows'],
-    enabled: !!user,
+    enabled: !!user && viewMode === 'followed',
   });
+  
+  // Fetch user's participating challenges
+  const { data: participatingChallenges = [], isLoading: participatingLoading, error: participatingError, refetch: refetchParticipating } = useQuery<FollowedIdeaWithUser[]>({
+    queryKey: ['/api/user/participating-challenges'],
+    enabled: !!user && viewMode === 'participating',
+  });
+  
+  // Combined data based on view mode
+  const currentData = viewMode === 'followed' ? followedIdeas : participatingChallenges;
+  const isLoading = viewMode === 'followed' ? followedLoading : participatingLoading;
+  const error = viewMode === 'followed' ? followedError : participatingError;
 
   useEffect(() => {
     if (!user && !authLoading) {
@@ -49,16 +62,21 @@ export default function FollowedIdeasPage() {
   }, [user, authLoading, setLocation]);
 
   useEffect(() => {
-    if (followedIdeas) {
+    if (currentData) {
       // Convert to array if it's not (API might return object)
-      const ideasArray = Array.isArray(followedIdeas) ? followedIdeas : [followedIdeas];
+      const ideasArray = Array.isArray(currentData) ? currentData : [currentData];
+      
+      // Add isParticipating flag for challenges if we're in participating mode
+      const processedData = viewMode === 'participating' 
+        ? ideasArray.map(item => ({ ...item, isParticipating: true }))
+        : ideasArray;
       
       // Apply search filter
-      let filtered = ideasArray;
+      let filtered = processedData;
       
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        filtered = ideasArray.filter(idea => 
+        filtered = processedData.filter(idea => 
           idea.title?.toLowerCase().includes(query) || 
           idea.description?.toLowerCase().includes(query) ||
           idea.tags?.some(tag => tag.toLowerCase().includes(query))
@@ -99,7 +117,7 @@ export default function FollowedIdeasPage() {
       
       setFilteredIdeas(filtered);
     }
-  }, [followedIdeas, searchQuery, currentTabIndex, sortBy]);
+  }, [currentData, searchQuery, currentTabIndex, sortBy, viewMode]);
 
   const handleUnfollow = async (ideaId: number) => {
     try {
@@ -121,13 +139,45 @@ export default function FollowedIdeasPage() {
       });
       
       // Refresh the data
-      refetch();
+      refetchFollowed();
       
     } catch (error) {
       console.error('Error unfollowing idea:', error);
       toast({
         title: 'Error',
         description: 'Failed to unfollow item',
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  const handleLeavingChallenge = async (challengeId: number) => {
+    try {
+      // Send API request to leave the challenge
+      const response = await fetch(`/api/challenges/${challengeId}/participate`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to leave challenge');
+      }
+      
+      toast({
+        title: 'Success',
+        description: 'You have withdrawn from the challenge',
+      });
+      
+      // Refresh the data
+      refetchParticipating();
+      
+    } catch (error) {
+      console.error('Error leaving challenge:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to leave the challenge',
         variant: 'destructive',
       });
     }
