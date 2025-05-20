@@ -192,8 +192,8 @@ export default function ChallengeDetailPage() {
   
   // Fetch submissions related to this challenge (for admin view)
   const { data: relatedSubmissions = [], isLoading: isRelatedSubmissionsLoading } = useQuery({
-    queryKey: ["/api/ideas", "submissions", numericId],
-    queryFn: () => apiRequest("GET", `/api/ideas?category=idea&relatedTo=${numericId}`)
+    queryKey: ["/api/challenges", numericId, "submissions"],
+    queryFn: () => apiRequest("GET", `/api/challenges/${numericId}/submissions`)
       .then(res => res.json()),
     enabled: !!isAdmin // Only load for admin users
   });

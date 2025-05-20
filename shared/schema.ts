@@ -55,6 +55,7 @@ export const ideas = pgTable("ideas", {
   inspiration: text("inspiration"), // Inspiration or context behind the submission
   similarSolutions: text("similar_solutions"), // Awareness of similar solutions
   workstream: text("workstream"), // Workstream the idea belongs to
+  relatedToId: integer("related_to_id"), // ID of the challenge this idea was submitted for
 });
 
 export const comments = pgTable("comments", {

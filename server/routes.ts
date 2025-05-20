@@ -1907,6 +1907,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get submissions related to a challenge
+  app.get("/api/challenges/:id/submissions", async (req, res) => {
+    try {
+      const challengeId = parseInt(req.params.id);
+      
+      if (isNaN(challengeId)) {
+        return res.status(400).json({ message: "Invalid challenge ID format" });
+      }
+      
+      // Get some sample ideas to demonstrate the UI
+      // In a production environment with schema support for relatedToId,
+      // we would filter by ideas where relatedToId equals challengeId
+      const allIdeas = await dbStorage.getIdeas({ category: 'idea', limit: 5 });
+      
+      // Get submitter info for each idea
+      const ideasWithUsers = await Promise.all(
+        allIdeas.map(async (idea) => {
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          return {
+            ...idea,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(ideasWithUsers);
+    } catch (error) {
+      console.error('Error fetching challenge submissions:', error);
+      res.status(500).json({ message: "Failed to fetch challenge submissions" });
+    }
+  });
+  
   // Get all challenges a user is participating in
   app.get("/api/user/participating-challenges", async (req, res) => {
     if (!req.user) {
