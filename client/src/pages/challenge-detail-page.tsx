@@ -182,6 +182,32 @@ export default function ChallengeDetailPage() {
   function getInitial(name: string) {
     return name.charAt(0).toUpperCase();
   }
+  
+  // Comment submission handler
+  const handleAddComment = async (content: string, parentId?: number) => {
+    if (!user) return;
+    
+    const comment = {
+      content,
+      parentId: parentId || null
+    };
+    
+    try {
+      await apiRequest("POST", `/api/ideas/${numericId}/comments`, comment);
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas", numericId] });
+      toast({
+        title: "Comment added",
+        description: "Your comment has been added to the discussion"
+      });
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+      toast({
+        title: "Comment failed",
+        description: "There was an error adding your comment",
+        variant: "destructive"
+      });
+    }
+  }
 
   // Start/End date calculations
   const today = new Date();
@@ -527,6 +553,7 @@ export default function ChallengeDetailPage() {
                       <CommentSection 
                         ideaId={numericId}
                         comments={challenge.comments || []}
+                        onAddComment={handleAddComment}
                       />
                     </div>
                   </CardFooter>
@@ -621,10 +648,10 @@ export default function ChallengeDetailPage() {
               </div>
             ) : (
               <div className="grid gap-4">
-                {participants.map((participant) => (
+                {participants.map((participant: any) => (
                   <div key={participant.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-slate-100">
                     <Avatar>
-                      <AvatarImage src={participant.avatarUrl || undefined} />
+                      <AvatarImage src={typeof participant.avatarUrl === 'string' ? participant.avatarUrl : undefined} />
                       <AvatarFallback>{participant.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>

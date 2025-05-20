@@ -170,7 +170,7 @@ export function CommentSection({ comments, ideaId, onAddComment }: CommentSectio
       {user && (
         <div className="flex items-start">
           <Avatar className="h-10 w-10 flex-shrink-0">
-            <AvatarImage src={user.avatarUrl} alt={user.displayName} />
+            <AvatarImage src={typeof user.avatarUrl === 'string' ? user.avatarUrl : undefined} alt={user.displayName} />
             <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="ml-3 flex-1">
