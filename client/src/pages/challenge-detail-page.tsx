@@ -58,6 +58,9 @@ export default function ChallengeDetailPage() {
     enabled: !!user // Only run if user is logged in
   });
   
+  // Extract isParticipant from API response
+  const isParticipant = participantData?.isParticipant || false;
+  
   // Get all participants
   const { data: participants = [], isLoading: isParticipantsLoading } = useQuery({
     queryKey: ["/api/challenges", numericId, "participants"],
@@ -111,8 +114,6 @@ export default function ChallengeDetailPage() {
       });
     }
   });
-  
-  const isParticipant = participantData?.isParticipant || false;
 
   // Check if user has voted for this challenge
   const { data: hasVoted, isLoading: voteCheckLoading } = useQuery({
