@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ChallengeSubmitFormProps {
   onSubmit: (data: {
@@ -240,10 +241,21 @@ export function ChallengeSubmitForm({
               <FormItem>
                 <FormLabel>Timeframe</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="E.g., '14 days', '2 weeks'" 
-                    {...field} 
-                  />
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select timeframe" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1 week">1 week</SelectItem>
+                      <SelectItem value="2 weeks">2 weeks</SelectItem>
+                      <SelectItem value="1 month">1 month</SelectItem>
+                      <SelectItem value="3 months">3 months</SelectItem>
+                      <SelectItem value="6 months">6 months</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormDescription>
                   Specify the duration of the challenge
