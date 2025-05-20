@@ -618,10 +618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         filters.status = 'submitted';
       }
       
-      // If relatedTo parameter is provided, get ideas related to a specific challenge
-      if (req.query.relatedTo && !isNaN(Number(req.query.relatedTo))) {
-        filters.relatedToId = Number(req.query.relatedTo);
-      }
+      // We'll add a new endpoint specifically for challenge-related submissions
       
       // For admin dashboard with 'all=true', allow full access without filtering
       // But check that the user has admin rights

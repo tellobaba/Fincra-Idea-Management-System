@@ -33,7 +33,6 @@ export interface IStorage {
     sortDirection?: 'asc' | 'desc';
     limit?: number;
     offset?: number;
-    relatedToId?: number; // Added to filter ideas related to a specific challenge
   }): Promise<Idea[]>;
   updateIdea(id: number, updates: Partial<Idea>): Promise<Idea | undefined>;
   deleteIdea(id: number): Promise<boolean>;
@@ -259,7 +258,6 @@ export class DatabaseStorage implements IStorage {
     sortDirection?: 'asc' | 'desc';
     limit?: number;
     offset?: number;
-    relatedToId?: number;
   }): Promise<Idea[]> {
     let query = db.select().from(ideas);
     
@@ -286,10 +284,7 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(ideas.priority, filters.priority));
       }
       
-      // Filter by related challenge ID - used to find ideas submitted as part of a challenge
-      if (filters.relatedToId) {
-        conditions.push(eq(ideas.relatedToId, filters.relatedToId));
-      }
+      // Future enhancement: Filter by related challenge ID
       
       if (filters.search) {
         const searchTerm = `%${filters.search}%`;
