@@ -398,12 +398,12 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex space-x-2">
-                            <Link href={`/ideas/${idea.id}`}>
+                            <Link href={categoryType === 'challenge' ? `/challenges/${idea.id}` : `/ideas/${idea.id}`}>
                               <Button variant="ghost" size="sm">
                                 <ChevronRight className="h-4 w-4" />
                               </Button>
                             </Link>
-                            <Link href={`/ideas/${idea.id}#comments`}>
+                            <Link href={categoryType === 'challenge' ? `/challenges/${idea.id}#comments` : `/ideas/${idea.id}#comments`}>
                               <Button variant="ghost" size="sm">
                                 <MessageCircle className="h-4 w-4" />
                               </Button>
