@@ -199,7 +199,7 @@ export function ExistingUserView() {
   });
   
   // Process challenge data for display
-  const challengesData = realChallengesData.map((challenge, index) => {
+  const challengesData = Array.isArray(realChallengesData) ? realChallengesData.map((challenge, index) => {
     // Calculate remaining days (between 5-15 days)
     const remainingDays = 5 + (index % 3) * 5;
     
@@ -241,7 +241,7 @@ export function ExistingUserView() {
       participants,
       ...theme
     };
-  });
+  }) : [];
 
   // Combine all loading states for overall loading indicator
   const isLoading = topIdeasLoading || volumeLoading || statusLoading || activityLoading || leaderboardLoading || challengesLoading;
