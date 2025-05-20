@@ -1907,34 +1907,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get submissions related to a challenge
   app.get("/api/challenges/:id/submissions", async (req, res) => {
     try {
-      const challengeId = parseInt(req.params.id);
+      // Check if user is authenticated and has admin-like permissions
+      if (!req.user || !['admin', 'reviewer', 'transformer', 'implementer'].includes(req.user.role)) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
       
+      const challengeId = parseInt(req.params.id);
       if (isNaN(challengeId)) {
         return res.status(400).json({ message: "Invalid challenge ID format" });
       }
       
-      // Get some sample ideas to demonstrate the UI
-      // In a production environment with schema support for relatedToId,
-      // we would filter by ideas where relatedToId equals challengeId
-      const allIdeas = await dbStorage.getIdeas({ category: 'idea', limit: 5 });
+      // Get the challenge to confirm it exists
+      const challenge = await dbStorage.getIdea(challengeId);
+      if (!challenge || challenge.category !== 'challenge') {
+        return res.status(404).json({ message: 'Challenge not found' });
+      }
       
-      // Get submitter info for each idea
-      const ideasWithUsers = await Promise.all(
-        allIdeas.map(async (idea) => {
-          const submitter = await dbStorage.getUser(idea.submittedById);
-          return {
-            ...idea,
-            submitter: submitter ? {
-              id: submitter.id,
-              displayName: submitter.displayName,
-              department: submitter.department,
-              avatarUrl: submitter.avatarUrl,
-            } : null,
-          };
-        })
-      );
+      // Get all participants in this challenge
+      const participants = await dbStorage.getChallengeParticipants(challengeId);
+      const participantIds = participants.map(p => p.id);
       
-      res.json(ideasWithUsers);
+      // Get ideas submitted by participants
+      const submissions = [];
+      if (participantIds.length > 0) {
+        // Get all ideas from these users (created after the challenge)
+        for (const userId of participantIds) {
+          const userIdeas = await dbStorage.getUserSubmissions(userId);
+          
+          // Filter to only include non-challenge ideas created after the challenge started
+          const userValidIdeas = userIdeas.filter(idea => 
+            idea.category !== 'challenge' && 
+            new Date(idea.createdAt) > new Date(challenge.createdAt)
+          );
+          
+          // Add submitter info to each idea
+          for (const idea of userValidIdeas) {
+            const submitter = participants.find(p => p.id === idea.submittedById);
+            submissions.push({
+              ...idea,
+              submitter: submitter ? {
+                id: submitter.id,
+                displayName: submitter.displayName,
+                department: submitter.department,
+                avatarUrl: submitter.avatarUrl
+              } : null
+            });
+          }
+        }
+      }
+      
+      res.json(submissions);
     } catch (error) {
       console.error('Error fetching challenge submissions:', error);
       res.status(500).json({ message: "Failed to fetch challenge submissions" });
