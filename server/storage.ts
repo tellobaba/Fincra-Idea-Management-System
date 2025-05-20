@@ -1070,6 +1070,140 @@ export class DatabaseStorage implements IStorage {
       return 0;
     }
   }
+
+  // Challenge Participant operations
+  async addChallengeParticipant(userId: number, challengeId: number): Promise<ChallengeParticipant> {
+    try {
+      // Check if already a participant
+      const existingParticipant = await db.select()
+        .from(challengeParticipants)
+        .where(and(
+          eq(challengeParticipants.userId, userId),
+          eq(challengeParticipants.challengeId, challengeId)
+        ));
+      
+      if (existingParticipant.length > 0) {
+        return existingParticipant[0];
+      }
+
+      // Add as participant
+      const [participant] = await db.insert(challengeParticipants)
+        .values({
+          userId,
+          challengeId
+        })
+        .returning();
+      
+      return participant;
+    } catch (error) {
+      console.error('Error adding challenge participant:', error);
+      throw error;
+    }
+  }
+
+  async removeChallengeParticipant(userId: number, challengeId: number): Promise<boolean> {
+    try {
+      await db.delete(challengeParticipants)
+        .where(and(
+          eq(challengeParticipants.userId, userId),
+          eq(challengeParticipants.challengeId, challengeId)
+        ));
+      
+      return true;
+    } catch (error) {
+      console.error('Error removing challenge participant:', error);
+      return false;
+    }
+  }
+
+  async isChallengeParticipant(userId: number, challengeId: number): Promise<boolean> {
+    try {
+      const result = await db.select()
+        .from(challengeParticipants)
+        .where(and(
+          eq(challengeParticipants.userId, userId),
+          eq(challengeParticipants.challengeId, challengeId)
+        ));
+      
+      return result.length > 0;
+    } catch (error) {
+      console.error('Error checking if challenge participant:', error);
+      return false;
+    }
+  }
+
+  async getChallengeParticipants(challengeId: number): Promise<User[]> {
+    try {
+      const participants = await db.select()
+        .from(challengeParticipants)
+        .innerJoin(users, eq(challengeParticipants.userId, users.id))
+        .where(eq(challengeParticipants.challengeId, challengeId));
+      
+      // Extract just the user data from each row
+      return participants.map(p => ({
+        id: p.users.id,
+        username: p.users.username,
+        password: p.users.password,
+        displayName: p.users.displayName,
+        department: p.users.department,
+        role: p.users.role,
+        avatarUrl: p.users.avatarUrl
+      }));
+    } catch (error) {
+      console.error('Error getting challenge participants:', error);
+      return [];
+    }
+  }
+
+  async getUserParticipatingChallenges(userId: number): Promise<Idea[]> {
+    try {
+      const challenges = await db.select()
+        .from(challengeParticipants)
+        .innerJoin(ideas, eq(challengeParticipants.challengeId, ideas.id))
+        .where(and(
+          eq(challengeParticipants.userId, userId),
+          eq(ideas.category, 'challenge')
+        ));
+      
+      // Extract just the idea data from each row
+      return challenges.map(c => ({
+        id: c.ideas.id,
+        title: c.ideas.title,
+        description: c.ideas.description,
+        category: c.ideas.category,
+        tags: c.ideas.tags,
+        department: c.ideas.department,
+        status: c.ideas.status,
+        priority: c.ideas.priority,
+        votes: c.ideas.votes,
+        submittedById: c.ideas.submittedById,
+        assignedToId: c.ideas.assignedToId,
+        reviewerId: c.ideas.reviewerId,
+        reviewerEmail: c.ideas.reviewerEmail,
+        transformerId: c.ideas.transformerId,
+        transformerEmail: c.ideas.transformerEmail,
+        implementerId: c.ideas.implementerId,
+        implementerEmail: c.ideas.implementerEmail,
+        createdAt: c.ideas.createdAt,
+        updatedAt: c.ideas.updatedAt,
+        impactScore: c.ideas.impactScore,
+        costSaved: c.ideas.costSaved,
+        revenueGenerated: c.ideas.revenueGenerated,
+        attachments: c.ideas.attachments,
+        mediaUrls: c.ideas.mediaUrls,
+        impact: c.ideas.impact,
+        adminNotes: c.ideas.adminNotes,
+        attachmentUrl: c.ideas.attachmentUrl,
+        organizationCategory: c.ideas.organizationCategory,
+        inspiration: c.ideas.inspiration,
+        similarSolutions: c.ideas.similarSolutions,
+        workstream: c.ideas.workstream
+      }));
+    } catch (error) {
+      console.error('Error getting user participating challenges:', error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

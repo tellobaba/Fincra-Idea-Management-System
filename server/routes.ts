@@ -1804,6 +1804,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to perform search' });
     }
   });
+  
+  // Challenge participant endpoints
+  
+  // Check if user is a participant in a challenge
+  app.get("/api/challenges/:id/isParticipant", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const challengeId = parseInt(req.params.id);
+      const isParticipant = await dbStorage.isChallengeParticipant(req.user.id, challengeId);
+      
+      res.json({ isParticipant });
+    } catch (error) {
+      console.error('Error checking challenge participation:', error);
+      res.status(500).json({ message: "Failed to check challenge participation" });
+    }
+  });
+  
+  // Add user as participant to a challenge
+  app.post("/api/challenges/:id/participate", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const challengeId = parseInt(req.params.id);
+      
+      // Make sure the challenge exists and is of type 'challenge'
+      const challenge = await dbStorage.getIdea(challengeId);
+      if (!challenge) {
+        return res.status(404).json({ message: "Challenge not found" });
+      }
+      
+      if (challenge.category !== 'challenge') {
+        return res.status(400).json({ message: "Item is not a challenge" });
+      }
+      
+      const participant = await dbStorage.addChallengeParticipant(req.user.id, challengeId);
+      
+      // Create a notification for the challenge creator
+      if (challenge.submittedById !== req.user.id) {
+        await dbStorage.createNotification({
+          userId: challenge.submittedById,
+          title: "New Challenge Participant",
+          message: `${req.user.displayName} has joined your challenge: ${challenge.title}`,
+          type: "follow", // Using follow type since there's no specific participant type
+          relatedItemId: challengeId,
+          relatedItemType: "challenge",
+          actorId: req.user.id
+        });
+      }
+      
+      res.json({ success: true, participant });
+    } catch (error) {
+      console.error('Error participating in challenge:', error);
+      res.status(500).json({ message: "Failed to participate in challenge" });
+    }
+  });
+  
+  // Remove user from challenge participants
+  app.delete("/api/challenges/:id/participate", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const challengeId = parseInt(req.params.id);
+      const success = await dbStorage.removeChallengeParticipant(req.user.id, challengeId);
+      
+      res.json({ success });
+    } catch (error) {
+      console.error('Error removing from challenge:', error);
+      res.status(500).json({ message: "Failed to remove from challenge" });
+    }
+  });
+  
+  // Get all participants for a challenge
+  app.get("/api/challenges/:id/participants", async (req, res) => {
+    try {
+      const challengeId = parseInt(req.params.id);
+      const participants = await dbStorage.getChallengeParticipants(challengeId);
+      
+      // Remove passwords from the response
+      const sanitizedParticipants = participants.map(p => {
+        const { password, ...participant } = p;
+        return participant;
+      });
+      
+      res.json(sanitizedParticipants);
+    } catch (error) {
+      console.error('Error getting challenge participants:', error);
+      res.status(500).json({ message: "Failed to get challenge participants" });
+    }
+  });
+  
+  // Get all challenges a user is participating in
+  app.get("/api/user/participating-challenges", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const challenges = await dbStorage.getUserParticipatingChallenges(req.user.id);
+      
+      // Get user info for each idea
+      const challengesWithUsers = await Promise.all(
+        challenges.map(async (challenge) => {
+          const submitter = await dbStorage.getUser(challenge.submittedById);
+          return {
+            ...challenge,
+            submitter: submitter ? {
+              id: submitter.id,
+              displayName: submitter.displayName,
+              department: submitter.department,
+              avatarUrl: submitter.avatarUrl,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(challengesWithUsers);
+    } catch (error) {
+      console.error('Error getting participating challenges:', error);
+      res.status(500).json({ message: "Failed to get participating challenges" });
+    }
+  });
 
   // Autocomplete suggestions API endpoint
   app.get("/api/search/suggestions", async (req, res) => {
