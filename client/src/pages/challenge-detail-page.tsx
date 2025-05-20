@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Status } from "@shared/schema";
 import { 
   Loader2, Calendar, Award, Users, ArrowLeft, CheckCircle, UserPlus, 
-  Glasses, ClipboardList, BarChart, FileSpreadsheet, Download, User
+  Glasses, ClipboardList, BarChart, FileSpreadsheet, Download, User, Clock
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sidebar } from "@/components/dashboard/sidebar";
