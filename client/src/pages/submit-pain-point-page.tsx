@@ -20,33 +20,38 @@ export default function SubmitPainPointPage() {
       description: string;
       urgency: string;
       rootCause: string;
-      files?: FileList;
+      files?: File[];
       voiceNote?: File;
     }) => {
-      // Create a properly structured JSON object that matches expected schema fields
-      const requestData = {
-        title: formData.title,
-        description: formData.description,
-        category: 'pain-point', // Set category explicitly
-        department: user?.department || 'Other', // Use user's department from auth context
-        status: 'submitted', // default status
-        priority: formData.urgency, // Map urgency to priority
-        impact: formData.rootCause || '', // Map rootCause to impact
-        inspiration: '',
-        similarSolutions: '',
-        tags: [],
-        attachments: [] // empty array as we're not handling attachments currently
-      };
-
-      console.log('Submitting pain point with data:', requestData);
+      // Create FormData object to handle both text data and files
+      const formDataObj = new FormData();
       
-      // Use fetch with JSON data
+      // Add all form fields to FormData
+      formDataObj.append('title', formData.title);
+      formDataObj.append('description', formData.description);
+      formDataObj.append('category', 'pain-point'); // Set category explicitly
+      formDataObj.append('department', user?.department || 'Other'); // Use user's department from auth context
+      formDataObj.append('status', 'submitted'); // default status
+      formDataObj.append('priority', formData.urgency); // Map urgency to priority
+      formDataObj.append('impact', formData.rootCause || ''); // Map rootCause to impact
+      formDataObj.append('inspiration', '');
+      formDataObj.append('similarSolutions', '');
+      formDataObj.append('tags', JSON.stringify([]));
+      
+      // Add files if provided
+      if (formData.files && formData.files.length > 0) {
+        formData.files.forEach(file => {
+          formDataObj.append('files', file);
+        });
+        console.log(`Adding ${formData.files.length} files to pain point submission`);
+      }
+      
+      console.log('Submitting pain point with FormData'); 
+      
+      // Use fetch with FormData (no Content-Type header as it's set automatically with boundary)
       const response = await fetch('/api/ideas', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData),
+        body: formDataObj,
         credentials: 'include'
       });
 

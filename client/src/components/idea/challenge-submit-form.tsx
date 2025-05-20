@@ -331,12 +331,27 @@ export function ChallengeSubmitForm({
                 Select Files
               </Button>
             </label>
-            {files && files.length > 0 && (
+            {files.length > 0 && (
               <div className="mt-4 w-full">
                 <p className="text-sm font-medium">Selected files:</p>
                 <ul className="text-sm mt-1">
-                  {Array.from(files).map((file, index) => (
-                    <li key={index} className="text-muted-foreground">{file.name}</li>
+                  {files.map((file, index) => (
+                    <li key={index} className="flex justify-between items-center text-muted-foreground py-1">
+                      <span className="truncate max-w-[200px]">{file.name}</span>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                        onClick={() => setFiles(files.filter((_, i) => i !== index))}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 6 6 18"></path>
+                          <path d="m6 6 12 12"></path>
+                        </svg>
+                        <span className="sr-only">Remove</span>
+                      </Button>
+                    </li>
                   ))}
                 </ul>
               </div>

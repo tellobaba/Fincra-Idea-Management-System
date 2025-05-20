@@ -30,7 +30,7 @@ interface PainPointSubmitFormProps {
     description: string;
     urgency: string;
     rootCause: string;
-    files?: FileList;
+    files?: File[];
     voiceNote?: File;
   }) => void;
   onCancel?: () => void;
@@ -60,7 +60,7 @@ export function PainPointSubmitForm({
   initialData = {},
 }: PainPointSubmitFormProps) {
   const [isSaving, setIsSaving] = useState(false);
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [voiceNote, setVoiceNote] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -81,12 +81,29 @@ export function PainPointSubmitForm({
   const onFormSubmit = async (values: FormValues) => {
     setIsSaving(true);
     try {
-      // Transform values and add files/voice note with correct field name 'media'
+      // Transform values and add files
       const transformedValues = {
         ...values,
-        media: files || undefined,
+        files: files.length > 0 ? files : undefined,
         voiceNote: voiceNote || undefined,
       };
+      
+      // Add voice note to files if available
+      if (voiceNote) {
+        console.log('Adding voice recording to submission:', { 
+          name: voiceNote.name, 
+          type: voiceNote.type, 
+          size: voiceNote.size 
+        });
+        // Add voice note to the files array if files is defined
+        if (transformedValues.files) {
+          transformedValues.files = [...transformedValues.files, voiceNote];
+        } else {
+          transformedValues.files = [voiceNote];
+        }
+      }
+      
+      console.log('Submitting pain point with files:', transformedValues.files?.length || 0);
       await onSubmit(transformedValues);
     } finally {
       setIsSaving(false);
@@ -95,7 +112,12 @@ export function PainPointSubmitForm({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFiles(e.target.files);
+      // Convert FileList to array and add to existing files
+      const newFiles = Array.from(e.target.files);
+      setFiles(prevFiles => [...prevFiles, ...newFiles]);
+      
+      // Reset input value so selecting the same file again triggers the event
+      e.target.value = '';
     }
   };
 
@@ -286,12 +308,27 @@ export function PainPointSubmitForm({
                 Select Files
               </Button>
             </label>
-            {files && files.length > 0 && (
+            {files.length > 0 && (
               <div className="mt-4 w-full">
                 <p className="text-sm font-medium">Selected files:</p>
                 <ul className="text-sm mt-1">
-                  {Array.from(files).map((file, index) => (
-                    <li key={index} className="text-muted-foreground">{file.name}</li>
+                  {files.map((file, index) => (
+                    <li key={index} className="flex justify-between items-center text-muted-foreground py-1">
+                      <span className="truncate max-w-[200px]">{file.name}</span>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                        onClick={() => setFiles(files.filter((_, i) => i !== index))}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 6 6 18"></path>
+                          <path d="m6 6 12 12"></path>
+                        </svg>
+                        <span className="sr-only">Remove</span>
+                      </Button>
+                    </li>
                   ))}
                 </ul>
               </div>
