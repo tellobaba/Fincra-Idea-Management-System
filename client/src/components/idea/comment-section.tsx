@@ -93,7 +93,7 @@ export function CommentSection({ comments, ideaId, onAddComment }: CommentSectio
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-medium">Discussion ({comments.length})</h3>
+      <h3 className="text-lg font-medium">Discussion ({comments ? comments.length : 0})</h3>
       
       {/* Comments list */}
       <div className="space-y-6">
