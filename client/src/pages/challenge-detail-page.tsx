@@ -708,13 +708,62 @@ export default function ChallengeDetailPage() {
               <div className="space-y-6">
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle>Challenge Status</CardTitle>
+                    <CardTitle>Challenge Timeline</CardTitle>
                     <CardDescription>
-                      Current status and progress of this challenge
+                      Time remaining for this challenge
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <IdeaStatusTracker currentStatus={challenge.status as Status} />
+                    {/* Enhanced time progress bar */}
+                    <div className="mb-6">
+                      <div className="flex justify-between mb-2 text-sm text-gray-600">
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span>Started: {formattedDate}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span>Ends: {formattedEndDate}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Progress bar */}
+                      <div className="w-full bg-gray-100 rounded-full h-5 border border-gray-200 mt-3">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ease-in-out flex items-center justify-center text-xs font-medium text-white ${
+                            remainingDays > 0 
+                              ? remainingDays < 3 
+                                ? 'bg-orange-500' 
+                                : 'bg-blue-600' 
+                              : 'bg-red-600'
+                          }`} 
+                          style={{ 
+                            width: `${Math.max(0, Math.min(100, (daysElapsed / daysTotal) * 100))}%` 
+                          }}
+                        >
+                          {Math.floor((daysElapsed / daysTotal) * 100)}%
+                        </div>
+                      </div>
+                      
+                      {/* Time remaining indicator */}
+                      <div className="flex items-center justify-center mt-4">
+                        <div className={`flex items-center justify-center px-4 py-2 rounded-full ${
+                          remainingDays > 0 
+                            ? remainingDays < 3 
+                              ? 'bg-orange-100 text-orange-700' 
+                              : 'bg-blue-100 text-blue-700' 
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          <Clock className="h-5 w-5 mr-2" />
+                          <p className="font-medium">
+                            {remainingDays > 0 
+                              ? `${remainingDays} days remaining` 
+                              : "Challenge ended"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
                     <div className="mt-4">
                       <p className="text-sm text-gray-500 mb-2">Current Status:</p>
                       <Badge 
