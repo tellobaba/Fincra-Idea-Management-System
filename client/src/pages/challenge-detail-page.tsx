@@ -293,16 +293,24 @@ export default function ChallengeDetailPage() {
                     variant={isParticipant ? "outline" : "default"}
                     className={isParticipant ? "" : "bg-green-600 hover:bg-green-700"}
                     onClick={() => isParticipant ? withdrawMutation.mutate() : participateMutation.mutate()}
-                    disabled={participateMutation.isPending || withdrawMutation.isPending || isParticipantLoading}
+                    disabled={
+                      participateMutation.isPending || 
+                      withdrawMutation.isPending || 
+                      isParticipantLoading || 
+                      user.id === challenge.submittedById // Disable if user is the creator
+                    }
+                    title={user.id === challenge.submittedById ? "You cannot participate in your own challenge" : ""}
                   >
                     {participateMutation.isPending || withdrawMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : isParticipant ? (
                       <CheckCircle className="mr-2 h-4 w-4" />
+                    ) : user.id === challenge.submittedById ? (
+                      <UserPlus className="mr-2 h-4 w-4 opacity-50" />
                     ) : (
                       <UserPlus className="mr-2 h-4 w-4" />
                     )}
-                    {isParticipant ? "Participating" : "Participate"}
+                    {isParticipant ? "Participating" : user.id === challenge.submittedById ? "Creator" : "Participate"}
                   </Button>
                 )}
                 
@@ -351,7 +359,20 @@ export default function ChallengeDetailPage() {
                           </div>
                           <p className="text-sm mb-2">Start: {formattedDate}</p>
                           <p className="text-sm mb-2">End: {formattedEndDate}</p>
-                          <p className="text-sm font-medium text-blue-700">
+                          
+                          {/* Time progress bar */}
+                          <div className="mt-3 mb-1">
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                              <div 
+                                className={`h-2.5 rounded-full ${remainingDays > 0 ? 'bg-blue-600' : 'bg-red-600'}`} 
+                                style={{ 
+                                  width: `${Math.max(0, Math.min(100, (daysElapsed / daysTotal) * 100))}%` 
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                          
+                          <p className="text-sm font-medium text-blue-700 mt-2">
                             {remainingDays > 0 
                               ? `${remainingDays} days remaining` 
                               : "Challenge ended"}
@@ -504,9 +525,8 @@ export default function ChallengeDetailPage() {
                     {/* Comments section */}
                     <div className="w-full">
                       <CommentSection 
-                        ideaId={numericId} 
-                        initialComments={challenge.comments || []} 
-                        className="mt-4"
+                        ideaId={numericId}
+                        comments={challenge.comments || []}
                       />
                     </div>
                   </CardFooter>
