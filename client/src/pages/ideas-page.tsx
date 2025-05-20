@@ -356,7 +356,10 @@ export default function IdeasPage({ categoryType = 'opportunity' }: IdeasPagePro
                     ideas.map((idea: any) => (
                       <tr key={idea.id} className="bg-white border-b hover:bg-gray-50">
                         <td className="px-6 py-4 font-medium">
-                          <Link href={`/ideas/${idea.id}`} className="text-blue-600 hover:underline">
+                          <Link 
+                            href={idea.category === 'challenge' ? `/challenges/${idea.id}` : `/ideas/${idea.id}`} 
+                            className="text-blue-600 hover:underline"
+                          >
                             {getCategoryIcon(idea.category)} {idea.title}
                           </Link>
                           <p className="text-xs text-gray-500 mt-1">
