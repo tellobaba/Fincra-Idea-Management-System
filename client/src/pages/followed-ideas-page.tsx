@@ -230,9 +230,34 @@ export default function FollowedIdeasPage() {
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                  <h1 className="text-3xl font-bold">Followed Items</h1>
-                  <p className="text-muted-foreground mt-1">Items you've pinned for later reference</p>
+                  <h1 className="text-3xl font-bold">
+                    {viewMode === 'followed' ? 'Followed Items' : 'Participating Challenges'}
+                  </h1>
+                  <p className="text-muted-foreground mt-1">
+                    {viewMode === 'followed' 
+                      ? "Items you've pinned for later reference" 
+                      : "Challenges you're currently participating in"}
+                  </p>
                 </div>
+              </div>
+              
+              <div className="flex space-x-2">
+                <Button 
+                  variant={viewMode === 'followed' ? 'default' : 'outline'} 
+                  onClick={() => setViewMode('followed')}
+                  className={viewMode === 'followed' ? '' : 'text-muted-foreground'}
+                >
+                  <Tag className="mr-2 h-4 w-4" />
+                  Followed Items
+                </Button>
+                <Button 
+                  variant={viewMode === 'participating' ? 'default' : 'outline'} 
+                  onClick={() => setViewMode('participating')}
+                  className={viewMode === 'participating' ? '' : 'text-muted-foreground'}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Participating Challenges
+                </Button>
               </div>
             </div>
 
@@ -297,10 +322,22 @@ export default function FollowedIdeasPage() {
               </Alert>
             ) : filteredIdeas.length === 0 ? (
               <div className="text-center py-12 border rounded-lg">
-                <h3 className="text-lg font-medium mb-2">No items found</h3>
-                <p className="text-muted-foreground mb-6">You haven't followed any items yet or none match your current filters.</p>
-                <Button variant="outline" onClick={() => setLocation('/')}>
-                  <Plus className="h-4 w-4 mr-2" /> Browse Items
+                <h3 className="text-lg font-medium mb-2">
+                  {viewMode === 'followed' 
+                    ? "No followed items found" 
+                    : "You're not participating in any challenges"}
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  {viewMode === 'followed'
+                    ? "You haven't followed any items yet or none match your current filters."
+                    : "Join a challenge to contribute your ideas and collaborate with others."}
+                </p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setLocation(viewMode === 'followed' ? '/' : '/challenges')}
+                >
+                  <Plus className="h-4 w-4 mr-2" /> 
+                  {viewMode === 'followed' ? 'Browse Items' : 'Explore Challenges'}
                 </Button>
               </div>
             ) : (
@@ -331,6 +368,21 @@ export default function FollowedIdeasPage() {
                       <p className="text-muted-foreground line-clamp-2 mb-3">
                         {idea.description}
                       </p>
+                      
+                      {idea.isParticipating && idea.category === 'challenge' && (
+                        <div className="border rounded-md p-3 mb-3 bg-blue-50 border-blue-100">
+                          <div className="flex items-center mb-2">
+                            <Calendar className="h-4 w-4 mr-2 text-blue-600" />
+                            <h3 className="text-sm font-medium text-blue-700">Challenge Timeline</h3>
+                          </div>
+                          {idea.adminNotes && (
+                            <p className="text-xs text-blue-600 mb-1">Timeframe: {idea.adminNotes}</p>
+                          )}
+                          <p className="text-xs text-blue-600">
+                            Started: {new Date(idea.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      )}
                       
                       <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center">
@@ -364,10 +416,22 @@ export default function FollowedIdeasPage() {
                           <Button variant="ghost" size="sm" onClick={() => setLocation(`/ideas/${idea.id}`)}>
                             View Details
                           </Button>
+                          {idea.isParticipating && idea.category === 'challenge' && (
+                            <Button variant="ghost" size="sm" onClick={() => setLocation(`/ideas/submit?challengeId=${idea.id}`)}>
+                              Submit Solution
+                            </Button>
+                          )}
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => handleUnfollow(idea.id)}>
-                          Unfollow
-                        </Button>
+                        {idea.isParticipating ? (
+                          <Button variant="outline" size="sm" onClick={() => handleLeavingChallenge(idea.id)}>
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Leave Challenge
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm" onClick={() => handleUnfollow(idea.id)}>
+                            Unfollow
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
