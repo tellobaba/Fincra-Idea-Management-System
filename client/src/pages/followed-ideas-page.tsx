@@ -361,7 +361,7 @@ export default function FollowedIdeasPage() {
                       </div>
                       
                       <h3 className="text-xl font-semibold mb-2 cursor-pointer hover:text-primary"
-                          onClick={() => setLocation(`/ideas/${idea.id}`)}>
+                          onClick={() => setLocation(idea.category === 'challenge' ? `/challenges/${idea.id}` : `/ideas/${idea.id}`)}>
                         {idea.title}
                       </h3>
                       
@@ -413,11 +413,11 @@ export default function FollowedIdeasPage() {
                       
                       <div className="flex justify-between items-center mt-4">
                         <div className="flex items-center space-x-2">
-                          <Button variant="ghost" size="sm" onClick={() => setLocation(`/ideas/${idea.id}`)}>
+                          <Button variant="ghost" size="sm" onClick={() => setLocation(idea.category === 'challenge' ? `/challenges/${idea.id}` : `/ideas/${idea.id}`)}>
                             View Details
                           </Button>
                           {idea.isParticipating && idea.category === 'challenge' && (
-                            <Button variant="ghost" size="sm" onClick={() => setLocation(`/ideas/submit?challengeId=${idea.id}`)}>
+                            <Button variant="ghost" size="sm" onClick={() => setLocation(`/submit/idea?challengeId=${idea.id}`)}>
                               Submit Solution
                             </Button>
                           )}

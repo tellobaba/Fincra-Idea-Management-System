@@ -491,7 +491,7 @@ export default function ChallengeDetailPage() {
                       <div className="border-t pt-4 mt-4 border-gray-100">
                         <Button 
                           className="w-full"
-                          onClick={() => navigate(`/ideas/submit?challengeId=${numericId}`)}
+                          onClick={() => navigate(`/submit/idea?challengeId=${numericId}`)}
                         >
                           Submit Your Solution
                         </Button>
