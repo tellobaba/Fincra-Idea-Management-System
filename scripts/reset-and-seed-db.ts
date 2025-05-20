@@ -243,25 +243,44 @@ async function main() {
       return createdIdea;
     }
     
-    // Create submissions for each user
+    // Create submissions for each user with a better balance
     for (const user of regularUsers) {
       // Create at least one of each category for each user
       await createSubmissionForUser(user, 'pain-point', painPointsData, painPointTags);
       await createSubmissionForUser(user, 'opportunity', ideasData, ideaTags);
       await createSubmissionForUser(user, 'challenge', challengesData, challengeTags);
       
-      // Add additional random submissions (0-2 more of each type)
-      const additionalSubmissions = Math.floor(Math.random() * 3);
+      // Add additional random submissions weighted to create a better mix 
+      // in the recent activity section (more opportunities and pain-points)
+      const additionalSubmissions = 1 + Math.floor(Math.random() * 3); // 1-3 more submissions
       for (let i = 0; i < additionalSubmissions; i++) {
-        const categoryIndex = Math.floor(Math.random() * 3);
-        if (categoryIndex === 0) {
+        // Weighted distribution: 30% pain-points, 50% opportunities, 20% challenges
+        const rand = Math.random();
+        if (rand < 0.3) {
           await createSubmissionForUser(user, 'pain-point', painPointsData, painPointTags);
-        } else if (categoryIndex === 1) {
+        } else if (rand < 0.8) {
           await createSubmissionForUser(user, 'opportunity', ideasData, ideaTags);
         } else {
           await createSubmissionForUser(user, 'challenge', challengesData, challengeTags);
         }
       }
+    }
+    
+    // Create a few very recent submissions to ensure they appear in top activity
+    const recentSubmissions = [
+      { category: 'pain-point', data: painPointsData, tags: painPointTags },
+      { category: 'opportunity', data: ideasData, tags: ideaTags },
+      { category: 'challenge', data: challengesData, tags: challengeTags },
+      { category: 'pain-point', data: painPointsData, tags: painPointTags },
+      { category: 'opportunity', data: ideasData, tags: ideaTags }
+    ];
+    
+    // Get 3 random users for recent submissions
+    const recentUsers = [...regularUsers].sort(() => 0.5 - Math.random()).slice(0, 3);
+    for (let i = 0; i < Math.min(recentSubmissions.length, recentUsers.length * 2); i++) {
+      const user = recentUsers[i % recentUsers.length];
+      const submission = recentSubmissions[i];
+      await createSubmissionForUser(user, submission.category, submission.data, submission.tags);
     }
     
     // Add some comments to ideas
@@ -369,6 +388,43 @@ async function main() {
     }
     
     await distributeFollows();
+    
+    // Function to add participants to challenge ideas
+    async function addChallengeParticipants() {
+      // Get all challenge-type ideas
+      const challengeIdeas = createdIdeas.filter(idea => idea.category === 'challenge');
+      console.log(`Found ${challengeIdeas.length} challenges to add participants to`);
+      
+      for (const challenge of challengeIdeas) {
+        // For each challenge, add 3-7 random participants (excluding the submitter)
+        const eligibleUsers = users.filter(user => user.id !== challenge.submittedById);
+        const participantCount = 3 + Math.floor(Math.random() * 5); // 3-7 participants
+        
+        // Shuffle and select random users
+        const shuffledUsers = [...eligibleUsers].sort(() => 0.5 - Math.random());
+        const selectedUsers = shuffledUsers.slice(0, Math.min(participantCount, shuffledUsers.length));
+        
+        for (const user of selectedUsers) {
+          await storage.addChallengeParticipant(user.id, challenge.id);
+          console.log(`Added user ${user.id} as participant to challenge ${challenge.id}`);
+          
+          // Create notification for the challenge creator
+          if (challenge.submittedById !== user.id) {
+            await storage.createNotification({
+              userId: challenge.submittedById,
+              title: "New Challenge Participant",
+              message: `${user.displayName} has joined your challenge: ${challenge.title}`,
+              type: "follow", // Using follow type since there's no specific participant type
+              relatedItemId: challenge.id,
+              relatedItemType: "challenge",
+              actorId: user.id
+            });
+          }
+        }
+      }
+    }
+    
+    await addChallengeParticipants();
     
     // Add status change notifications for all non-submitted ideas
     for (const idea of createdIdeas) {
