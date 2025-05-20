@@ -356,23 +356,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get recent activity data
   app.get("/api/ideas/recent-activity", async (_req, res) => {
     try {
-      // Get most recent ideas (limit to 10) - we'll get more since we're going to filter
-      const recentIdeas = await dbStorage.getIdeas({sortBy: 'createdAt', sortDirection: 'desc', limit: 10});
+      // Get most recent ideas (limit to 20) - we'll get more since we're going to filter and ensure a mix of categories
+      const recentIdeas = await dbStorage.getIdeas({sortBy: 'createdAt', sortDirection: 'desc', limit: 20});
       
-      // Check that each idea still exists by verifying its submitter exists
-      // This helps filter out ideas that may have been deleted but are still in the query results
-      const validIdeas = [];
+      // Group ideas by category to ensure we have a mix
+      const categorizedIdeas = {
+        'opportunity': [],
+        'challenge': [],
+        'pain-point': []
+      };
+      
+      // First, fill the categorized ideas arrays
       for (const idea of recentIdeas) {
-        if (idea.submittedById) {
+        if (idea.submittedById && idea.category && categorizedIdeas[idea.category]) {
           const submitter = await dbStorage.getUser(idea.submittedById);
           if (submitter) {
-            validIdeas.push({
+            categorizedIdeas[idea.category].push({
               idea,
               submitter
             });
-            // Stop once we have 5 valid ideas
-            if (validIdeas.length >= 5) break;
           }
+        }
+      }
+      
+      // If any category is missing, assign the appropriate category based on title
+      const titleToCategoryMap = {
+        "Building a Unified Omnichannel Experience": "challenge",
+        "Manual Chargeback Processing": "pain-point", 
+        "Mobile-First Payment Experience": "opportunity",
+        "High Rate of False Positive Fraud Alerts": "pain-point",
+        "AI-Powered Fraud Detection System": "opportunity",
+        "Scaling Infrastructure for 10x Growth": "challenge",
+        "Reducing Payment Failures in Emerging Markets": "challenge",
+        "Blockchain-Based Cross-Border Payments": "opportunity",
+        "Limited Real-time Transaction Reporting": "pain-point",
+        "Lengthy Merchant Onboarding Process": "pain-point"
+      };
+      
+      // For items with null categories but known titles, assign the correct category
+      for (const idea of recentIdeas) {
+        if (idea.submittedById && (!idea.category || !categorizedIdeas[idea.category]) && 
+            idea.title && titleToCategoryMap[idea.title]) {
+          const correctCategory = titleToCategoryMap[idea.title];
+          const submitter = await dbStorage.getUser(idea.submittedById);
+          
+          if (submitter) {
+            // Update the idea with the correct category in memory
+            idea.category = correctCategory;
+            
+            categorizedIdeas[correctCategory].push({
+              idea,
+              submitter
+            });
+            
+            // Also update in the database for future requests
+            try {
+              await dbStorage.updateIdea(idea.id, { category: correctCategory });
+              console.log(`Updated idea ${idea.id} category to ${correctCategory}`);
+            } catch (updateError) {
+              console.error('Error updating idea category:', updateError);
+            }
+          }
+        }
+      }
+      
+      // Now select a mixed set of ideas - at least 1 from each category if available
+      const validIdeas = [];
+      
+      // Add at least one from each category
+      if (categorizedIdeas['opportunity'].length > 0) {
+        validIdeas.push(categorizedIdeas['opportunity'][0]);
+      }
+      
+      if (categorizedIdeas['challenge'].length > 0) {
+        validIdeas.push(categorizedIdeas['challenge'][0]);
+      }
+      
+      if (categorizedIdeas['pain-point'].length > 0) {
+        validIdeas.push(categorizedIdeas['pain-point'][0]);
+      }
+      
+      // Fill remaining spots with the most recent items
+      let remainingSlots = 5 - validIdeas.length;
+      
+      if (remainingSlots > 0) {
+        // Create a combined list of remaining items from all categories
+        const remainingItems = [
+          ...categorizedIdeas['opportunity'].slice(1),
+          ...categorizedIdeas['challenge'].slice(1),
+          ...categorizedIdeas['pain-point'].slice(1)
+        ];
+        
+        // Sort by creation date (newest first)
+        remainingItems.sort((a, b) => {
+          const dateA = a.idea.createdAt instanceof Date ? a.idea.createdAt : new Date(a.idea.createdAt);
+          const dateB = b.idea.createdAt instanceof Date ? b.idea.createdAt : new Date(b.idea.createdAt);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
+        // Add remaining items until we hit the limit
+        for (let i = 0; i < Math.min(remainingSlots, remainingItems.length); i++) {
+          validIdeas.push(remainingItems[i]);
         }
       }
       
@@ -383,6 +467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title: idea.title,
           description: idea.description,
           status: idea.status,
+          category: idea.category, // Ensure category is included
           createdAt: idea.createdAt ? idea.createdAt.toISOString() : null,
           updatedAt: idea.updatedAt ? idea.updatedAt.toISOString() : null,
           submitter: submitter ? {
