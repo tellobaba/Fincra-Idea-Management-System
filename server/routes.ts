@@ -1809,7 +1809,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Check if user is a participant in a challenge
   app.get("/api/challenges/:id/isParticipant", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
     
@@ -1826,7 +1826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Add user as participant to a challenge
   app.post("/api/challenges/:id/participate", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
     
@@ -1867,7 +1867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Remove user from challenge participants
   app.delete("/api/challenges/:id/participate", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
     
@@ -1903,7 +1903,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Get all challenges a user is participating in
   app.get("/api/user/participating-challenges", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
     
