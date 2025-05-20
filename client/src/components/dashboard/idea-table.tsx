@@ -171,7 +171,7 @@ export function IdeaTable({
                       className="text-primary p-0 h-auto"
                       asChild
                     >
-                      <Link href={`/ideas/${idea.id}`}>View</Link>
+                      <Link href={idea.category === 'challenge' ? `/challenges/${idea.id}` : `/ideas/${idea.id}`}>View</Link>
                     </Button>
                   </TableCell>
                 </TableRow>

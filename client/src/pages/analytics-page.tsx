@@ -369,12 +369,12 @@ export default function AnalyticsPage() {
                 ) : recentHighlights.length > 0 ? (
                   recentHighlights.map((highlight: any, index: number) => (
                     <a 
-                      href={`/ideas/${highlight.id}`} 
+                      href={highlight.category === 'challenge' ? `/challenges/${highlight.id}` : `/ideas/${highlight.id}`} 
                       key={index} 
                       className="border border-gray-200 rounded-lg p-4 h-full flex flex-col shadow-md hover:shadow-lg transition-all cursor-pointer no-underline text-inherit"
                       onClick={(e) => {
                         e.preventDefault();
-                        window.location.href = `/ideas/${highlight.id}`;
+                        window.location.href = highlight.category === 'challenge' ? `/challenges/${highlight.id}` : `/ideas/${highlight.id}`;
                       }}
                     >
                       <div className="flex items-center mb-2">
