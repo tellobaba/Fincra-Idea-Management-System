@@ -21,33 +21,38 @@ export default function SubmitChallengePage() {
       criteria: string;
       timeframe: string;
       reward: string;
-      files?: FileList;
+      files?: File[];
     }) => {
-      // Create a properly structured JSON object that matches expected schema fields
-      const requestData = {
-        title: formData.title,
-        description: formData.description,
-        impact: formData.criteria || '', // Map criteria to impact field
-        adminNotes: formData.timeframe || '', // Map timeframe to adminNotes
-        inspiration: formData.reward || '', // Map reward to inspiration
-        category: 'challenge', // Set category explicitly
-        department: user?.department || 'Engineering',
-        status: 'submitted', // default status
-        priority: 'medium', // default priority
-        similarSolutions: '',
-        tags: [],
-        attachments: [] // empty array as we're not handling attachments currently
-      };
-
-      console.log('Submitting challenge with data:', requestData);
+      // Create FormData object to handle both text data and files
+      const formDataObj = new FormData();
       
-      // Use fetch with JSON data
+      // Add all form fields to FormData
+      formDataObj.append('title', formData.title);
+      formDataObj.append('description', formData.description);
+      formDataObj.append('impact', formData.criteria || ''); // Map criteria to impact field
+      formDataObj.append('adminNotes', formData.timeframe || ''); // Map timeframe to adminNotes
+      formDataObj.append('inspiration', formData.reward || ''); // Map reward to inspiration
+      formDataObj.append('category', 'challenge'); // Set category explicitly
+      formDataObj.append('department', user?.department || 'Engineering');
+      formDataObj.append('status', 'submitted'); // default status
+      formDataObj.append('priority', 'medium'); // default priority
+      formDataObj.append('similarSolutions', '');
+      formDataObj.append('tags', JSON.stringify([]));
+      
+      // Add files if provided
+      if (formData.files && formData.files.length > 0) {
+        formData.files.forEach(file => {
+          formDataObj.append('files', file);
+        });
+        console.log(`Adding ${formData.files.length} files to challenge submission`);
+      }
+      
+      console.log('Submitting challenge with FormData'); 
+      
+      // Use fetch with FormData (no Content-Type header as it's set automatically with boundary)
       const response = await fetch('/api/ideas', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData),
+        body: formDataObj,
         credentials: 'include'
       });
 

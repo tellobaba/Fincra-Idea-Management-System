@@ -25,7 +25,7 @@ interface ChallengeSubmitFormProps {
     criteria: string;
     timeframe: string;
     reward: string;
-    media?: FileList;
+    files?: File[];
     voiceNote?: File;
   }) => void;
   onCancel?: () => void;
@@ -56,7 +56,7 @@ export function ChallengeSubmitForm({
   initialData = {},
 }: ChallengeSubmitFormProps) {
   const [isSaving, setIsSaving] = useState(false);
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [voiceNote, setVoiceNote] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -77,12 +77,29 @@ export function ChallengeSubmitForm({
   const onFormSubmit = async (values: FormValues) => {
     setIsSaving(true);
     try {
-      // Transform values and add files with correct field name 'media'
+      // Transform values and add files
       const transformedValues = {
         ...values,
-        media: files || undefined,
+        files: files.length > 0 ? files : undefined,
         voiceNote: voiceNote || undefined,
       };
+      
+      // Add voice note to files if available
+      if (voiceNote) {
+        console.log('Adding voice recording to submission:', { 
+          name: voiceNote.name, 
+          type: voiceNote.type, 
+          size: voiceNote.size 
+        });
+        // Add voice note to the files array if files is defined
+        if (transformedValues.files) {
+          transformedValues.files = [...transformedValues.files, voiceNote];
+        } else {
+          transformedValues.files = [voiceNote];
+        }
+      }
+      
+      console.log('Submitting challenge with files:', transformedValues.files?.length || 0);
       await onSubmit(transformedValues);
     } finally {
       setIsSaving(false);
@@ -91,7 +108,12 @@ export function ChallengeSubmitForm({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFiles(e.target.files);
+      // Convert FileList to array and add to existing files
+      const newFiles = Array.from(e.target.files);
+      setFiles(prevFiles => [...prevFiles, ...newFiles]);
+      
+      // Reset input value so selecting the same file again triggers the event
+      e.target.value = '';
     }
   };
 
