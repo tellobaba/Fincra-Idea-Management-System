@@ -401,11 +401,19 @@ export default function ChallengeDetailPage() {
                           <p className="text-sm mb-2">Start: {formattedDate}</p>
                           <p className="text-sm mb-2">End: {formattedEndDate}</p>
                           
-                          {/* Time progress bar */}
-                          <div className="mt-3 mb-1">
-                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          {/* Enhanced time progress bar */}
+                          <div className="mt-4 mb-3">
+                            <div className="flex justify-between mb-1 text-xs">
+                              <span>Started {formattedDate}</span>
+                              <span>Ends {formattedEndDate}</span>
+                            </div>
+                            <div className="w-full bg-gray-100 rounded-full h-4 border border-gray-200">
                               <div 
-                                className={`h-2.5 rounded-full ${remainingDays > 0 ? 'bg-blue-600' : 'bg-red-600'}`} 
+                                className={`h-3.5 rounded-full ${remainingDays > 0 
+                                  ? remainingDays < 3 
+                                    ? 'bg-orange-500' 
+                                    : 'bg-blue-600' 
+                                  : 'bg-red-600'}`} 
                                 style={{ 
                                   width: `${Math.max(0, Math.min(100, (daysElapsed / daysTotal) * 100))}%` 
                                 }}
@@ -413,11 +421,14 @@ export default function ChallengeDetailPage() {
                             </div>
                           </div>
                           
-                          <p className="text-sm font-medium text-blue-700 mt-2">
-                            {remainingDays > 0 
-                              ? `${remainingDays} days remaining` 
-                              : "Challenge ended"}
-                          </p>
+                          <div className="flex items-center justify-center mt-2">
+                            <Clock className="h-4 w-4 mr-1 text-blue-700" />
+                            <p className="text-sm font-medium text-blue-700">
+                              {remainingDays > 0 
+                                ? `${remainingDays} days remaining` 
+                                : "Challenge ended"}
+                            </p>
+                          </div>
                         </CardContent>
                       </Card>
                       
