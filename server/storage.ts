@@ -1,4 +1,4 @@
-import { users, ideas, comments, userVotes, follows, notifications, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment, type InsertUserVote, type UserVote, type InsertFollow, type Follow, type InsertNotification, type Notification } from "@shared/schema";
+import { users, ideas, comments, userVotes, follows, notifications, challengeParticipants, type User, type InsertUser, type Idea, type InsertIdea, type Comment, type InsertComment, type InsertUserVote, type UserVote, type InsertFollow, type Follow, type InsertNotification, type Notification, type InsertChallengeParticipant, type ChallengeParticipant } from "@shared/schema";
 import session from "express-session";
 import { db } from "./db";
 import { eq, asc, desc, and, or, sql } from "drizzle-orm";
@@ -88,6 +88,13 @@ export interface IStorage {
   markNotificationAsRead(id: number): Promise<Notification>;
   markAllNotificationsAsRead(userId: number): Promise<void>;
   getUnreadNotificationCount(userId: number): Promise<number>;
+  
+  // Challenge Participant operations
+  addChallengeParticipant(userId: number, challengeId: number): Promise<ChallengeParticipant>;
+  removeChallengeParticipant(userId: number, challengeId: number): Promise<boolean>;
+  isChallengeParticipant(userId: number, challengeId: number): Promise<boolean>;
+  getChallengeParticipants(challengeId: number): Promise<User[]>;
+  getUserParticipatingChallenges(userId: number): Promise<Idea[]>;
   
   // Session store
   sessionStore: session.SessionStore;

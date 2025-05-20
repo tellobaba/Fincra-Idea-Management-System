@@ -12,6 +12,14 @@ export const users = pgTable("users", {
   avatarUrl: text("avatar_url"),
 });
 
+// Table to track challenge participants
+export const challengeParticipants = pgTable("challenge_participants", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  challengeId: integer("challenge_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const ideas = pgTable("ideas", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -145,9 +153,17 @@ export const insertNotificationSchema = createInsertSchema(notifications).pick({
   actorId: true,
 });
 
+export const insertChallengeParticipantSchema = createInsertSchema(challengeParticipants).pick({
+  userId: true,
+  challengeId: true,
+});
+
 // Type exports
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+export type InsertChallengeParticipant = z.infer<typeof insertChallengeParticipantSchema>;
+export type ChallengeParticipant = typeof challengeParticipants.$inferSelect;
 
 export type InsertIdea = z.infer<typeof insertIdeaSchema>;
 export type Idea = typeof ideas.$inferSelect;
