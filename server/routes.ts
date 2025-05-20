@@ -426,6 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ideasWithUsers = validIdeas.map(({idea, submitter}) => {
         return {
           ...idea,
+          category: idea.category, // Ensure category is included in response
           submitter: submitter ? {
             id: submitter.id,
             displayName: submitter.displayName || 'Anonymous',
